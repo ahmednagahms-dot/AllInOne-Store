@@ -1,255 +1,187 @@
-import { useState } from "react";
 import {
-    Search,
     Heart,
     ShoppingCart,
     User,
-    Menu,
-    X,
+    Search,
+    ClipboardList,
     ChevronDown,
     } from "lucide-react";
 
     const STORE_LOGO_URL =
     "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
 
-    function BrandLogo() {
-    return (
-        <a href="/" className="flex shrink-0 items-center gap-2">
-        <img
-            src={STORE_LOGO_URL}
-            alt="ShopEase"
-            className="h-[34px] w-auto object-contain"
-        />
-        <span className="whitespace-nowrap text-[18px] font-bold tracking-[-0.4px] text-[#10265B]">
-            AllIn<span className="text-[#5046E5]">One</span>
-        </span>
-        </a>
-    );
-    }
-
     function Navbar() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        if (!searchQuery.trim()) return;
-        // تنفيذ التوجيه لصفحة البحث، مثال: router.push(`/search?q=${searchQuery}`)
-    };
-
     return (
-        <header className="w-full bg-white font-['Inter',Arial,sans-serif]">
-        {/* Top Shipping Bar */}
-        <div className="bg-[#071B49] text-white">
-            <div className="mx-auto flex h-[28px] max-w-[1200px] items-center justify-between px-4 sm:px-5">
-            <span className="text-[9px] font-normal tracking-[0.01em]">
+        <>
+        {/* Top Bar */}
+        <div className="w-full bg-[#0F172A] text-white">
+            <div className="mx-auto flex min-h-9 max-w-[1200px] items-center justify-between gap-4 px-5 text-xs sm:px-6 sm:text-sm">
+            {/* Shipping */}
+            <p className="hidden sm:block">
                 Free shipping on orders over $50
-            </span>
+            </p>
 
-            <div className="hidden items-center gap-5 sm:flex">
-                <button className="text-[9px] font-normal hover:text-[#D8E6FF]">
-                Track Order
+            <p className="sm:hidden">
+                Free shipping over $50
+            </p>
+
+            {/* Top Right */}
+            <div className="ml-auto flex items-center gap-4">
+                <button
+                type="button"
+                className="flex items-center gap-1 transition hover:text-indigo-300"
+                >
+                English
+                <ChevronDown size={13} />
                 </button>
 
-                <button className="text-[9px] font-normal hover:text-[#D8E6FF]">
-                Help
-                </button>
+                <span className="h-4 w-px bg-slate-600" />
 
-                <button className="flex items-center gap-1 text-[9px] font-normal hover:text-[#D8E6FF]">
-                EN
-                <ChevronDown size={9} strokeWidth={1.8} />
+                <button
+                type="button"
+                className="flex items-center gap-1 transition hover:text-indigo-300"
+                >
+                USD
+                <ChevronDown size={13} />
                 </button>
             </div>
             </div>
         </div>
 
         {/* Main Navbar */}
-        <nav
-            className="border-b border-[#E5E7EB] bg-white"
-            style={{ backgroundColor: "#FFFFFF" }}
-        >
-            <div className="mx-auto flex min-h-[70px] max-w-[1200px] items-center justify-between gap-5 px-5 sm:px-6 lg:min-h-[76px]">
+        <header className="w-full border-b border-slate-200 bg-white">
+            <div className="mx-auto flex h-20 max-w-[1200px] items-center gap-5 px-5 sm:px-6">
             {/* Logo */}
-            <BrandLogo />
+            <a
+                href="/"
+                className="flex shrink-0 items-center gap-2"
+            >
+                <img
+                src={STORE_LOGO_URL}
+                alt="AllInOne"
+                className="h-10 w-10 object-contain"
+                />
 
-            {/* Desktop Navigation */}
-            <div className="hidden items-center gap-7 lg:flex">
+                <span className="text-xl font-bold tracking-tight text-[#0F172A]">
+                All<span className="text-[#5046E5]">InOne</span>
+                </span>
+            </a>
+
+            {/* Navigation */}
+            <nav className="hidden items-center gap-6 lg:flex">
                 <a
                 href="/"
-                className="text-[13px] font-semibold text-[#1554E8] transition hover:text-[#5046E5]"
+                className="text-sm font-semibold text-[#5046E5]"
                 >
                 Home
                 </a>
+
                 <a
                 href="#shop"
-                className="text-[13px] font-medium text-[#667085] transition hover:text-[#1554E8]"
+                className="text-sm font-medium text-slate-600 transition hover:text-[#5046E5]"
                 >
                 Shop
                 </a>
+
                 <a
                 href="#orders"
-                className="text-[13px] font-medium text-[#667085] transition hover:text-[#1554E8]"
+                className="text-sm font-medium text-slate-600 transition hover:text-[#5046E5]"
                 >
                 My Orders
                 </a>
+
                 <a
                 href="#wishlist"
-                className="text-[13px] font-medium text-[#667085] transition hover:text-[#1554E8]"
+                className="text-sm font-medium text-slate-600 transition hover:text-[#5046E5]"
                 >
                 Wishlist
                 </a>
-            </div>
+            </nav>
 
-            {/* Desktop Search */}
-            <form
-                onSubmit={handleSearchSubmit}
-                className="hidden min-w-0 flex-1 lg:block lg:max-w-[260px] xl:max-w-[300px]"
-            >
-                <div
-                    className="relative flex h-[40px] items-center rounded-full border-0 bg-white"
-                    style={{ backgroundColor: "#FFFFFF", borderColor: "#FFFFFF" }}
-                >
+            {/* Search */}
+            <div className="ml-auto hidden max-w-[280px] flex-1 md:block">
+                <div className="relative">
                 <Search
-                    size={15}
-                    strokeWidth={1.8}
-                    className="absolute left-3 z-10 text-[#000000]"
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 />
+
                 <input
                     type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search products..."
-                    aria-label="Search products"
-                    className="navbar-search-input navbar-search-input-bordered min-w-0 flex-1 bg-transparent pl-9 pr-3 text-[13px] text-[#000000] placeholder:text-[#000000] outline-none caret-black focus:ring-0"
-                    style={{ color: "#000000", caretColor: "#000000", paddingLeft: "2rem" }}
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#5046E5] focus:bg-white"
                 />
                 </div>
-            </form>
+            </div>
 
-            {/* Desktop Actions */}
-            <div className="hidden items-center gap-4 lg:flex">
+            {/* Right Actions */}
+            <div className="flex items-center gap-2">
                 {/* Wishlist */}
-                <a
-                href="#wishlist"
-                className="relative flex h-10 w-10 items-center justify-center text-[#667085] transition hover:text-[#1554E8]"
+                <button
+                type="button"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-[#EEF2FF] hover:text-[#5046E5]"
                 aria-label="Wishlist"
                 >
-                <Heart size={22} strokeWidth={1.8} />
-                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-[#1554E8] text-[9px] font-bold text-white">
-                    2
-                </span>
-                </a>
+                <Heart size={20} />
+                </button>
 
                 {/* Cart */}
-                <a
-                href="#cart"
-                className="relative flex h-10 w-10 items-center justify-center text-[#667085] transition hover:text-[#1554E8]"
-                aria-label="Shopping cart"
+                <button
+                type="button"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-[#EEF2FF] hover:text-[#5046E5]"
+                aria-label="Shopping Cart"
                 >
-                <ShoppingCart size={22} strokeWidth={1.8} />
-                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-[#1554E8] text-[9px] font-bold text-white">
-                    3
+                <ShoppingCart size={20} />
+
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#5046E5] px-1 text-[9px] font-bold text-white">
+                    0
                 </span>
-                </a>
+                </button>
 
                 {/* User */}
-                <a
-                href="/login"
-                className="flex items-center gap-2 border-l border-[#E5E7EB] pl-4"
-                >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E8EEF9] text-[#1554E8]">
-                    <User size={16} strokeWidth={1.8} />
-                </div>
-                <div className="hidden xl:block">
-                    <p className="text-[11px] font-semibold text-[#10265B]">
-                    Welcome
-                    </p>
-                    <p className="text-[10px] text-[#98A2B3]">My Account</p>
-                </div>
-                </a>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
+                <button
                 type="button"
-                onClick={() => setIsMenuOpen((prev) => !prev)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#10265B] hover:bg-[#F8FAFC] lg:hidden"
-                aria-label="Toggle menu"
-            >
-                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-            </div>
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EEF2FF] text-[#5046E5] transition hover:bg-[#5046E5] hover:text-white"
+                aria-label="Account"
+                >
+                <User size={19} />
+                </button>
 
-            {/* Mobile Menu */}
-            {isMenuOpen && (
-            <div className="border-t border-[#E5E7EB] bg-white px-5 py-4 lg:hidden">
-                {/* Mobile Search */}
-                <form onSubmit={handleSearchSubmit} className="mb-4">
-                <div
-                    className="relative flex h-[44px] items-center rounded-full border-0 bg-white"
-                    style={{ backgroundColor: "#FFFFFF", borderColor: "#FFFFFF" }}
-                >
-                    <Search
-                    size={16}
-                    strokeWidth={1.8}
-                    className="absolute left-3 z-10 text-[#000000]"
-                    />
-                    <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    aria-label="Search products"
-                    className="navbar-search-input navbar-search-input-bordered min-w-0 flex-1 bg-transparent pl-10 pr-3 text-[14px] text-[#000000] placeholder:text-[#000000] outline-none caret-black focus:ring-0"
-                    style={{ color: "#000000", caretColor: "#000000", paddingLeft: "3.25rem" }}
-                    />
-                </div>
-                </form>
+                {/* Welcome + Account */}
+                <div className="hidden min-w-24 sm:block">
+                <p className="text-[11px] text-slate-400">
+                    Welcome
+                </p>
 
-                {/* Mobile Links */}
-                <div className="flex flex-col">
-                <a
-                    href="/"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="border-b border-[#F0F2F5] py-3 text-[14px] font-semibold text-[#1554E8]"
+                <button
+                    type="button"
+                    className="flex items-center gap-1 text-sm font-semibold text-[#0F172A] transition hover:text-[#5046E5]"
                 >
-                    Home
-                </a>
-                <a
-                    href="#shop"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="border-b border-[#F0F2F5] py-3 text-[14px] font-medium text-[#667085]"
-                >
-                    Shop
-                </a>
-                <a
-                    href="#orders"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="border-b border-[#F0F2F5] py-3 text-[14px] font-medium text-[#667085]"
-                >
-                    My Orders
-                </a>
-                <a
-                    href="#wishlist"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="border-b border-[#F0F2F5] py-3 text-[14px] font-medium text-[#667085]"
-                >
-                    Wishlist
-                </a>
-                <a
-                    href="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-2 py-3 text-[14px] font-medium text-[#667085]"
-                >
-                    <User size={16} />
-                    My Account
-                </a>
+                    Sign In / Register
+                    <ChevronDown size={13} />
+                </button>
                 </div>
             </div>
-            )}
-        </nav>
+            </div>
+
+            {/* Mobile Search */}
+            <div className="border-t border-slate-100 px-5 py-3 md:hidden">
+            <div className="relative">
+                <Search
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                type="text"
+                placeholder="Search products..."
+                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-[#5046E5]"
+                />
+            </div>
+            </div>
         </header>
+        </>
     );
-    }
+}
 
-export default Navbar;    
+export default Navbar;

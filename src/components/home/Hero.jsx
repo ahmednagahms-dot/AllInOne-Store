@@ -1,4 +1,4 @@
-    import {
+import {
     ArrowRight,
     ChevronLeft,
     ChevronRight,
@@ -6,6 +6,8 @@
     ShieldCheck,
     Truck,
     } from "lucide-react";
+
+    import heroImage from "../../assets/hero.png";
 
     function Hero() {
     return (
@@ -38,18 +40,25 @@
 
                 {/* Buttons */}
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                    <button className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#1554E8] px-6 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0D47D9]">
+                    <button
+                    type="button"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#1554E8] px-6 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0D47D9]"
+                    >
                     Shop Now
                     <ArrowRight size={15} strokeWidth={2.2} />
                     </button>
 
-                    <button className="inline-flex h-11 items-center justify-center rounded-lg border border-[#1554E8] bg-white px-6 text-xs font-semibold text-[#1554E8] transition hover:bg-[#F3F7FF]">
+                    <button
+                    type="button"
+                    className="inline-flex h-11 items-center justify-center rounded-lg border border-[#1554E8] bg-white px-6 text-xs font-semibold text-[#1554E8] transition hover:bg-[#F3F7FF]"
+                    >
                     Explore Collections
                     </button>
                 </div>
 
                 {/* Benefits */}
                 <div className="mt-8 grid max-w-[560px] grid-cols-1 gap-4 border-t border-[#D7E4F7] pt-6 sm:grid-cols-3 sm:gap-3">
+                    {/* Premium Quality */}
                     <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#1554E8]">
                         <ShieldCheck size={16} />
@@ -59,12 +68,14 @@
                         <p className="text-[10px] font-bold text-[#10265B]">
                         Premium Quality
                         </p>
+
                         <p className="mt-0.5 text-[8px] text-slate-400">
                         Trusted products
                         </p>
                     </div>
                     </div>
 
+                    {/* Fast Delivery */}
                     <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#1554E8]">
                         <Truck size={16} />
@@ -74,12 +85,14 @@
                         <p className="text-[10px] font-bold text-[#10265B]">
                         Fast Delivery
                         </p>
+
                         <p className="mt-0.5 text-[8px] text-slate-400">
                         Quick & reliable
                         </p>
                     </div>
                     </div>
 
+                    {/* Easy Returns */}
                     <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#1554E8]">
                         <RotateCcw size={16} />
@@ -89,6 +102,7 @@
                         <p className="text-[10px] font-bold text-[#10265B]">
                         Easy Returns
                         </p>
+
                         <p className="mt-0.5 text-[8px] text-slate-400">
                         Hassle-free returns
                         </p>
@@ -102,27 +116,22 @@
                 {/* Decorative Circle */}
                 <div className="absolute right-[5%] top-1/2 h-[280px] w-[280px] -translate-y-1/2 rounded-full bg-white/70 sm:h-[330px] sm:w-[330px] lg:h-[370px] lg:w-[370px]" />
 
-                {/* Product Placeholder */}
-                <div className="relative z-10 flex h-[250px] w-[250px] items-center justify-center rounded-full bg-gradient-to-br from-white to-[#DDEAFF] shadow-[0_20px_50px_rgba(21,84,232,0.12)] sm:h-[290px] sm:w-[290px] lg:h-[320px] lg:w-[320px]">
-                    <div className="text-center">
-                    <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-[#10265B] shadow-xl sm:h-28 sm:w-28">
-                        <span className="text-4xl">⌚</span>
-                    </div>
-
-                    <p className="text-xs font-semibold text-[#10265B]">
-                        Latest Tech
-                    </p>
-
-                    <p className="mt-1 text-[9px] text-slate-400">
-                        Premium Collection
-                    </p>
-                    </div>
+                {/* Product Image */}
+                <div className="relative z-10 flex h-[250px] w-[250px] items-center justify-center sm:h-[290px] sm:w-[290px] lg:h-[320px] lg:w-[320px]">
+                    <img
+                    src={heroImage}
+                    alt="Latest Tech"
+                    className="h-full w-full object-contain drop-shadow-[0_20px_30px_rgba(21,84,232,0.18)] transition duration-500 hover:scale-105"
+                    />
                 </div>
 
                 {/* Discount Badge */}
                 <div className="absolute right-[8%] top-[8%] z-20 flex h-16 w-16 rotate-6 items-center justify-center rounded-full bg-[#1554E8] text-center text-white shadow-lg sm:h-[72px] sm:w-[72px]">
                     <div>
-                    <p className="text-lg font-extrabold leading-none">40%</p>
+                    <p className="text-lg font-extrabold leading-none">
+                        40%
+                    </p>
+
                     <p className="mt-0.5 text-[8px] font-semibold uppercase">
                         Off
                     </p>
@@ -158,6 +167,6 @@
         </div>
         </section>
     );
-    }
+}
 
-    export default Hero;
+export default Hero;

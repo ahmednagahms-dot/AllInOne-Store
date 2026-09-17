@@ -1,9 +1,10 @@
 import { Routes, Route } from "react-router-dom";
+import Home from "../data/pages/Home";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<div >ALLINONE STORE</div>} />
+      <Route path="/" element={<Home />} />
     </Routes>
   );
 }

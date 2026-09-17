@@ -1,10 +1,10 @@
 import {
-    Facebook,
-    Instagram,
-    Twitter,
-    Youtube,
     ShieldCheck,
     CreditCard,
+    Camera,
+    MessageCircle,
+    Send,
+    Play,
     } from "lucide-react";
 
     const STORE_LOGO_URL =
@@ -15,7 +15,7 @@ import {
         <a href="/" className="inline-flex items-center gap-2">
         <img
             src={STORE_LOGO_URL}
-            alt="ShopEase"
+            alt="AllInOne"
             className="h-[38px] w-auto object-contain"
         />
 
@@ -32,6 +32,7 @@ import {
         <div className="mx-auto max-w-[1200px] px-5 py-12 sm:px-6 lg:py-14">
             {/* Main Footer */}
             <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-12">
+            
             {/* Brand */}
             <div>
                 <BrandLogo />
@@ -49,7 +50,7 @@ import {
                     aria-label="Facebook"
                     className="flex h-8 w-8 items-center justify-center rounded-full border border-[#24324A] bg-[#17243A] text-[#C8D3E5] transition hover:border-[#5046E5] hover:bg-[#5046E5] hover:text-white"
                 >
-                    <Facebook size={14} />
+                    <Camera size={14} />
                 </a>
 
                 <a
@@ -57,7 +58,7 @@ import {
                     aria-label="Instagram"
                     className="flex h-8 w-8 items-center justify-center rounded-full border border-[#24324A] bg-[#17243A] text-[#C8D3E5] transition hover:border-[#5046E5] hover:bg-[#5046E5] hover:text-white"
                 >
-                    <Instagram size={14} />
+                    <MessageCircle size={14} />
                 </a>
 
                 <a
@@ -65,7 +66,7 @@ import {
                     aria-label="Twitter"
                     className="flex h-8 w-8 items-center justify-center rounded-full border border-[#24324A] bg-[#17243A] text-[#C8D3E5] transition hover:border-[#5046E5] hover:bg-[#5046E5] hover:text-white"
                 >
-                    <Twitter size={14} />
+                    <Send size={14} />
                 </a>
 
                 <a
@@ -73,7 +74,7 @@ import {
                     aria-label="Youtube"
                     className="flex h-8 w-8 items-center justify-center rounded-full border border-[#24324A] bg-[#17243A] text-[#C8D3E5] transition hover:border-[#5046E5] hover:bg-[#5046E5] hover:text-white"
                 >
-                    <Youtube size={14} />
+                    <Play size={14} />
                 </a>
                 </div>
             </div>
@@ -84,7 +85,7 @@ import {
                 Quick Links
                 </h3>
 
-                <ul className="footer-links mt-5 space-y-3">
+                <ul className="mt-5 space-y-3">
                 <li>
                     <a
                     href="/"
@@ -129,7 +130,7 @@ import {
                 Customer Care
                 </h3>
 
-                <ul className="footer-links mt-5 space-y-3">
+                <ul className="mt-5 space-y-3">
                 <li>
                     <a
                     href="#"
@@ -183,7 +184,7 @@ import {
                 Legal
                 </h3>
 
-                <ul className="footer-links mt-5 space-y-3">
+                <ul className="mt-5 space-y-3">
                 <li>
                     <a
                     href="#"
@@ -233,6 +234,7 @@ import {
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+                
                 {/* Secure Payment */}
                 <div className="flex items-center gap-2 text-[#AEBBD0]">
                 <CreditCard size={15} strokeWidth={1.7} />
