@@ -13,10 +13,9 @@ export default function BestSellers() {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        // نجيب منتجات أكتر ونختار منها (الـ API مش عنده sort بـ best-sellers صريح)
+      
         const { data } = await getProducts({ limit: 10 });
         const list = data.products || data.data || data || [];
-        // ناخد من المنتج رقم 4 للـ 8 تقريباً، أو أول 5 لو العدد أقل
         const sliced = Array.isArray(list) ? list.slice(3, 8) : [];
         setProducts(sliced.length > 0 ? sliced : list.slice(0, 5));
       } catch (err) {

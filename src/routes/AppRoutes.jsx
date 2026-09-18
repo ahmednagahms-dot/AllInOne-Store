@@ -14,7 +14,7 @@ export default function AppRoutes() {
       {/* الصفحات اللي جواها Navbar + Footer */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
-        
+           
       </Route>
     </Routes>
   );

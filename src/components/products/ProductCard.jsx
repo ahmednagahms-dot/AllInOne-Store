@@ -2,10 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, Star, ImageOff } from "lucide-react";
 
-/* =========================================================
-   استخراج أول صورة من أي شكل بيانات
-   (بدون getImageUrl — لأن الـ API على Vercel)
-========================================================= */
 function resolveFirstImage(product) {
   if (!product) return null;
 
