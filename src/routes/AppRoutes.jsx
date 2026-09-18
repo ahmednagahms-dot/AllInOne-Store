@@ -1,21 +1,12 @@
 import { Routes, Route } from "react-router-dom";
-import MainLayout from "../components/layout/MainLayout";
-import Home from "../pages/Home";
-
-
-
+import ShoppingCart from "../components/ui/Cart.jsx";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      
-
-
-      {/* الصفحات اللي جواها Navbar + Footer */}
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
-           
-      </Route>
+      <Route path="/" element={<div>ALLINONE STORE</div>} />
+      <Route path="/cart" element={<ShoppingCart />} />
+      <Route path="/shop" element={<div>Shop Page</div>} />
     </Routes>
   );
 }
