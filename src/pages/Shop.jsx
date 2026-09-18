@@ -10,7 +10,7 @@ import { Search } from "lucide-react";
 import { ChevronRight } from "lucide-react";
 
 const ShopImage =
-  "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?q=80&w=1000&auto=format&fit=crop";
+  "https://res.cloudinary.com/iuc91bdy/image/upload/v1789752545/swhfkjpwjhblaonheeo5.png";
 
 export default function Shop() {
   const [allProducts, setAllProducts] = useState([]);

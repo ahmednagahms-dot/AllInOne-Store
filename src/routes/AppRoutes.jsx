@@ -1,9 +1,23 @@
 import { Routes, Route } from "react-router-dom";
+import MainLayout from "../components/layout/MainLayout";
+import Home from "../pages/Home";
+import Shop from "../pages/Shop";
+
+
+
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<div >ALLINONE STORE</div>} />
+      
+
+
+      {/* الصفحات اللي جواها Navbar + Footer */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/shop" element={<Shop />} />
+        
+      </Route>
     </Routes>
   );
 }
