@@ -1,12 +1,12 @@
 import { Routes, Route } from "react-router-dom";
-// import Wishlist from "../components/Wishlist";  
-import Cart from "../components/ui/Cart";
+import ShoppingCart from "../components/ui/Cart.jsx";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/cart" element={<Cart />} />
-      {/* <Route path="/wishlist" element={<Wishlist />} /> */}
+      <Route path="/" element={<div>ALLINONE STORE</div>} />
+      <Route path="/cart" element={<ShoppingCart />} />
+      <Route path="/shop" element={<div>Shop Page</div>} />
     </Routes>
-  )
+  );
 }
