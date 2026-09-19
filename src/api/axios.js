@@ -3,19 +3,26 @@ import Cookies from "js-cookie";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "https://e-commerce-api-3wara.vercel.app",
+<<<<<<< HEAD
+  baseURL :"/api",
+ withCredentials : true,
+=======
   withCredentials: true,
+>>>>>>> bea2942cca817471a2d0b8fbfd0ca66fb8142fc3
 });
 
-// Request Interceptor -> إضافة التوكن
+// Request Interceptor -> Add token
 api.interceptors.request.use((config) => {
   const token = Cookies.get("store_token");
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
-// Response Interceptor -> التعامل مع 401
+// Response Interceptor -> Handle 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -23,18 +30,19 @@ api.interceptors.response.use(
       Cookies.remove("store_token");
       Cookies.remove("store_user");
 
-      // التحقق من المسار سواء باستخدام Path أو Hash
+      // Check current path (path or hash)
       const currentUrl = window.location.href.toLowerCase();
-      const isAuthPage = 
-        currentUrl.includes("login") || 
-        currentUrl.includes("signup") || 
+      const isAuthPage =
+        currentUrl.includes("login") ||
+        currentUrl.includes("signup") ||
         currentUrl.includes("forgot");
 
-      // عدم التوجيه لـ login لو المستخدم موجود بالفعل في إحدى صفحات التوثيق
+      // Don't redirect to login if user is already on an auth page
       if (!isAuthPage) {
         window.location.href = "/login";
       }
     }
+
     return Promise.reject(error);
   }
 );

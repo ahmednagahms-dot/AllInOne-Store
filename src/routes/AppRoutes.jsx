@@ -1,25 +1,122 @@
+<<<<<<< HEAD
 import { Routes, Route } from "react-router-dom";
+import ShoppingCart from "../components/ui/Cart.jsx";
+import Profile from "../pages/profile.jsx";
+export default function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<div>ALLINONE STORE</div>} />
+      <Route path="/cart" element={<ShoppingCart />} />
+      <Route path="/shop" element={<div>Shop Page</div>} />
+      <Route path="/profile" element={<Profile />} />
+=======
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
+import MainLayout from "../components/layout/MainLayout";
+
+// Auth
 import Login from "../components/auth/Login";
 import Signup from "../components/auth/Signup";
 import ForgetPassword from "../components/auth/ForgetPassword";
-import MainLayout from "../components/layout/MainLayout";
+import VerifyOtp from "../components/auth/VerifyOtp";
+
+// Pages
 import Home from "../pages/Home";
+<<<<<<< HEAD
 import Checkout from "../pages/Checkout";
+=======
+import Shop from "../pages/Shop";
+import Cart from "../pages/Cart";
+
+import ProductDetail from "../pages/ProductDetail";
+import Orders from "../pages/Orders";
+import OrderDetails from "../pages/OrderDetails";
+
+
+
+// لازم المستخدم يكون مسجل دخول عشان يوصل للصفحة
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+>>>>>>> main
 
 export default function AppRoutes() {
   return (
     <Routes>
+<<<<<<< HEAD
+=======
+      {/* ===== Auth ===== */}
+>>>>>>> main
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/register" element={<Signup />} />
       <Route path="/forgot" element={<ForgetPassword />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
+<<<<<<< HEAD
       
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/checkout" element={<Checkout />} />
+=======
+      <Route path="/verify-otp" element={<VerifyOtp />} />
+
+      {/* ===== Regular pages ===== */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/shop" element={<Shop />} />
+        {/* مفرد عشان يتوافق مع كل اللينكات الموجودة فعليًا في باقي الملفات */}
+        <Route path="/product/:id" element={<ProductDetail />} />
+
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+  
+
+        {/* Orders */}
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/:id"
+          element={
+            <ProtectedRoute>
+              <OrderDetails />
+            </ProtectedRoute>
+          }
+        />
+
+   
+
+     
+>>>>>>> main
       </Route>
+>>>>>>> bea2942cca817471a2d0b8fbfd0ca66fb8142fc3
     </Routes>
   );
 }

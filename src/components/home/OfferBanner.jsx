@@ -1,18 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { ArrowRight, Clock } from "lucide-react";
 
 /* =========================================================
-   ثوابت
+   Constants
 ========================================================= */
-// مدة العرض: 2 يوم + 18 ساعة + 45 دقيقة + 30 ثانية
+// Offer duration: 2 days + 18 hours + 45 minutes + 30 seconds
 const OFFER_DURATION_MS =
   (2 * 24 * 60 * 60 + 18 * 60 * 60 + 45 * 60 + 30) * 1000;
 
-// المفتاح المستخدم في localStorage لحفظ وقت انتهاء العرض
+// localStorage key to persist offer end time
 const STORAGE_KEY = "offer_end_time";
 
+const BANNER_IMAGE_URL =
+  "https://res.cloudinary.com/iuc91bdy/image/upload/v1789753443/lpx0f1kxvabtd04wycye.webp";
+
 /* =========================================================
-   دالة حساب الفرق بين وقتين
+   Time difference helper
 ========================================================= */
 function getTimeLeft(targetTime) {
   const diff = Math.max(0, targetTime - Date.now());
@@ -27,28 +31,31 @@ function getTimeLeft(targetTime) {
 }
 
 /* =========================================================
-   مكوّن صغير لعرض صندوق رقم واحد
+   Small component: single time box
 ========================================================= */
 function TimeBox({ value, label }) {
   return (
-    <div className="flex h-16 w-16 flex-col items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm sm:h-20 sm:w-20">
-      <span className="text-xl font-bold tabular-nums sm:text-2xl">
+    <div className="flex flex-col items-center justify-center rounded-xl bg-white/15 px-3 py-2 backdrop-blur-sm sm:px-4 sm:py-3">
+      <span className="text-lg font-bold tabular-nums text-white sm:text-xl">
         {String(value).padStart(2, "0")}
       </span>
-      <span className="text-[10px] text-indigo-100 sm:text-xs">{label}</span>
+      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-primary-100 sm:text-[10px]">
+        {label}
+      </span>
     </div>
   );
 }
 
 /* =========================================================
-   المكوّن الرئيسي
+   Main component
 ========================================================= */
-function OfferBanner() {
-  // نحسب وقت الانتهاء مرة واحدة فقط (يُحفظ في localStorage)
+export default function OfferBanner() {
+  // Compute end time only once (persisted in localStorage)
   const endTime = useMemo(() => {
     if (typeof window === "undefined") return Date.now() + OFFER_DURATION_MS;
 
     const saved = window.localStorage.getItem(STORAGE_KEY);
+
     if (saved && Number(saved) > Date.now()) {
       return Number(saved);
     }
@@ -60,83 +67,97 @@ function OfferBanner() {
 
   const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(endTime));
 
-  // تشغيل العداد
+  // Countdown timer
   useEffect(() => {
-    // لو خلص بالفعل من أول لحظة
     if (timeLeft.finished) return;
 
-    const intervalId = setInterval(() => {
+    const id = setInterval(() => {
       const next = getTimeLeft(endTime);
       setTimeLeft(next);
 
       if (next.finished) {
-        clearInterval(intervalId);
+        clearInterval(id);
         window.localStorage.removeItem(STORAGE_KEY);
       }
     }, 1000);
 
-    return () => clearInterval(intervalId);
+    return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endTime]);
 
   const isFinished = timeLeft.finished;
 
   return (
-    <section className="w-full bg-white py-16">
-      <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
-        <div className="relative overflow-hidden rounded-3xl bg-[#5046E5] px-6 py-10 text-white sm:px-10 lg:px-14">
-          {/* دوائر تزيينية */}
-          <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/10" />
-          <div className="absolute -bottom-20 right-24 h-40 w-40 rounded-full bg-white/5" />
-
-          <div className="relative z-10 flex flex-col items-center justify-between gap-8 lg:flex-row">
-            {/* النصوص */}
-            <div className="max-w-xl text-center lg:text-left">
-              <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-indigo-200">
+    <section className="w-full bg-white py-10 sm:py-14">
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <div className="relative overflow-hidden rounded-3xl bg-primary-600">
+          <div className="grid grid-cols-1 items-center gap-6 p-6 sm:p-10 lg:grid-cols-2 lg:gap-4 lg:p-12">
+            {/* Left: Text + Countdown */}
+            <div className="relative z-10">
+              <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-100 sm:text-xs">
                 Limited Time Offer
-              </p>
+              </span>
 
-              <h2 className="text-3xl font-bold sm:text-4xl">
-                Up to 50% Off Top Brands
+              <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-[42px]">
+                Up to 50% Off
+                <br />
+                Top Brands
               </h2>
 
-              <p className="mt-3 text-sm leading-6 text-indigo-100 sm:text-base">
-                Grab amazing deals on the latest technology before the offer
-                ends.
+              <p className="mt-3 max-w-md text-sm leading-6 text-primary-100 sm:text-[15px]">
+                Don't miss out on our biggest sale of the season. Premium
+                electronics at record low prices.
               </p>
 
-              <button
-                type="button"
-                disabled={isFinished}
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#5046E5] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isFinished ? "Offer Ended" : "Shop Now"}
-                {!isFinished && <ArrowRight size={17} />}
-              </button>
-            </div>
-
-            {/* العدّاد التنازلي */}
-            <div className="flex flex-col items-center">
-              <div className="mb-4 flex items-center gap-2 text-sm font-medium text-indigo-100">
-                <Clock size={17} />
-                <span>{isFinished ? "Offer Has Ended" : "Offer Ends In"}</span>
+              {/* Countdown */}
+              <div className="mt-6 flex items-center gap-2 sm:gap-3">
+                <TimeBox value={timeLeft.days} label="Days" />
+                <TimeBox value={timeLeft.hours} label="Hours" />
+                <TimeBox value={timeLeft.minutes} label="Minutes" />
+                <TimeBox value={timeLeft.seconds} label="Seconds" />
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-3">
-                <TimeBox value={timeLeft.days} label="Days" />
-                <span className="text-xl font-bold">:</span>
-                <TimeBox value={timeLeft.hours} label="Hours" />
-                <span className="text-xl font-bold">:</span>
-                <TimeBox value={timeLeft.minutes} label="Minutes" />
-                <span className="text-xl font-bold">:</span>
-                <TimeBox value={timeLeft.seconds} label="Seconds" />
+              {/* CTA */}
+              {isFinished ? (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/60 px-6 py-3 text-sm font-bold text-primary-700 cursor-not-allowed"
+                >
+                  Offer Ended
+                </button>
+              ) : (
+                <Link
+                  to="/shop"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-600 transition hover:bg-primary-50"
+                >
+                  Shop the Sale
+                  <ArrowRight size={16} />
+                </Link>
+              )}
+            </div>
+
+            {/* Right: Image */}
+            <div className="relative z-10 lg:justify-self-end">
+              <div className="overflow-hidden rounded-2xl">
+                <img
+                  src={BANNER_IMAGE_URL}
+                  alt="Limited time offer"
+                  loading="lazy"
+                  className="h-full w-full object-cover lg:max-h-[360px] lg:max-w-[520px]"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
               </div>
             </div>
           </div>
+
+          {/* Decorative circles */}
+          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/5" />
+          <div className="pointer-events-none absolute -bottom-24 left-32 h-48 w-48 rounded-full bg-white/5" />
         </div>
       </div>
     </section>
   );
 }
-
-export default OfferBanner;
