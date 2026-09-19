@@ -1,19 +1,17 @@
 import api from "./axios";
 
-// تسجيل الدخول
-export const login = (data) => api.post("/auth/login", data);
+export const login = (payload) => api.post("/auth/login", payload);
 
-// تسجيل حساب جديد - خطوة 1 (إرسال OTP)
-export const sendRegisterOtp = (data) => api.post("/auth/register/send-otp", data);
+export const logout = () => api.post("/auth/logout");
 
-// تسجيل حساب جديد - خطوة 2 (تأكيد OTP + إنشاء الحساب)
-export const verifyRegisterOtp = (data) => api.post("/auth/register/verify-otp", data);
-
-// نسيت كلمة المرور - إرسال OTP
-export const sendForgotPasswordOtp = (data) => api.post("/auth/forgot-password/send-otp", data);
-
-// نسيت كلمة المرور - تأكيد OTP + تغيير الباسورد
-export const verifyForgotPasswordOtp = (data) => api.post("/auth/forgot-password/verify-otp", data);
-
-// بيانات المستخدم الحالي
 export const getMe = () => api.get("/auth/me");
+
+export const registerSendOtp = (payload) => api.post("/auth/register/send-otp", payload);
+
+export const registerVerifyOtp = (payload) => api.post("/auth/register/verify-otp", payload);
+
+export const forgotPasswordSendOtp = (payload) => api.post("/auth/forgot-password/send-otp", payload);
+
+export const forgotPasswordVerifyOtp = (payload) => api.post("/auth/forgot-password/verify-otp", payload);
+
+export const changeRole = (payload) => api.patch("/auth/change-role", payload);

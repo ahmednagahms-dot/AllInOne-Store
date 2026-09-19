@@ -1,84 +1,80 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import Cookies from "js-cookie";
-import { getMe } from "../api/auth.api";
+import { getMe, login as loginApi, logout as logoutApi } from "../api/auth.api";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(() => {
+    const saved = Cookies.get("allinone_user");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [loading, setLoading] = useState(true);
 
-  // عند فتح الموقع: نقرأ التوكن ونجيب بيانات المستخدم
-  useEffect(() => {
-    const initAuth = async () => {
-      const token = Cookies.get("store_token");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const { data } = await getMe();
-        const userData = data.user || data;
-        setUser(userData);
-        setIsAuthenticated(true);
-      } catch {
-        Cookies.remove("store_token");
-        Cookies.remove("store_user");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-  }, []);
-
-  // ===== تسجيل الدخول (مهم جدًا) =====
-  const loginUser = (token, userData) => {
-    Cookies.set("store_token", token, { expires: 7 });
-
-    if (userData) {
-      Cookies.set("store_user", JSON.stringify(userData), { expires: 7 });
-      setUser(userData);
+  const fetchSession = async () => {
+    const token = Cookies.get("allinone_token");
+    if (!token) {
+      setLoading(false);
+      return;
     }
 
-    setIsAuthenticated(true); // ← ده اللي بيخلي الـ Navbar يتحدث فورًا
+    try {
+      const { data } = await getMe();
+      setUser(data.user);
+      Cookies.set("allinone_user", JSON.stringify(data.user), { expires: 7, sameSite: "strict" });
+    } catch (err) {
+      setUser(null);
+      Cookies.remove("allinone_user");
+      Cookies.remove("allinone_token");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ===== تسجيل الخروج =====
-  const logoutUser = () => {
-    Cookies.remove("store_token");
-    Cookies.remove("store_user");
-    setUser(null);
-    setIsAuthenticated(false);
+  useEffect(() => {
+    fetchSession();
+  }, []);
+
+  const loginUser = async (payload) => {
+    const { data } = await loginApi(payload);
+    Cookies.set("allinone_token", data.token, { expires: 7, sameSite: "strict" });
+    await fetchSession();
+    return data;
   };
 
-  // تحديث بيانات المستخدم محليًا
-  const updateUser = (newData) => {
-    setUser((prev) => {
-      const updated = { ...prev, ...newData };
-      Cookies.set("store_user", JSON.stringify(updated), { expires: 7 });
-      return updated;
-    });
+  const logoutUser = async () => {
+    try {
+      await logoutApi();
+    } catch (err) {
+      
+    } finally {
+      Cookies.remove("allinone_user");
+      Cookies.remove("allinone_token");
+      setUser(null);
+    }
   };
 
-  const value = {
-    user,
-    isAuthenticated,
-    loading,
-    loginUser,
-    logoutUser,
-    updateUser,
+  const updateUser = (userData) => {
+    setUser(userData);
+    Cookies.set("allinone_user", JSON.stringify(userData), { expires: 7, sameSite: "strict" });
   };
+
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      loginUser,
+      logoutUser,
+      updateUser,
+      refreshUser: fetchSession,
+      isAuthenticated: !!user,
+    }),
+    [user, loading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return context;
+  return useContext(AuthContext);
 }
