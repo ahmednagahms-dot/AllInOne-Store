@@ -113,7 +113,10 @@ export default function Hero() {
               </div>
 
               <h1 className="max-w-[520px] text-3xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-4xl lg:text-[42px]">
-                <HighlightedTitle title={slide.title} highlight={slide.highlight} />
+                <HighlightedTitle
+                  title={slide.title}
+                  highlight={slide.highlight}
+                />
               </h1>
 
               <p className="mt-4 max-w-[460px] text-sm leading-relaxed text-gray-500 sm:text-[15px]">
@@ -137,9 +140,21 @@ export default function Hero() {
               </div>
 
               <div className="mt-8 grid max-w-[520px] grid-cols-1 gap-4 border-t border-primary-100 pt-6 sm:grid-cols-3">
-                <Benefit icon={ShieldCheck} title="Premium Quality" subtitle="Guaranteed" />
-                <Benefit icon={Truck} title="Fast Delivery" subtitle="2–5 Business Days" />
-                <Benefit icon={RotateCcw} title="Easy Returns" subtitle="30 Days" />
+                <Benefit
+                  icon={ShieldCheck}
+                  title="Premium Quality"
+                  subtitle="Guaranteed"
+                />
+                <Benefit
+                  icon={Truck}
+                  title="Fast Delivery"
+                  subtitle="2–5 Business Days"
+                />
+                <Benefit
+                  icon={RotateCcw}
+                  title="Easy Returns"
+                  subtitle="30 Days"
+                />
               </div>
             </div>
 
@@ -158,8 +173,12 @@ export default function Hero() {
 
               <div className="absolute right-[10%] top-[10%] z-20 flex h-16 w-16 rotate-6 items-center justify-center rounded-full bg-primary-500 text-center text-white shadow-lg sm:h-[72px] sm:w-[72px]">
                 <div>
-                  <p className="text-[9px] font-bold uppercase text-white/80">Up to</p>
-                  <p className="text-lg font-extrabold leading-none">{slide.discount}</p>
+                  <p className="text-[9px] font-bold uppercase text-white/80">
+                    Up to
+                  </p>
+                  <p className="text-lg font-extrabold leading-none">
+                    {slide.discount}
+                  </p>
                   <p className="text-[8px] font-semibold uppercase">Off</p>
                 </div>
               </div>
@@ -192,7 +211,9 @@ export default function Hero() {
                 onClick={() => setIndex(i)}
                 aria-label={`Slide ${i + 1}`}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === index ? "w-5 bg-primary-500" : "w-1.5 bg-slate-300 hover:bg-slate-400"
+                  i === index
+                    ? "w-5 bg-primary-500"
+                    : "w-1.5 bg-slate-300 hover:bg-slate-400"
                 }`}
               />
             ))}

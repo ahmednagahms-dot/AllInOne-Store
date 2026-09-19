@@ -1,13 +1,23 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 
-const OFFER_DURATION_MS = 3 * 24 * 60 * 60 * 1000; // 3 أيام
+/* =========================================================
+   Constants
+========================================================= */
+// Offer duration: 2 days + 18 hours + 45 minutes + 30 seconds
+const OFFER_DURATION_MS =
+  (2 * 24 * 60 * 60 + 18 * 60 * 60 + 45 * 60 + 30) * 1000;
+
+// localStorage key to persist offer end time
 const STORAGE_KEY = "offer_end_time";
 
 const BANNER_IMAGE_URL =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1789753443/lpx0f1kxvabtd04wycye.webp";
 
+/* =========================================================
+   Time difference helper
+========================================================= */
 function getTimeLeft(targetTime) {
   const diff = Math.max(0, targetTime - Date.now());
 
@@ -20,6 +30,9 @@ function getTimeLeft(targetTime) {
   };
 }
 
+/* =========================================================
+   Small component: single time box
+========================================================= */
 function TimeBox({ value, label }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl bg-white/15 px-3 py-2 backdrop-blur-sm sm:px-4 sm:py-3">
@@ -33,11 +46,16 @@ function TimeBox({ value, label }) {
   );
 }
 
+/* =========================================================
+   Main component
+========================================================= */
 export default function OfferBanner() {
+  // Compute end time only once (persisted in localStorage)
   const endTime = useMemo(() => {
     if (typeof window === "undefined") return Date.now() + OFFER_DURATION_MS;
 
     const saved = window.localStorage.getItem(STORAGE_KEY);
+
     if (saved && Number(saved) > Date.now()) {
       return Number(saved);
     }
@@ -49,6 +67,7 @@ export default function OfferBanner() {
 
   const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(endTime));
 
+  // Countdown timer
   useEffect(() => {
     if (timeLeft.finished) return;
 
@@ -63,7 +82,8 @@ export default function OfferBanner() {
     }, 1000);
 
     return () => clearInterval(id);
-  }, [endTime, timeLeft.finished]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [endTime]);
 
   const isFinished = timeLeft.finished;
 
