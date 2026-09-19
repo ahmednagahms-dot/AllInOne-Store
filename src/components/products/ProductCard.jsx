@@ -48,7 +48,6 @@ function getPricing(product) {
   let finalPrice = price;
   let finalOldPrice = oldPrice;
 
-  // لو فيه discountPrice من الـ API
   if (discountPrice > 0 && discountPrice < price) {
     finalPrice = discountPrice;
     finalOldPrice = price;
@@ -74,7 +73,7 @@ export default function ProductCard({ product }) {
   } = useWishlist();
 
   const productId = product._id || product.id;
-  const name = product.name || product.title || "منتج بدون اسم";
+  const name = product.name || product.title || "Unnamed Product";
   const rating = Number(product.rating || product.averageRating) || 0;
   const reviewsCount =
     product.reviewsCount ?? product.numReviews ?? product.reviews?.length ?? 0;
@@ -94,15 +93,15 @@ export default function ProductCard({ product }) {
     try {
       if (liked) {
         await removeFromWishlist(productId);
-        toast.success("تمت الإزالة من المفضلة");
+        toast.success("Removed from wishlist");
       } else {
         await addToWishlist(productId);
-        toast.success("تمت الإضافة للمفضلة");
+        toast.success("Added to wishlist");
       }
     } catch (err) {
       console.error(err);
       toast.error(
-        err.response?.data?.message || "يجب تسجيل الدخول أولاً"
+        err.response?.data?.message || "Please log in first"
       );
     }
   };
@@ -116,11 +115,11 @@ export default function ProductCard({ product }) {
     try {
       setCartLoading(true);
       await addToCart(productId, 1);
-      toast.success("تمت الإضافة إلى السلة");
+      toast.success("Added to cart");
     } catch (err) {
       console.error(err);
       toast.error(
-        err.response?.data?.message || "يجب تسجيل الدخول أولاً"
+        err.response?.data?.message || "Please log in first"
       );
     } finally {
       setCartLoading(false);
@@ -132,7 +131,7 @@ export default function ProductCard({ product }) {
       {/* Image */}
       <div className="relative flex h-[220px] items-center justify-center overflow-hidden bg-slate-50 p-4">
         <Link
-          to={productId ? `/product/${productId}` : "#"}
+          to={productId ? `/products/${productId}` : "#"}
           className="h-full w-full"
         >
           {showImage ? (
@@ -209,7 +208,7 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Name */}
-        <Link to={productId ? `/product/${productId}` : "#"}>
+        <Link to={productId ? `/products/${productId}` : "#"}>
           <h3 className="line-clamp-2 min-h-[40px] text-sm font-semibold text-[#0F172A] hover:text-[#5046E5] transition">
             {name}
           </h3>
