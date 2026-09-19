@@ -62,9 +62,7 @@ function Benefit({ icon: Icon, title, subtitle }) {
 }
 
 function HighlightedTitle({ title, highlight }) {
-  if (!highlight || !title.includes(highlight)) {
-    return <>{title}</>;
-  }
+  if (!highlight || !title.includes(highlight)) return <>{title}</>;
   const parts = title.split(highlight);
   return (
     <>
@@ -105,9 +103,8 @@ export default function Hero() {
           onMouseLeave={() => setIsPaused(false)}
         >
           <div className="grid min-h-[420px] grid-cols-1 items-center lg:grid-cols-2">
-            {/* ===== Left: Text ===== */}
+            {/* Left */}
             <div className="relative z-10 px-6 py-10 sm:px-10 md:px-12 lg:px-14 lg:py-12">
-              {/* Badge */}
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary-500">
@@ -115,20 +112,14 @@ export default function Hero() {
                 </span>
               </div>
 
-              {/* Title */}
               <h1 className="max-w-[520px] text-3xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-4xl lg:text-[42px]">
-                <HighlightedTitle
-                  title={slide.title}
-                  highlight={slide.highlight}
-                />
+                <HighlightedTitle title={slide.title} highlight={slide.highlight} />
               </h1>
 
-              {/* Description */}
               <p className="mt-4 max-w-[460px] text-sm leading-relaxed text-gray-500 sm:text-[15px]">
                 {slide.description}
               </p>
 
-              {/* Buttons */}
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/shop"
@@ -145,32 +136,17 @@ export default function Hero() {
                 </Link>
               </div>
 
-              {/* Benefits */}
               <div className="mt-8 grid max-w-[520px] grid-cols-1 gap-4 border-t border-primary-100 pt-6 sm:grid-cols-3">
-                <Benefit
-                  icon={ShieldCheck}
-                  title="Premium Quality"
-                  subtitle="Guaranteed"
-                />
-                <Benefit
-                  icon={Truck}
-                  title="Fast Delivery"
-                  subtitle="2–5 Business Days"
-                />
-                <Benefit
-                  icon={RotateCcw}
-                  title="Easy Returns"
-                  subtitle="30 Days"
-                />
+                <Benefit icon={ShieldCheck} title="Premium Quality" subtitle="Guaranteed" />
+                <Benefit icon={Truck} title="Fast Delivery" subtitle="2–5 Business Days" />
+                <Benefit icon={RotateCcw} title="Easy Returns" subtitle="30 Days" />
               </div>
             </div>
 
-            {/* ===== Right: Image ===== */}
+            {/* Right */}
             <div className="relative flex min-h-[300px] items-center justify-center px-8 pb-10 pt-4 lg:min-h-[420px] lg:pb-0">
-              {/* Circle background */}
               <div className="absolute right-[8%] top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full bg-white/60 sm:h-[320px] sm:w-[320px] lg:h-[360px] lg:w-[360px]" />
 
-              {/* Product */}
               <div className="relative z-10 h-[240px] w-[240px] sm:h-[280px] sm:w-[280px] lg:h-[310px] lg:w-[310px]">
                 <img
                   key={slide.id}
@@ -180,15 +156,10 @@ export default function Hero() {
                 />
               </div>
 
-              {/* Discount Badge */}
               <div className="absolute right-[10%] top-[10%] z-20 flex h-16 w-16 rotate-6 items-center justify-center rounded-full bg-primary-500 text-center text-white shadow-lg sm:h-[72px] sm:w-[72px]">
                 <div>
-                  <p className="text-[9px] font-bold uppercase text-white/80">
-                    Up to
-                  </p>
-                  <p className="text-lg font-extrabold leading-none">
-                    {slide.discount}
-                  </p>
+                  <p className="text-[9px] font-bold uppercase text-white/80">Up to</p>
+                  <p className="text-lg font-extrabold leading-none">{slide.discount}</p>
                   <p className="text-[8px] font-semibold uppercase">Off</p>
                 </div>
               </div>
@@ -221,9 +192,7 @@ export default function Hero() {
                 onClick={() => setIndex(i)}
                 aria-label={`Slide ${i + 1}`}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === index
-                    ? "w-5 bg-primary-500"
-                    : "w-1.5 bg-slate-300 hover:bg-slate-400"
+                  i === index ? "w-5 bg-primary-500" : "w-1.5 bg-slate-300 hover:bg-slate-400"
                 }`}
               />
             ))}

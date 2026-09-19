@@ -1,618 +1,407 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { addToWishlist } from "../api/wishlist.api";
+import { toast } from "react-toastify";
+import Button from "../components/ui/Button";
 import {
-  ShoppingCart as CartIcon,
+  Loader2,
+  Minus,
+  Plus,
   Trash2,
   Heart,
-  Lock,
+  ShoppingBag,
+  ShieldCheck,
   RotateCcw,
-  MessageCircle,
-  CheckCircle2,
-  XCircle,
+  Headphones,
   AlertTriangle,
-  Loader2,
+  Tag,
+  X,
+  ArrowRight,
 } from "lucide-react";
-import {
-  getCart,
-  updateCartItem,
-  removeCartItem,
-  clearCart,
-  applyCoupon,
-  removeCoupon,
-} from "../api/cart.api";
 
-/* =========================================================
-   استخراج الـ cart من أي شكل رد
-========================================================= */
-function extractCart(response) {
-  const data = response?.data ?? response;
-
-  // نلاقي الـ cart object
-  const cart = data?.cart ?? data?.data?.cart ?? data?.data ?? data;
-
-  // نلاقي الـ items array
-  const items =
-    cart?.items ??
-    cart?.cartItems ??
-    cart?.products ??
-    data?.items ??
-    [];
-
-  return {
-    cart,
-    items: Array.isArray(items) ? items : [],
-    coupon: cart?.coupon || null,
-    couponCode: cart?.couponCode || null,
-    discount: Number(cart?.discount) || 0,
-    couponError: cart?.couponError || null,
-  };
+// Extract product data from cart item
+function getItemProduct(item) {
+  return item.product && typeof item.product === "object"
+    ? item.product
+    : item;
 }
 
-/* =========================================================
-   استخراج بيانات منتج من عنصر cart
-========================================================= */
-function normalizeItem(item) {
-  const product = item.product || item;
-  const id = product._id || product.id || item.productId || item._id;
-
-  // الصورة
-  const images = product.images || item.images;
-  const rawImg =
-    (Array.isArray(images) && images[0]) ||
-    product.image ||
-    item.image ||
-    item.img ||
-    null;
-
-  const img =
-    typeof rawImg === "string"
-      ? rawImg
-      : rawImg?.url||  rawImg?.path || null;
-
-  return {
-    id,
-    name: product.name||  product.title||  item.name || "منتج",
-    brand: product.brand || product.category || item.brand || "",
-    desc:
-      item.variant ||
-      item.description ||
-      product.description ||
-      "",
-    price: Number(item.price ?? product.price) || 0,
-    oldPrice: Number(product.oldPrice || product.comparePrice) || 0,
-    qty: Number(item.quantity ?? item.qty) || 1,
-    img,
-    stock: product.stock,
-    stockStatus:
-      typeof product.stock === "number"
-        ? product.stock === 0
-          ? "Out of stock"
-          : product.stock < 5
-          ? "Low stock"
-          : "In stock"
-        : item.stock || "In stock",
-    discount: product.discount || 0,
-  };
-}
-
-/* =========================================================
-   مكوّن بسيط لعرض حالة (Empty/Loading/Error)
-========================================================= */
-function StateCard({ title, children }) {
+function getItemImage(item) {
+  const product = getItemProduct(item);
   return (
-    <div className="rounded-xl border bg-white p-6 text-center">
-      <p className="mb-4 text-left text-[11px] font-bold text-gray-500">
-        {title}
-      </p>
-      {children}
-    </div>
+    product.images?.[0]?.url ||
+    product.image ||
+    "https://placehold.co/150x150?text=No+Image"
   );
 }
 
-/* =========================================================
-   المكوّن الرئيسي
-========================================================= */
-export default function ShoppingCart() {
-  const [items, setItems] = useState([]);
-  const [coupon, setCoupon] = useState(null);
-  const [couponInput, setCouponInput] = useState("");
-  const [couponMessage, setCouponMessage] = useState(null); // { type: "success"|"error", text }
+function getItemId(item) {
+  return (
+    item.productId ||
+    item.product?._id ||
+    item.product ||
+    item._id
+  );
+}
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
+export default function Cart() {
+  const {
+    cart,
+    loading,
+    error,
+    fetchCart,
+    updateItem,
+    removeItem,
+    applyCartCoupon,
+    removeCartCoupon,
+    clearAllCart, // ✅ fixed name
+  } = useCart();
 
-  /* =========================================================
-     جلب السلة
-  ========================================================= */
-  const fetchCart = async () => {
-    setLoading(true);
-    setError(null);
+  const navigate = useNavigate();
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [busyItemId, setBusyItemId] = useState(null);
+
+  const items = cart?.items || cart?.products || [];
+
+  const subtotal = items.reduce((sum, item) => {
+    const product = getItemProduct(item);
+    const price = product.discountPrice ?? product.price ?? 0;
+    return sum + price * (item.quantity || 1);
+  }, 0);
+
+  const discount = cart?.discount ?? cart?.couponDiscount ?? 0;
+  const total =
+    cart?.total ?? cart?.totalPriceAfterDiscount ?? subtotal - discount;
+  const appliedCoupon = cart?.coupon || cart?.appliedCoupon;
+
+  const handleQuantityChange = async (item, nextQty) => {
+    if (nextQty < 1) return;
+    const id = getItemId(item);
+    setBusyItemId(id);
+    await updateItem(id, nextQty);
+    setBusyItemId(null);
+  };
+
+  const handleRemove = async (item) => {
+    const id = getItemId(item);
+    setBusyItemId(id);
+    await removeItem(id);
+    setBusyItemId(null);
+  };
+
+  const handleMoveToWishlist = async (item) => {
+    const id = getItemId(item);
+    setBusyItemId(id);
     try {
-      const res = await getCart();
-      const { items: raw, coupon: c } = extractCart(res);
-      setItems(raw.map(normalizeItem));
-      setCoupon(c);
+      await addToWishlist(id);
+      await removeItem(id);
+      toast.success("Moved to wishlist");
     } catch (err) {
-      console.error("Cart fetch error:", err);
-      setError("تعذر تحميل السلة");
-      setItems([]);
+      console.error(err);
+      toast.error("Failed to move to wishlist");
     } finally {
-      setLoading(false);
+      setBusyItemId(null);
     }
   };
 
-  useEffect(() => {
-    fetchCart();
-  }, []);
-  /* =========================================================
-     الإجماليات
-  ========================================================= */
-  const totals = useMemo(() => {
-    const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-    const oldSubtotal = items.reduce(
-      (s, i) => s + (i.oldPrice || i.price) * i.qty,
-      0
-    );
-
-    const productDiscount = oldSubtotal - subtotal;
-    const couponDiscount = `coupon?.discountAmount  coupon?.discount  0`;
-    const discount = productDiscount + couponDiscount;
-
-    const shipping = subtotal >= 50 || subtotal === 0 ? 0 : 10;
-    const tax = subtotal * 0.1;
-    const total = subtotal - couponDiscount + shipping + tax;
-
-    return {
-      subtotal,
-      discount,
-      couponDiscount,
-      shipping,
-      tax,
-      total: Math.max(0, total),
-      count: items.reduce((s, i) => s + i.qty, 0),
-    };
-  }, [items, coupon]);
-
-  /* =========================================================
-     تعديل الكمية
-  ========================================================= */
-  const handleUpdateQty = async (id, newQty) => {
-    if (newQty < 1) return;
-    setUpdatingId(id);
-
-    // Optimistic update
-    const prev = items;
-    setItems((list) =>
-      list.map((i) => (i.id === id ? { ...i, qty: newQty } : i))
-    );
-
-    try {
-      await updateCartItem({ productId: id, quantity: newQty });
-    } catch (err) {
-      console.error(err);
-      setItems(prev); // rollback
-    } finally {
-      setUpdatingId(null);
-    }
+  const handleApplyCoupon = async (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    const ok = await applyCartCoupon(couponCode.trim());
+    setCouponLoading(false);
+    if (ok) setCouponCode("");
   };
 
-  /* =========================================================
-     حذف عنصر
-  ========================================================= */
-  const handleRemove = async (id) => {
-    setUpdatingId(id);
-    const prev = items;
-    setItems((list) => list.filter((i) => i.id !== id));
-
-    try {
-      await removeCartItem(id);
-    } catch (err) {
-      console.error(err);
-      setItems(prev);
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  /* =========================================================
-     تفريغ السلة
-  ========================================================= */
-  const handleClear = async () => {
-    if (!window.confirm("متأكد إنك عايز تفرّغ السلة؟")) return;
-    const prev = items;
-    setItems([]);
-
-    try {
-      await clearCart();
-    } catch (err) {
-      console.error(err);
-      setItems(prev);
-    }
-  };
-
-  /* =========================================================
-     تطبيق كوبون
-  ========================================================= */
-  const handleApplyCoupon = async () => {
-    const code = couponInput.trim();
-    if (!code) return;
-
-    try {
-      const res = await applyCoupon({ code });
-      const { coupon: c } = extractCart(res);
-
-      setCoupon(c || { code, discountAmount: 0 });
-      setCouponMessage({
-        type: "success",
-        text:` Coupon "${code}" applied successfully!`,
-      });
-      setCouponInput("");
-    } catch (err) {
-      console.error(err);
-      setCouponMessage({
-        type: "error",
-        text:
-          err?.response?.data?.message ||
-          "Invalid coupon code. Please try again.",
-      });
-    }
-  };
-
-  /* =========================================================
-     إزالة الكوبون
-  ========================================================= */
   const handleRemoveCoupon = async () => {
-    try {
-      await removeCoupon();
-      setCoupon(null);
-      setCouponMessage(null);
-    } catch (err) {
-      console.error(err);
-    }
+    setCouponLoading(true);
+    await removeCartCoupon();
+    setCouponLoading(false);
   };
 
-  /* =========================================================
-     Loading State
-  ========================================================= */
+  const handleClearCart = async () => {
+    if (!window.confirm("Are you sure you want to clear the entire cart?"))
+      return;
+    await clearAllCart(); // ✅ fixed call
+  };
+
+  // ===== Loading State =====
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7fb]">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-blue-600" size={36} />
-          <p className="text-sm text-gray-500">Loading your cart...</p>
-        </div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary-500" size={40} />
       </div>
     );
   }
-  /* =========================================================
-     Error State
-  ========================================================= */
+
+  // ===== Error State =====
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7fb] p-4">
-        <div className="w-full max-w-md rounded-xl border bg-white p-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500">
-            <AlertTriangle size={24} />
-          </div>
-          <h2 className="text-lg font-bold">Oops! Something went wrong</h2>
-          <p className="mt-1 text-sm text-gray-500">{error}</p>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center px-4">
+        <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center">
+          <AlertTriangle className="text-danger" size={28} />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">Something went wrong</h2>
+        <p className="text-gray-500 max-w-sm">
+          We couldn't load your cart. Please try again or continue shopping.
+        </p>
+        <div className="flex gap-3">
           <button
             onClick={fetchCart}
-            className="mt-5 w-full rounded-lg bg-blue-600 py-2.5 text-sm font-bold text-white"
+            className="px-6 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
           >
             Try Again
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  /* =========================================================
-     Empty State
-  ========================================================= */
-  if (items.length === 0) {
-    return (
-      <div className="min-h-screen bg-[#f6f7fb] p-4 md:p-6">
-        <div className="mx-auto max-w-md rounded-xl border bg-white p-8 text-center">
-          <div className="mb-4 text-5xl">🛒</div>
-          <h3 className="text-base font-extrabold">Your cart is empty</h3>
-          <p className="mt-1 text-xs text-gray-400">
-            Looks like you haven't added anything to your cart yet.
-          </p>
           <Link
             to="/shop"
-            className="mt-5 inline-block rounded-full bg-blue-600 px-6 py-2.5 text-xs font-bold text-white"
+            className="px-6 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
           >
-            Continue Shopping →
+            Continue Shopping
           </Link>
         </div>
       </div>
     );
   }
 
-  /* =========================================================
-     Main Render
-  ========================================================= */
-  return (
-    <div className="min-h-screen bg-[#f6f7fb] p-4 md:p-6">
-      <div className="mx-auto max-w-[1280px]">
-        {/* ============ Header ============ */}
-        <div className="mb-6 flex items-start justify-between">
-          <div>
-            <p className="text-[11px] text-gray-400">Home › Cart</p>
-            <h1 className="mt-1 text-[22px] font-extrabold">Shopping Cart</h1>
-            <p className="mt-1 text-[11px] text-gray-500">
-              Review your items and proceed to checkout when you're ready.
-            </p>
-          </div>
+  // ===== Empty State =====
+  if (items.length === 0) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center px-4">
+        <div className="w-20 h-20 rounded-full bg-primary-50 flex items-center justify-center">
+          <ShoppingBag className="text-primary-500" size={32} />
         </div>
+        <h2 className="text-xl font-bold text-gray-900">Your cart is empty</h2>
+        <p className="text-gray-500 max-w-sm">
+          Looks like you haven't added anything yet. Explore the store and find
+          something you like!
+        </p>
+        <Link
+          to="/shop"
+          className="mt-2 px-6 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
+        >
+          Continue Shopping
+        </Link>
+      </div>
+    );
+  }
 
-        {/* ============ Main Layout ============ */}
-        <div className="flex flex-col items-start gap-5 lg:flex-row">
-          {/* ===== Cart Items ===== */}
-          <div className="w-full rounded-xl border border-gray-100 bg-white p-4 lg:w-[68%]">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-[13px] font-bold">
-                {items.length} item{items.length !== 1 ? "s" : ""} in your cart
-              </h2>
-              <button
-                onClick={handleClear}
-                className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-red-500"
-              >
-                <Trash2 size={12} />
-                Clear Cart
-              </button>
-            </div>
+  // ===== Cart with items =====
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+          Shopping Cart
+        </h1>
+        <p className="text-gray-500 mt-1">Review your items before checkout</p>
+      </div>
 
-            {items.map((item) => (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* ===== Items List ===== */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              {items.length} {items.length === 1 ? "item" : "items"} in cart
+            </p>
+            <button
+              onClick={handleClearCart}
+              className="text-sm text-danger hover:underline flex items-center gap-1"
+            >
+              <Trash2 size={14} />
+              Clear Cart
+            </button>
+          </div>
+
+          {items.map((item) => {
+            const product = getItemProduct(item);
+            const id = getItemId(item);
+            const isBusy = busyItemId === id;
+            const price = product.discountPrice ?? product.price ?? 0;
+            const originalPrice = product.discountPrice ? product.price : null;
+
+            return (
               <div
-                key={item.id}
-                className="flex gap-3 border-b py-4 last:border-0"
+                key={id}
+                className={`flex gap-4 bg-white border border-gray-100 rounded-2xl p-4 transition ${
+                  isBusy ? "opacity-50 pointer-events-none" : ""
+                }`}
               >
-                <img
-                  src={item.img || "/placeholder.png"}
-                  onError={(e) => {
-                    e.currentTarget.src = "/placeholder.png";
-                  }}
-                  alt={item.name}
-                  className="h-[64px] w-[64px] rounded-lg border bg-gray-50 object-cover"
-                />
+                <Link
+                  to={`/product/${id}`}
+                  className="w-24 h-24 shrink-0 rounded-xl overflow-hidden bg-gray-50"
+                >
+                  <img
+                    src={getItemImage(item)}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </Link>
 
-                <div className="flex-1">
-                  <h3 className="text-[12px] font-bold">{item.name}</h3>
-                  <p className="text-[10px] text-gray-400">{item.brand}</p>
-                  {item.desc && (
-                    <p className="text-[10px] text-gray-400">{item.desc}</p>
-                  )}
-                  <span
-                    className={`text-[10px] ${
-                      item.stockStatus === "Low stock"
-                        ? "text-amber-500"
-                        : item.stockStatus === "Out of stock"
-                        ? "text-red-500"
-                        : "text-green-600"
-                    }`}
-                  >
-                    ● {item.stockStatus}
-                  </span>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="text-[11px] font-bold">
-                      ${item.price.toFixed(2)}
-                    </span>
-                    {item.oldPrice > item.price && (
-                      <>
-                        <span className="text-[10px] text-gray-400 line-through">
-                          ${item.oldPrice.toFixed(2)}
-                        </span>
-                        <span className="rounded-full bg-red-50 px-2 py-0.5 text-[9px] text-red-500">
-                          -
-                          {Math.round(
-                            ((item.oldPrice - item.price) / item.oldPrice) *
-                              100
-                          )}
-                          %
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-end justify-between">
-                  <div className="flex flex-col items-end gap-2">
-                    <div className="flex items-center gap-1 rounded-full border px-2 py-1">
-                      <button
-                        onClick={() => handleUpdateQty(item.id, item.qty - 1)}
-                        disabled={item.qty <= 1 || updatingId === item.id}
-                        className="h-5 w-5 disabled:opacity-40"
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Link
+                        to={`/product/${id}`}
+                        className="font-medium text-gray-900 hover:text-primary-500 line-clamp-1"
                       >
-                        -
+                        {product.name || "Product"}
+                      </Link>
+                      {product.category && (
+                        <p className="text-xs text-gray-400 capitalize mt-0.5">
+                          {product.category}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-left shrink-0">
+                      <p className="font-bold text-gray-900">
+                        ${(price * (item.quantity || 1)).toFixed(2)}
+                      </p>
+                      {originalPrice && (
+                        <p className="text-xs text-gray-400 line-through">
+                          $
+                          {(originalPrice * (item.quantity || 1)).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4">
+                    {/* Quantity */}
+                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() =>
+                          handleQuantityChange(item, (item.quantity || 1) - 1)
+                        }
+                        disabled={(item.quantity || 1) <= 1}
+                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition disabled:opacity-40"
+                      >
+                        <Minus size={14} />
                       </button>
-                      <span className="w-4 text-center text-[11px] font-bold">
-                        {item.qty}
+                      <span className="w-8 text-center text-sm font-medium">
+                        {item.quantity || 1}
                       </span>
                       <button
-                        onClick={() => handleUpdateQty(item.id, item.qty + 1)}
-                        disabled={updatingId === item.id}
-                        className="h-5 w-5 disabled:opacity-40"
+                        onClick={() =>
+                          handleQuantityChange(item, (item.quantity || 1) + 1)
+                        }
+                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition"
                       >
-                        +
+                        <Plus size={14} />
                       </button>
                     </div>
-                    <span className="text-[12px] font-bold">
-                      ${(item.price * item.qty).toFixed(2)}
-                    </span>
-                  </div>
 
-                  <div className="mt-2 flex gap-3 text-[10px] text-gray-400">
-                    <button className="flex items-center gap-1 hover:text-blue-600">
-                      <Heart size={11} />
-                      Wishlist
-                    </button>
-                    <button
-                      onClick={() => handleRemove(item.id)}
-                      disabled={updatingId === item.id}
-                      className="flex items-center gap-1 hover:text-red-500 disabled:opacity-40"
-                    >
-                      <Trash2 size={11} />
-                      Remove
-                    </button>
+                    {/* Actions */}
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => handleMoveToWishlist(item)}
+                        className="text-xs text-gray-500 hover:text-primary-500 flex items-center gap-1"
+                      >
+                        <Heart size={14} />
+                        Move to Wishlist
+                      </button>
+                      <button
+                        onClick={() => handleRemove(item)}
+                        className="text-xs text-danger hover:underline flex items-center gap-1"
+                      >
+                        <Trash2 size={14} />
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
 
-          {/* ===== Order Summary ===== */}
-          <div className="h-fit w-full rounded-xl border border-gray-100 bg-white p-4 lg:w-[32%]">
-            <h2 className="mb-4 text-[13px] font-bold">Order Summary</h2>
+        {/* ===== Order Summary ===== */}
+        <div className="lg:col-span-1">
+          <div className="bg-white border border-gray-100 rounded-2xl p-6 sticky top-24">
+            <h3 className="font-bold text-gray-900 mb-5">Order Summary</h3>
 
-            <div className="space-y-2 text-[11px]">
-              <div className="flex justify-between">
-                <span className="text-gray-500">
-                  Subtotal ({totals.count} items)
-                </span>
-                <span className="font-medium">
-                  ${totals.subtotal.toFixed(2)}
-                </span>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
               </div>
-              {totals.discount > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Discount</span>
-                  <span className="text-red-500">
-                    -${totals.discount.toFixed(2)}
-                  </span>
+              {discount > 0 && (
+                <div className="flex justify-between text-success">
+                  <span>Discount</span>
+                  <span>-${discount.toFixed(2)}</span>
                 </div>
               )}
+            </div>
 
-              <div className="flex justify-between">
-                <span className="text-gray-500">
-                  Shipping
-                  <br />
-                  <span className="text-[9px]">
-                    Free shipping on orders over $50
-                  </span>
-                </span>
-                <span>
-                  {totals.shipping === 0
-                    ? "$0.00"
-                    :`$$ {totals.shipping.toFixed(2)`}
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-500">Estimated Tax</span>
-                <span>${totals.tax.toFixed(2)}</span>
-              </div>
-
-              <div className="mt-3 flex justify-between border-t pt-3 text-[13px] font-extrabold">
-                <span>Total</span>
-                <span>${totals.total.toFixed(2)}</span>
-              </div>
+            <div className="border-t border-gray-100 my-4 pt-4 flex justify-between font-bold text-gray-900">
+              <span>Total</span>
+              <span>${Number(total).toFixed(2)}</span>
             </div>
 
             {/* Coupon */}
-            <div className="mt-4 flex gap-2">
-              <input
-                value={couponInput}
-                onChange={(e) => setCouponInput(e.target.value)}
-                placeholder="Enter coupon code"
-                className="w-full rounded-lg border px-3 py-2 text-[11px] outline-none"
-              />
-              <button
-                onClick={handleApplyCoupon}
-                className="rounded-lg border px-4 text-[11px] font-bold text-blue-600"
-              >
-                Apply
-              </button>
-            </div>
-
-            {/* Coupon Message */}
-            {couponMessage && (
-              <div
-                className={`mt-3 flex items-start gap-2 rounded-lg border px-3 py-2.5 ${
-                  couponMessage.type === "success"
-                    ? "border-green-100 bg-green-50 text-green-700"
-                    : "border-red-100 bg-red-50 text-red-600"
-                }`}
-              >
-                <div
-                  className={`mt-0.5 flex h-4 w-4 items-center justify-center rounded-full text-white ${
-                    couponMessage.type === "success"
-                      ? "bg-green-500"
-                      : "bg-red-500"
-                  }`}
-                >
-                  {couponMessage.type === "success" ? (
-                    <CheckCircle2 size={10} />
-                  ) : (
-                    <XCircle size={10} />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="text-[10px] font-bold leading-none">
-                    {couponMessage.type === "success"
-                      ? "Coupon applied successfully!"
-                      : "Invalid coupon code!"}
-                  </p>
-                  <p className="mt-1 text-[9px]">{couponMessage.text}</p>
-                </div>
-                <button
-                  onClick={() => setCouponMessage(null)}
-                  className="text-[10px]"
-                >
-                  ×
-                </button>
-              </div>
-            )}
-
-            {/* Applied Coupon */}
-            {coupon?.code && (
-              <div className="mt-3 flex items-center justify-between rounded-lg border border-green-100 bg-green-50 px-3 py-2 text-[10px] text-green-700">
-                <span>
-                  Coupon <b>{coupon.code}</b> applied
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between bg-success/10 text-success text-sm px-3 py-2.5 rounded-lg mb-4">
+                <span className="flex items-center gap-2">
+                  <Tag size={14} />
+                  Coupon {appliedCoupon.code || appliedCoupon} applied
                 </span>
-                <button
-                  onClick={handleRemoveCoupon}
-                  className="text-green-500 hover:text-red-500"
-                >
-                  ×
+                <button onClick={handleRemoveCoupon} disabled={couponLoading}>
+                  <X size={14} />
                 </button>
               </div>
+            ) : (
+              <form onSubmit={handleApplyCoupon} className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Enter coupon code"
+                  className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+                <button
+                  type="submit"
+                  disabled={couponLoading || !couponCode.trim()}
+                  className="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+                >
+                  {couponLoading ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    "Apply"
+                  )}
+                </button>
+              </form>
             )}
-            <Link
-              to="/checkout"
-              className="mt-4 block w-full rounded-lg bg-blue-600 py-2.5 text-center text-[11px] font-bold text-white"
+
+            <Button
+              onClick={() => navigate("/checkout")}
+              className="w-full"
+              size="lg"
             >
-              Proceed to Checkout →
-            </Link>
+              Proceed to Checkout
+              <ArrowRight size={18} />
+            </Button>
 
             <Link
               to="/shop"
-              className="mt-2 block w-full rounded-lg border py-2.5 text-center text-[11px]"
+              className="w-full flex items-center justify-center text-sm text-gray-500 hover:text-primary-500 mt-3"
             >
               Continue Shopping
             </Link>
 
-            {/* Trust badges */}
-            <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-center">
-              <div>
-                <div className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-gray-50">
-                  <Lock size={13} className="text-gray-500" />
-                </div>
-                <p className="mt-1 text-[9px] font-bold">Secure</p>
+            <div className="grid grid-cols-3 gap-2 mt-6 pt-6 border-t border-gray-100 text-center">
+              <div className="flex flex-col items-center gap-1">
+                <ShieldCheck className="text-primary-500" size={18} />
+                <span className="text-[11px] text-gray-500">
+                  Secure Payment
+                </span>
               </div>
-              <div>
-                <div className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-gray-50">
-                  <RotateCcw size={13} className="text-gray-500" />
-                </div>
-                <p className="mt-1 text-[9px] font-bold">Easy Returns</p>
+              <div className="flex flex-col items-center gap-1">
+                <RotateCcw className="text-primary-500" size={18} />
+                <span className="text-[11px] text-gray-500">Easy Returns</span>
               </div>
-              <div>
-                <div className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-gray-50">
-                  <MessageCircle size={13} className="text-gray-500" />
-                </div>
-                <p className="mt-1 text-[9px] font-bold">Support</p>
+              <div className="flex flex-col items-center gap-1">
+                <Headphones className="text-primary-500" size={18} />
+                <span className="text-[11px] text-gray-500">Support</span>
               </div>
             </div>
           </div>

@@ -6,86 +6,79 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // جلب الجلسة عند فتح الموقع
-  const fetchSession = async () => {
-    const savedToken = Cookies.get("store_token");
-    const savedUser = Cookies.get("store_user");
-
-    if (!savedToken) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setToken(savedToken);
-
-      // نجرب نجيب البيانات من الـ API عشان نتأكد إن التوكن لسه صالح
-      const { data } = await getMe();
-      setUser(data.user || data);
-
-      // نحدث الكوكي لو في تغيير
-      Cookies.set("store_user", JSON.stringify(data.user || data), { expires: 7 });
-    } catch (error) {
-      // التوكن بايظ → نمسحه
-      Cookies.remove("store_token");
-      Cookies.remove("store_user");
-      setToken(null);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // عند فتح الموقع: نقرأ التوكن ونجيب بيانات المستخدم
   useEffect(() => {
-    fetchSession();
+    const initAuth = async () => {
+      const token = Cookies.get("store_token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data } = await getMe();
+        const userData = data.user || data;
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch {
+        Cookies.remove("store_token");
+        Cookies.remove("store_user");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
-  // تسجيل الدخول
-  const loginUser = (userData, authToken) => {
-    setUser(userData);
-    setToken(authToken);
+  // ===== تسجيل الدخول (مهم جدًا) =====
+  const loginUser = (token, userData) => {
+    Cookies.set("store_token", token, { expires: 7 });
 
-    Cookies.set("store_token", authToken, { expires: 7 });
-    Cookies.set("store_user", JSON.stringify(userData), { expires: 7 });
+    if (userData) {
+      Cookies.set("store_user", JSON.stringify(userData), { expires: 7 });
+      setUser(userData);
+    }
+
+    setIsAuthenticated(true); // ← ده اللي بيخلي الـ Navbar يتحدث فورًا
   };
 
-  // تسجيل الخروج
+  // ===== تسجيل الخروج =====
   const logoutUser = () => {
-    setUser(null);
-    setToken(null);
-
     Cookies.remove("store_token");
     Cookies.remove("store_user");
+    setUser(null);
+    setIsAuthenticated(false);
   };
 
-  // تحديث بيانات المستخدم
-  const updateUser = (newUserData) => {
-    setUser(newUserData);
-    Cookies.set("store_user", JSON.stringify(newUserData), { expires: 7 });
+  // تحديث بيانات المستخدم محليًا
+  const updateUser = (newData) => {
+    setUser((prev) => {
+      const updated = { ...prev, ...newData };
+      Cookies.set("store_user", JSON.stringify(updated), { expires: 7 });
+      return updated;
+    });
   };
 
   const value = {
     user,
-    token,
+    isAuthenticated,
     loading,
-    isAuthenticated: !!token && !!user,
     loginUser,
     logoutUser,
     updateUser,
-    fetchSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Hook للاستخدام
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 }
