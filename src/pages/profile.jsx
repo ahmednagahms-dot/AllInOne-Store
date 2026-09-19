@@ -139,4 +139,4 @@ export default function Profile() {
     </div>
   )
 }
-        
+        // updated profile v2
