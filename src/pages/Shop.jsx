@@ -5,7 +5,6 @@ import Pagination from "../components/ui/Pagination";
 import ProductToolbar from "../components/products/ProductToolbar";
 import ShopSidebar from "../components/products/ShopSidebar";
 import ShopFeatures from "../components/products/ShopFeatures";
-import ComponentStatesShowcase from "../components/products/ComponentStatesShowcase";
 import { Search } from "lucide-react";
 import { ChevronRight } from "lucide-react";
 
@@ -299,7 +298,7 @@ export default function Shop() {
           </main>
         </div>
         <ShopFeatures />
-        <ComponentStatesShowcase />
+        
       </div>
     </div>
   );
