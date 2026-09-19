@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "https://e-commerce-api-3wara.vercel.app",
+  baseURL :"/api",
  withCredentials : true,
 });
 

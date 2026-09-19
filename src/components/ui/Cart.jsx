@@ -19,7 +19,7 @@ import {
   clearCart,
   applyCoupon,
   removeCoupon,
-} from "../../api/cart.api";
+} from "../../api/cart.api"; 
 
 /* =========================================================
    استخراج الـ cart من أي شكل رد
