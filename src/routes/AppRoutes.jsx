@@ -1,6 +1,12 @@
 import { Routes, Route } from "react-router-dom";
 
 import MainLayout from "../components/layout/MainLayout";
+import Home from "../pages/Home";
+import Shop from "../pages/Shop";
+
+
+
+import MainLayout from "../components/layout/MainLayout";
 
 // Auth
 import Login from "../components/auth/Login";
@@ -27,9 +33,14 @@ export default function AppRoutes() {
       {/* ===== Regular pages (with Navbar + Footer) ===== */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
+
+        <Route path="/shop" element={<Shop />} />
+        
+
         <Route path="/cart" element={<Cart />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/shop" element={<div>Shop Page</div>} />
+
       </Route>
     </Routes>
   );
