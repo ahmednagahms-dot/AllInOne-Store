@@ -1,20 +1,34 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { getMe } from "../api/auth.api";
+import { getMe, updateProfile } from "../api/auth.api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+ 
+  const [user, setUser] = useState(() => {
+    try {
+      const cached = Cookies.get("store_user");
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => !!Cookies.get("store_token")
+  );
+
   const [loading, setLoading] = useState(true);
 
-  // عند فتح الموقع: نقرأ التوكن ونجيب بيانات المستخدم
+  // عند فتح الموقع: نتأكد من التوكن ونجيب أحدث بيانات المستخدم
   useEffect(() => {
     const initAuth = async () => {
       const token = Cookies.get("store_token");
       if (!token) {
         setLoading(false);
+        setUser(null);
+        setIsAuthenticated(false);
         return;
       }
 
@@ -23,9 +37,13 @@ export function AuthProvider({ children }) {
         const userData = data.user || data;
         setUser(userData);
         setIsAuthenticated(true);
+        // خزّن أحدث نسخة في الـ cookies
+        Cookies.set("store_user", JSON.stringify(userData), { expires: 7 });
       } catch {
         Cookies.remove("store_token");
         Cookies.remove("store_user");
+        setUser(null);
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -34,7 +52,7 @@ export function AuthProvider({ children }) {
     initAuth();
   }, []);
 
-  // ===== تسجيل الدخول (مهم جدًا) =====
+  // ===== تسجيل الدخول =====
   const loginUser = (token, userData) => {
     Cookies.set("store_token", token, { expires: 7 });
 
@@ -43,7 +61,7 @@ export function AuthProvider({ children }) {
       setUser(userData);
     }
 
-    setIsAuthenticated(true); // ← ده اللي بيخلي الـ Navbar يتحدث فورًا
+    setIsAuthenticated(true);
   };
 
   // ===== تسجيل الخروج =====
@@ -63,6 +81,14 @@ export function AuthProvider({ children }) {
     });
   };
 
+  // تعديل بيانات البروفايل فعليًا عبر الـ API
+  const updateProfileData = async (data) => {
+    const res = await updateProfile(data);
+    const updatedUser = res.data.user || res.data;
+    updateUser(updatedUser);
+    return updatedUser;
+  };
+
   const value = {
     user,
     isAuthenticated,
@@ -70,6 +96,7 @@ export function AuthProvider({ children }) {
     loginUser,
     logoutUser,
     updateUser,
+    updateProfileData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

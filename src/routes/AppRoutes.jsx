@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -12,9 +13,31 @@ import VerifyOtp from "../components/auth/VerifyOtp";
 import Home from "../pages/Home";
 import Shop from "../pages/Shop";
 import Cart from "../pages/Cart";
+
 import ProductDetail from "../pages/ProductDetail";
+import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
-import Orders from "../pages/Orders"; 
+
+
+
+// لازم المستخدم يكون مسجل دخول عشان يوصل للصفحة
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
 
 export default function AppRoutes() {
   return (
@@ -31,12 +54,40 @@ export default function AppRoutes() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/products/:id" element={<ProductDetail />} />
+        {/* مفرد عشان يتوافق مع كل اللينكات الموجودة فعليًا في باقي الملفات */}
+        <Route path="/product/:id" element={<ProductDetail />} />
+
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+  
 
         {/* Orders */}
-        <Route path="/orders" element={<Orders />} />             
-        <Route path="/orders/:id" element={<OrderDetails />} />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/:id"
+          element={
+            <ProtectedRoute>
+              <OrderDetails />
+            </ProtectedRoute>
+          }
+        />
+
+   
+
+     
       </Route>
     </Routes>
   );
