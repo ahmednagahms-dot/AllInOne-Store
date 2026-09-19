@@ -1,0 +1,212 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
+import { verifyRegisterOtp, sendRegisterOtp } from "../../api/auth.api";
+import { useAuth } from "../../context/AuthContext";
+import { Loader2, Mail, ArrowLeft } from "lucide-react";
+import Cookies from "js-cookie";
+
+export default function VerifyOtp() {
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const auth = useAuth();
+
+  const { email, username, password } = location.state || {};
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm();
+
+  const otpValue = watch("otp") || "";
+
+  // If no email
+  if (!email) {
+    return (
+      <div className="min-h-screen w-full bg-[#f3f5fc] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-sm w-full">
+          <p className="text-gray-500 mb-4 text-sm">No verification data</p>
+          <Link
+            to="/signup"
+            className="inline-flex items-center gap-2 text-[#2b64f6] font-semibold text-sm hover:underline"
+          >
+            <ArrowLeft size={16} />
+            Back to Sign Up
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const payload = {
+        email,
+        otp: String(data.otp).trim(),
+      };
+
+      // If API also needs username
+      if (username) payload.username = username;
+
+      console.log("Sending verify payload:", payload);
+
+      const res = await verifyRegisterOtp(payload);
+      console.log("Verify response:", res.data);
+
+      const token =
+        res.data?.token ||
+        res.data?.accessToken ||
+        res.data?.data?.token ||
+        res.data?.access_token;
+
+      const user =
+        res.data?.user ||
+        res.data?.data?.user ||
+        res.data?.data;
+
+      if (token) {
+        // Save token
+        Cookies.set("store_token", token, { expires: 7 });
+        if (user) {
+          Cookies.set("store_user", JSON.stringify(user), { expires: 7 });
+        }
+
+        // If there's loginUser in Context
+        if (auth?.loginUser) {
+          auth.loginUser(token, user);
+        } else if (auth?.setUser) {
+          auth.setUser(user);
+        }
+
+        toast.success("Account created successfully 🎉");
+        navigate("/");
+      } else {
+        // Verification succeeded but no token → go to login
+        toast.success("Verified successfully, please log in");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Verify error:", error.response?.data || error);
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        (Array.isArray(error.response?.data?.errors)
+          ? error.response.data.errors[0]
+          : null) ||
+        "Invalid or expired verification code";
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    setResending(true);
+    try {
+      // We need password and username to resend
+      // If not available in state, user goes back to signup
+      if (!password && !username) {
+        toast.info("Please sign up again to send a new code");
+        navigate("/signup");
+        return;
+      }
+      await sendRegisterOtp({
+        email,
+        username: username || email.split("@")[0],
+        password: password || "temp",
+      });
+      toast.success("Code resent successfully");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to resend");
+    } finally {
+      setResending(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-[#f3f5fc] flex items-center justify-center p-4 md:p-6 font-sans">
+      <div className="w-full max-w-[480px] bg-white rounded-[28px] shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-br from-[#2b64f6] to-[#1e40af] px-8 py-10 text-center text-white">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/20 flex items-center justify-center">
+            <Mail size={28} />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">Verify Your Email</h1>
+          <p className="text-sm text-blue-100">
+            We sent a verification code to
+          </p>
+          <p className="text-sm font-semibold mt-1 break-all">{email}</p>
+        </div>
+
+        {/* Form */}
+        <div className="px-8 py-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-xs font-bold text-[#334155] mb-2 text-center">
+                Enter Verification Code
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                placeholder="• • • • • •"
+                className="w-full px-4 py-4 border-2 border-[#dbe5ff] rounded-2xl text-center text-2xl font-bold tracking-[0.4em] text-[#10245A] bg-[#eff4ff] focus:outline-none focus:ring-2 focus:ring-[#2b64f6] focus:border-[#2b64f6] transition"
+                {...register("otp", {
+                  required: "Verification code is required",
+                  minLength: { value: 4, message: "Code is incomplete" },
+                  pattern: {
+                    value: /^[0-9]+$/,
+                    message: "Code must contain numbers only",
+                  },
+                })}
+              />
+              {errors.otp && (
+                <p className="text-red-500 text-xs mt-2 text-center font-medium">
+                  {errors.otp.message}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || otpValue.length < 4}
+              className="w-full py-3.5 bg-[#2b64f6] hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+            >
+              {loading && <Loader2 size={18} className="animate-spin" />}
+              {loading ? "Verifying..." : "Confirm Code"}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center space-y-3">
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="text-sm text-[#2b64f6] font-semibold hover:underline disabled:opacity-50"
+            >
+              {resending ? "Sending..." : "Resend Code"}
+            </button>
+
+            <p className="text-xs text-[#64748b]">
+              <Link
+                to="/signup"
+                className="font-semibold text-[#2b64f6] hover:underline"
+              >
+                Back to Sign Up
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

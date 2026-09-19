@@ -17,3 +17,15 @@ export const verifyForgotPasswordOtp = (data) => api.post("/auth/forgot-password
 
 // بيانات المستخدم الحالي
 export const getMe = () => api.get("/auth/me");
+<<<<<<< HEAD
+=======
+
+export const updateProfile = (data) => api.patch("/auth/me", data);
+
+// تغيير كلمة المرور وانت داخل حسابك - إرسال OTP للإيميل
+export const sendChangePasswordOtp = () => api.post("/auth/change-password/send-otp");
+
+// تغيير كلمة المرور - تأكيد OTP + كلمة المرور الجديدة
+export const verifyChangePasswordOtp = (data) =>
+  api.post("/auth/change-password/verify-otp", data);
+>>>>>>> bea2942cca817471a2d0b8fbfd0ca66fb8142fc3

@@ -90,9 +90,9 @@ export default function Navbar() {
               alt="ShopEase"
               className="h-9 w-auto object-contain"
             />
-           <span className="text-xl font-bold tracking-tight text-[#0F172A]">
-                AllIn<span className="text-[#5046E5]">One</span>
-                </span>
+            <span className="text-xl font-bold text-gray-900 hidden sm:block">
+              ShopEase
+            </span>
           </Link>
 
           {/* Desktop Nav Links */}
