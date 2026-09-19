@@ -2,10 +2,10 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ArrowLeft, MapPin, CreditCard, PackageX, Loader2 } from "lucide-react";
-import { getMyOrderById, cancelMyOrder } from "../../api/orders.api";
-import { addCartItem } from "../../api/cart.api";
-import { useAuth } from "../../context/AuthContext";
-import OrderStatusBadge from "../../components/orders/OrderStatusBadge";
+import { getMyOrderById, cancelMyOrder } from "../api/orders.api";
+import { addCartItem } from "../api/cart.api";
+import { useAuth } from "../context/AuthContext";
+import OrderStatusBadge from "../components/orders/OrderStatusBadge";
 
 const CANCELLABLE_STATUSES = ["pending", "confirmed"];
 

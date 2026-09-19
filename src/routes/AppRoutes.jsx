@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import OrderDetails from "../pages/profile/OrderDetails";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -14,15 +13,13 @@ import Home from "../pages/Home";
 import Shop from "../pages/Shop";
 import Cart from "../pages/Cart";
 import ProductDetail from "../pages/ProductDetail";
+import OrderDetails from "../pages/OrderDetails";
+import Orders from "../pages/Orders"; 
 
 export default function AppRoutes() {
   return (
     <Routes>
-
-      <Route path="/" element={<div >ALLINONE STORE</div>} />
-      <Route path="/profile/orders/:id" element={<OrderDetails />} />
-
-      {/* ===== Auth (no Navbar / Footer) ===== */}
+      {/* ===== Auth ===== */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/register" element={<Signup />} />
@@ -30,14 +27,17 @@ export default function AppRoutes() {
       <Route path="/forgot-password" element={<ForgetPassword />} />
       <Route path="/verify-otp" element={<VerifyOtp />} />
 
-      {/* ===== Regular pages (with Navbar + Footer) ===== */}
+      {/* ===== Regular pages ===== */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/products/:id" element={<ProductDetail />} />
-      </Route>
 
+        {/* Orders */}
+        <Route path="/orders" element={<Orders />} />             
+        <Route path="/orders/:id" element={<OrderDetails />} />
+      </Route>
     </Routes>
   );
 }
