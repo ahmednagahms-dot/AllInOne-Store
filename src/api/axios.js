@@ -3,10 +3,10 @@ import Cookies from "js-cookie";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "https://e-commerce-api-3wara.vercel.app",
- withCredentials : true,
+  withCredentials: true,
 });
 
-// Request Interceptor → إضافة التوكن
+// Request Interceptor -> إضافة التوكن
 api.interceptors.request.use((config) => {
   const token = Cookies.get("store_token");
   if (token) {
@@ -15,7 +15,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response Interceptor → التعامل مع 401
+// Response Interceptor -> التعامل مع 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -23,8 +23,15 @@ api.interceptors.response.use(
       Cookies.remove("store_token");
       Cookies.remove("store_user");
 
-      // نروح لصفحة اللوجين بس لو مش فيها أصلاً
-      if (!window.location.pathname.startsWith("/login")) {
+      // التحقق من المسار سواء باستخدام Path أو Hash
+      const currentUrl = window.location.href.toLowerCase();
+      const isAuthPage = 
+        currentUrl.includes("login") || 
+        currentUrl.includes("signup") || 
+        currentUrl.includes("forgot");
+
+      // عدم التوجيه لـ login لو المستخدم موجود بالفعل في إحدى صفحات التوثيق
+      if (!isAuthPage) {
         window.location.href = "/login";
       }
     }
