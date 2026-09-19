@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import ProductDetail from "../pages/ProductDetail";
 
 import Login from "../components/auth/Login";
 import Signup from "../components/auth/Signup";
@@ -15,6 +16,10 @@ import ShoppingCart from "../components/ui/Cart.jsx";
 export default function AppRoutes() {
   return (
     <Routes>
+
+      <Route path="/" element={<div >ALLINONE STORE</div>} />
+          <Route path="/products/:id" element={<ProductDetail />} />
+
 
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
@@ -34,6 +39,7 @@ export default function AppRoutes() {
       <Route path="/" element={<div>ALLINONE STORE</div>} />
       <Route path="/cart" element={<ShoppingCart />} />
       <Route path="/shop" element={<div>Shop Page</div>} />
+
 
     </Routes>
   );
