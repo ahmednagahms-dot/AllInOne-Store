@@ -1,31 +1,38 @@
 import api from "./axios";
 
+// ===========================
+// Auth
+// ===========================
+
 // تسجيل الدخول
 export const login = (data) => api.post("/auth/login", data);
 
 // تسجيل حساب جديد - خطوة 1 (إرسال OTP)
-export const sendRegisterOtp = (data) => api.post("/auth/register/send-otp", data);
+export const sendRegisterOtp = (data) =>
+  api.post("/auth/register/send-otp", data);
 
 // تسجيل حساب جديد - خطوة 2 (تأكيد OTP + إنشاء الحساب)
-export const verifyRegisterOtp = (data) => api.post("/auth/register/verify-otp", data);
+export const verifyRegisterOtp = (data) =>
+  api.post("/auth/register/verify-otp", data);
 
 // نسيت كلمة المرور - إرسال OTP
-export const sendForgotPasswordOtp = (data) => api.post("/auth/forgot-password/send-otp", data);
+export const sendForgotPasswordOtp = (data) =>
+  api.post("/auth/forgot-password/send-otp", data);
 
 // نسيت كلمة المرور - تأكيد OTP + تغيير الباسورد
-export const verifyForgotPasswordOtp = (data) => api.post("/auth/forgot-password/verify-otp", data);
+export const verifyForgotPasswordOtp = (data) =>
+  api.post("/auth/forgot-password/verify-otp", data);
+
+// ===========================
+// Profile
+// ===========================
 
 // بيانات المستخدم الحالي
 export const getMe = () => api.get("/auth/me");
-<<<<<<< HEAD
-=======
 
-export const updateProfile = (data) => api.patch("/auth/me", data);
 
-// تغيير كلمة المرور وانت داخل حسابك - إرسال OTP للإيميل
-export const sendChangePasswordOtp = () => api.post("/auth/change-password/send-otp");
+// إرسال OTP لتغيير كلمة المرور
+export const sendChangePasswordOtp = sendForgotPasswordOtp;
 
-// تغيير كلمة المرور - تأكيد OTP + كلمة المرور الجديدة
-export const verifyChangePasswordOtp = (data) =>
-  api.post("/auth/change-password/verify-otp", data);
->>>>>>> bea2942cca817471a2d0b8fbfd0ca66fb8142fc3
+// تأكيد OTP + كلمة المرور الجديدة
+export const verifyChangePasswordOtp = verifyForgotPasswordOtp;

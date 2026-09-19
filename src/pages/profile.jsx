@@ -1,142 +1,771 @@
-import { useEffect, useState } from "react"
-import { getMe } from "../api/auth.api"
-import { LogOut } from "lucide-react"
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import Cookies from "js-cookie";
+import {
+  getMe,
+  sendChangePasswordOtp,
+  verifyChangePasswordOtp,
+} from "../api/auth.api";
+import { uploadToCloudinary } from "../utils/upload";
+import {
+  Camera,
+  Lock,
+  Loader2,
+  Save,
+  Pencil,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  LogOut,
+} from "lucide-react";
+import { toast } from "react-toastify";
+
 export default function Profile() {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate();
+  const { logoutUser, updateUser } = useAuth();
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
-    country: "",
-    city: "",
-    street: "",
-    building: "",
-    postal: "",
-  })
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+  });
 
+  const [preferences, setPreferences] = useState({
+    language: "English",
+    currency: "USD ($)",
+    theme: "light",
+  });
+
+  const [passwordStep, setPasswordStep] = useState("idle");
+  const [passwordEmail, setPasswordEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+
+  // =========================
+  // Load profile (getMe + cache merge)
+  // =========================
   useEffect(() => {
-    getMe()
-     .then(res => {
-        setUser(res.data.data || res.data.user  || res.data)
-      })
-     .finally(() => setLoading(false))
-  }, [])
+    const load = async () => {
+      try {
+        let userData = null;
+        try {
+          const res = await getMe();
+          userData = res.data.user || res.data.data || res.data;
+        } catch (err) {
+          console.warn("getMe failed, using cache only:", err?.message);
+        }
 
-  if (loading) return <p className="p-10 text-center text-slate-500">Loading...</p>
-  if (!user) return <p className="p-10 text-center">Please login first</p>
+        let cached = {};
+        try {
+          const cachedStr = Cookies.get("store_user");
+          cached = cachedStr ? JSON.parse(cachedStr) : {};
+        } catch {
+          cached = {};
+        }
+
+        const merged = {
+          ...cached,
+          ...(userData || {}),
+          avatar: userData?.avatar || cached?.avatar || null,
+          firstName: userData?.firstName || cached?.firstName || "",
+          lastName: userData?.lastName || cached?.lastName || "",
+          username: userData?.username || cached?.username || "",
+          language: userData?.language || cached?.language || "English",
+          currency: userData?.currency || cached?.currency || "USD ($)",
+          theme: userData?.theme || cached?.theme || "light",
+          dateOfBirth: userData?.dateOfBirth || cached?.dateOfBirth || "",
+        };
+
+        setUser(merged);
+        setAvatarPreview(merged?.avatar || null);
+
+        const fullName =
+          merged?.firstName && merged?.lastName
+            ? `${merged.firstName} ${merged.lastName}`
+            : merged?.username || merged?.name || "";
+        const [firstName = "", ...rest] = fullName.split(" ");
+        const lastName = rest.join(" ");
+
+        setForm({
+          firstName: merged?.firstName || firstName || "",
+          lastName: merged?.lastName || lastName || "",
+          email: merged?.email || "",
+          phone: merged?.phone || "",
+          dateOfBirth: merged?.dateOfBirth
+            ? String(merged.dateOfBirth).slice(0, 10)
+            : "",
+        });
+
+        setPasswordEmail(merged?.email || "");
+
+        setPreferences({
+          language: merged?.language || "English",
+          currency: merged?.currency || "USD ($)",
+          theme: merged?.theme || "light",
+        });
+
+        Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
+        setIsEditing(false);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  // =========================
+  // Avatar
+  // =========================
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be less than 2MB");
+      e.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result);
+      setAvatarFile(file);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // =========================
+  // Save profile (محلي فقط)
+  // =========================
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+
+      let avatarUrl = null;
+
+      // 1. ارفع الصورة على Cloudinary
+      if (avatarFile) {
+        try {
+          setUploadingAvatar(true);
+          avatarUrl = await uploadToCloudinary(avatarFile);
+        } catch (err) {
+          console.error("Avatar upload failed:", err);
+          toast.error("Failed to upload avatar");
+          setUploadingAvatar(false);
+          setSaving(false);
+          return;
+        } finally {
+          setUploadingAvatar(false);
+        }
+      }
+
+      // 2. ✅ احفظ محلياً (الـ Backend مش بيدعم التعديل)
+      const merged = {
+        ...user,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        phone: form.phone,
+        dateOfBirth: form.dateOfBirth || "",
+        language: preferences.language,
+        currency: preferences.currency,
+        theme: preferences.theme,
+        ...(avatarUrl && { avatar: avatarUrl }),
+      };
+
+      setUser(merged);
+      if (updateUser) updateUser(merged);
+
+      // 3. احفظ في الـ cookies
+      Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
+
+      setAvatarFile(null);
+      if (avatarUrl) setAvatarPreview(avatarUrl);
+
+      toast.success("Profile updated");
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (!user) return;
+
+    const fullName =
+      user?.firstName && user?.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user?.username || user?.name || "";
+    const [firstName = "", ...rest] = fullName.split(" ");
+    const lastName = rest.join(" ");
+
+    setForm({
+      firstName: user?.firstName || firstName || "",
+      lastName: user?.lastName || lastName || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      dateOfBirth: user?.dateOfBirth
+        ? String(user.dateOfBirth).slice(0, 10)
+        : "",
+    });
+
+    setPreferences({
+      language: user?.language || "English",
+      currency: user?.currency || "USD ($)",
+      theme: user?.theme || "light",
+    });
+
+    setAvatarPreview(user?.avatar || null);
+    setAvatarFile(null);
+    setIsEditing(false);
+  };
+
+  // =========================
+  // Change Password
+  // =========================
+  const handleStartChangePassword = () => {
+    setPasswordStep("email");
+    setPasswordEmail(user?.email || "");
+  };
+
+  const handleSendOtp = async () => {
+    if (!passwordEmail.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
+
+    try {
+      setSendingOtp(true);
+      await sendChangePasswordOtp({ email: passwordEmail.trim() });
+      toast.success("OTP sent to your email");
+      setPasswordStep("otp");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!otp.trim()) {
+      toast.error("Please enter the OTP");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      setResettingPassword(true);
+      await verifyChangePasswordOtp({
+        email: passwordEmail.trim(),
+        otp: otp.trim(),
+        newPassword,
+      });
+      toast.success("Password changed successfully");
+      setPasswordStep("idle");
+      setOtp("");
+      setNewPassword("");
+      setShowPassword(false);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to change password");
+    } finally {
+      setResettingPassword(false);
+    }
+  };
+
+  const handleCancelChangePassword = () => {
+    setPasswordStep("idle");
+    setOtp("");
+    setNewPassword("");
+    setShowPassword(false);
+    setPasswordEmail(user?.email || "");
+  };
+
+  // =========================
+  // Logout
+  // =========================
+  const handleLogout = () => {
+    logoutUser();
+    toast.success("Logged out");
+    navigate("/login");
+  };
+
+  // =========================
+  // Loading / empty
+  // =========================
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="animate-spin text-indigo-600" size={40} />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <p className="text-slate-500 text-lg">Please login first</p>
+      </div>
+    );
+  }
+
+  const displayName =
+    user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.username || user.name || "User";
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] py-10">
-      <div className="max-w-[720px] mx-auto px-4">
-        <h1 className="text-[22px] font-bold text-slate-800 mb-6">My Profile</h1>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-6 px-4 sm:px-6">
+      <div className="max-w-[1000px] mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-xl font-bold text-slate-800 dark:text-white">
+              Account Settings
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Manage your account information and preferences
+            </p>
+          </div>
 
-        
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-[64px] h-[64px] rounded-full bg-[#4a5a7a] flex items-center justify-center overflow-hidden">
-              <svg viewBox="0 0 24 24" className="w-14 h-14 text-white/90 fill-white/90 mt-2">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
+          {!isEditing && (
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"
+            >
+              <Pencil size={14} />
+              Edit Profile
+            </button>
+          )}
+        </div>
+
+        {/* Profile Information */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-6">
+          <h2 className="text-base font-bold text-slate-800 dark:text-white mb-6">
+            Profile Information
+          </h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
+            {/* Avatar */}
+            <div className="flex flex-col items-center">
+              <div className="relative">
+                <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white dark:ring-slate-700 shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+                  {avatarPreview ? (
+                    <img
+                      src={avatarPreview}
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-3xl font-bold">
+                      {(displayName || "U")[0].toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => isEditing && fileInputRef.current?.click()}
+                  disabled={!isEditing || uploadingAvatar}
+                  className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-indigo-600 text-white shadow-md flex items-center justify-center hover:bg-indigo-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Change avatar"
+                  title={
+                    isEditing ? "Change avatar" : "Click Edit Profile first"
+                  }
+                >
+                  {uploadingAvatar ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Camera size={16} />
+                  )}
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => isEditing && fileInputRef.current?.click()}
+                disabled={!isEditing || uploadingAvatar}
+                className="mt-3 text-sm text-indigo-600 font-medium hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {uploadingAvatar
+                  ? "Uploading..."
+                  : isEditing
+                  ? "Change Photo"
+                  : "Edit to change photo"}
+              </button>
             </div>
+
+            {/* Fields */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                    First name
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={form.firstName}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500 bg-white dark:bg-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                    Last name
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={form.lastName}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500 bg-white dark:bg-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    disabled
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none bg-slate-50 dark:bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                    Phone
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <select
+                        disabled={!isEditing}
+                        className="appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500"
+                      >
+                        <option>+20</option>
+                        <option>+1</option>
+                        <option>+44</option>
+                        <option>+966</option>
+                      </select>
+                      <ChevronDown
+                        size={14}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                      />
+                    </div>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500 bg-white dark:bg-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                  Date of birth
+                </label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={form.dateOfBirth}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500 bg-white dark:bg-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Preferences */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-6">
+          <div className="mb-6">
+            <h2 className="text-base font-bold text-slate-800 dark:text-white">
+              Preferences
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Set your preferred language, currency and theme
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <p className="font-semibold text-slate-900">{user.username || user.name || "team6"}</p>
-              <p className="text-[13px] text-slate-500">{user.email}</p>
-              <p className="text-[12px] text-[#6c5ce7]">{user.role || "Customer"}</p>
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                Language
+              </label>
+              <div className="relative">
+                <select
+                  value={preferences.language}
+                  onChange={(e) =>
+                    setPreferences({
+                      ...preferences,
+                      language: e.target.value,
+                    })
+                  }
+                  disabled={!isEditing}
+                  className="w-full appearance-none px-3 py-2.5 pr-9 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500"
+                >
+                  <option>English</option>
+                  <option>العربية</option>
+                  <option>Français</option>
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                Currency
+              </label>
+              <div className="relative">
+                <select
+                  value={preferences.currency}
+                  onChange={(e) =>
+                    setPreferences({
+                      ...preferences,
+                      currency: e.target.value,
+                    })
+                  }
+                  disabled={!isEditing}
+                  className="w-full appearance-none px-3 py-2.5 pr-9 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500"
+                >
+                  <option>USD ($)</option>
+                  <option>EGP (E£)</option>
+                  <option>EUR (€)</option>
+                  <option>SAR (﷼)</option>
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                Theme
+              </label>
+              <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
+                {["light", "dark", "auto"].map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() =>
+                      isEditing && setPreferences({ ...preferences, theme: t })
+                    }
+                    disabled={!isEditing}
+                    className={`flex-1 py-1.5 text-xs font-medium rounded-lg capitalize transition ${
+                      preferences.theme === t
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                    } ${!isEditing ? "cursor-not-allowed opacity-70" : ""}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-
-          <div className="mt-6 space-y-3 text-[13px] text-slate-600">
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              {user.email}
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              {user.phone || "Not set"}
-            </div>
-          </div>
-
-          <button className="mt-6 px-4 py-[6px] rounded-md border border-[#6c5ce7] text-[#6c5ce7] text-[13px] font-medium hover:bg-[#f5f3ff] transition">
-            Edit Profile
-          </button>
         </div>
 
-        
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center gap-1.5 mb-4">
-            <svg className="w-5 h-5 text-[#6c5ce7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <h2 className="font-semibold text-slate-800 text-[15px]">Addresses</h2>
+        {/* Change Password */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Lock size={16} className="text-indigo-600" />
+            <h2 className="text-base font-bold text-slate-800 dark:text-white">
+              Change Password
+            </h2>
           </div>
 
-          <p className="text-[13px] text-slate-500 mb-4">No addresses yet.</p>
+          {passwordStep === "idle" && (
+            <button
+              type="button"
+              onClick={handleStartChangePassword}
+              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"
+            >
+              Change Password
+            </button>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              placeholder="Country"
-              value={form.country}
-              onChange={e => setForm({...form, country: e.target.value})}
-              className="col-span-1 border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] outline-none focus:border-[#6c5ce7] placeholder:text-slate-400"
-            />
-            <input
-              placeholder="City"
-              value={form.city}
-              onChange={e => setForm({...form, city: e.target.value})}
-              className="col-span-1 border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] outline-none focus:border-[#6c5ce7] placeholder:text-slate-400"
-            />
-            <input
-              placeholder="Street"
-              value={form.street}
-              onChange={e => setForm({...form, street: e.target.value})}
-              className="col-span-1 border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] outline-none focus:border-[#6c5ce7] placeholder:text-slate-400"
-            />
-            <input
-              placeholder="Building"
-              value={form.building}
-              onChange={e => setForm({...form, building: e.target.value})}
-              className="col-span-1 border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] outline-none focus:border-[#6c5ce7] placeholder:text-slate-400"
-            />
-            <input
-              placeholder="Postal code"
-              value={form.postal}
-              onChange={e => setForm({...form, postal: e.target.value})}
-              className="col-span-2 border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] outline-none focus:border-[#6c5ce7] placeholder:text-slate-400"
-            />
-          </div>
+          {passwordStep === "email" && (
+            <>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                We&apos;ll send an OTP to your email to verify your identity.
+              </p>
+              <input
+                type="email"
+                placeholder="Email"
+                value={passwordEmail}
+                onChange={(e) => setPasswordEmail(e.target.value)}
+                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white"
+              />
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={sendingOtp}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition disabled:opacity-60"
+                >
+                  {sendingOtp && (
+                    <Loader2 size={14} className="animate-spin" />
+                  )}
+                  Send OTP
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelChangePassword}
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
 
-          <button className="mt-4 px-4 py-2 rounded-md bg-[#4f46e5] hover:bg-[#4338ca] text-white text-[13px] font-medium transition flex items-center gap-1">
-            <span className="text-[16px] leading-none">+</span> Add Address
-          </button>
+          {passwordStep === "otp" && (
+            <>
+              <input
+                type="text"
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                maxLength={6}
+                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white"
+              />
+
+              <div className="relative mb-4">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="New password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2.5 pr-10 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleResetPassword}
+                  disabled={resettingPassword}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition disabled:opacity-60"
+                >
+                  {resettingPassword && (
+                    <Loader2 size={14} className="animate-spin" />
+                  )}
+                  Reset Password
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelChangePassword}
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
         </div>
-      </div>
-            <div className="max-w-[720px] mx-auto px-4">
-              <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 mt-6">
-<h2 className="font-bold text-xl text-black">change password</h2>
-<p className="text-gray-400">we'll send an otp to your amail to verify your identity</p>
-            <input
-              placeholder="email"
-              value={form.email}
-              onChange={e => setForm({...form, email: e.target.value})}
-              className="col-span-1 border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] w-full mt-2 outline-none focus:border-[#6c5ce7] placeholder:text-slate-400"
-    />
-    < div className="flex gap-3">
-          <button className="mt-4 px-4 py-2 rounded-md bg-[#4f46e5] text-white text-[13px] font-medium transition flex items-center gap-1">Send OTP</button>
-          <button className="mt-4 px-4 py-2 rounded-md bg-gray-200  text-black text-[13px] font-medium  flex items-center gap-1">Cancel</button>
+
+        {/* Footer actions */}
+        {isEditing && (
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition disabled:opacity-60 shadow-sm"
+            >
+              {saving ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Save size={14} />
+              )}
+              Save Changes
+            </button>
           </div>
-      </div>
-      </div>
-             <button className="w-[600px] m-auto flex items-center justify-center gap-2 bg-[#E30613] text-white py-3 rounded-lg">
-  <LogOut size={18} />
-  Logout
-</button>     
+        )}
 
-
+        {/* Logout */}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/50 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+        >
+          <LogOut size={16} />
+          Logout
+        </button>
+      </div>
     </div>
-  )
+  );
 }
-        // updated profile v2

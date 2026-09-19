@@ -1,11 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { getMe, updateProfile } from "../api/auth.api";
+import { getMe } from "../api/auth.api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
- 
   const [user, setUser] = useState(() => {
     try {
       const cached = Cookies.get("store_user");
@@ -35,10 +34,30 @@ export function AuthProvider({ children }) {
       try {
         const { data } = await getMe();
         const userData = data.user || data;
-        setUser(userData);
+
+        // ✅ ادمج بيانات الـ API مع الكاش
+        let cached = {};
+        try {
+          const cachedStr = Cookies.get("store_user");
+          cached = cachedStr ? JSON.parse(cachedStr) : {};
+        } catch {
+          cached = {};
+        }
+
+        // ✅ الـ API له الأولوية، بس الحقول الناقصة بتاخد من الكاش
+        const merged = {
+          ...cached,
+          ...userData,
+        };
+
+        // ✅ لو الـ API مش بيرجع avatar، استخدم اللي في الكاش
+        if (!userData?.avatar && cached?.avatar) {
+          merged.avatar = cached.avatar;
+        }
+
+        setUser(merged);
         setIsAuthenticated(true);
-        // خزّن أحدث نسخة في الـ cookies
-        Cookies.set("store_user", JSON.stringify(userData), { expires: 7 });
+        Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
       } catch {
         Cookies.remove("store_token");
         Cookies.remove("store_user");
@@ -81,14 +100,6 @@ export function AuthProvider({ children }) {
     });
   };
 
-  // تعديل بيانات البروفايل فعليًا عبر الـ API
-  const updateProfileData = async (data) => {
-    const res = await updateProfile(data);
-    const updatedUser = res.data.user || res.data;
-    updateUser(updatedUser);
-    return updatedUser;
-  };
-
   const value = {
     user,
     isAuthenticated,
@@ -96,7 +107,6 @@ export function AuthProvider({ children }) {
     loginUser,
     logoutUser,
     updateUser,
-    updateProfileData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
