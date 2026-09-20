@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
@@ -8,9 +8,7 @@ import {
   sendChangePasswordOtp,
   verifyChangePasswordOtp,
 } from "../api/auth.api";
-import { uploadToCloudinary } from "../utils/upload";
 import {
-  Camera,
   Lock,
   Loader2,
   Save,
@@ -31,10 +29,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [avatarFile, setAvatarFile] = useState(null);
-  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -59,7 +53,7 @@ export default function Profile() {
   const [resettingPassword, setResettingPassword] = useState(false);
 
   // =========================
-  // Load profile (getMe + cache merge)
+  // Load profile (getMe + localStorage merge)
   // =========================
   useEffect(() => {
     const load = async () => {
@@ -72,34 +66,58 @@ export default function Profile() {
           console.warn("getMe failed, using cache only:", err?.message);
         }
 
+        // ✅ اجيب الكاش من localStorage
         let cached = {};
         try {
-          const cachedStr = Cookies.get("store_user");
+          const cachedStr = localStorage.getItem("profile_cache");
           cached = cachedStr ? JSON.parse(cachedStr) : {};
         } catch {
           cached = {};
         }
 
+        // ✅ دالة مساعدة: تفرّق بين "قيمة فاضية" و "مفيش قيمة"
+        const pickValue = (apiValue, cachedValue, fallback = "") => {
+          if (
+            apiValue !== undefined &&
+            apiValue !== null &&
+            apiValue !== ""
+          )
+            return apiValue;
+          if (
+            cachedValue !== undefined &&
+            cachedValue !== null &&
+            cachedValue !== ""
+          )
+            return cachedValue;
+          return fallback;
+        };
+
         const currentLangLabel = i18n.language?.startsWith("ar")
           ? "العربية"
           : "English";
 
+        // ✅ الـ merge: الأولوية للـ API، بس لو فاضي → الكاش
         const merged = {
           ...cached,
           ...(userData || {}),
-          avatar: userData?.avatar || cached?.avatar || null,
-          firstName: userData?.firstName || cached?.firstName || "",
-          lastName: userData?.lastName || cached?.lastName || "",
-          username: userData?.username || cached?.username || "",
+          // حقول الـ API (بياخد من الكاش لو الـ API فاضي)
+          avatar: pickValue(userData?.avatar, cached?.avatar, null),
+          firstName: pickValue(userData?.firstName, cached?.firstName, ""),
+          lastName: pickValue(userData?.lastName, cached?.lastName, ""),
+          username: pickValue(userData?.username, cached?.username, ""),
+          email: pickValue(userData?.email, cached?.email, ""),
+          role: pickValue(userData?.role, cached?.role, "customer"),
+          // ✅ حقول الكاش (الأولوية للكاش لأن الـ API مش بيرجعهم)
+          phone: cached?.phone || userData?.phone || "",
+          dateOfBirth: cached?.dateOfBirth || userData?.dateOfBirth || "",
           language: currentLangLabel,
-          currency: userData?.currency || cached?.currency || "USD ($)",
-          theme: userData?.theme || cached?.theme || "light",
-          dateOfBirth: userData?.dateOfBirth || cached?.dateOfBirth || "",
+          currency: cached?.currency || userData?.currency || "USD ($)",
+          theme: cached?.theme || userData?.theme || "light",
         };
 
         setUser(merged);
-        setAvatarPreview(merged?.avatar || null);
 
+        // ✅ افصل الاسم
         const fullName =
           merged?.firstName && merged?.lastName
             ? `${merged.firstName} ${merged.lastName}`
@@ -125,11 +143,14 @@ export default function Profile() {
           theme: merged?.theme || "light",
         });
 
+        // ✅ احفظ النسخة المدمجة في localStorage + cookies
+        localStorage.setItem("profile_cache", JSON.stringify(merged));
         Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
+
         setIsEditing(false);
       } catch (err) {
         console.error(err);
-        toast.error(t("profile.loadError"));
+        toast.error(t("profile.loadError") || "Failed to load profile");
       } finally {
         setLoading(false);
       }
@@ -146,58 +167,17 @@ export default function Profile() {
     }));
   }, [i18n.language]);
 
-  // =========================
-  // Avatar
-  // =========================
-  const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error(t("profile.imageSizeError"));
-      e.target.value = "";
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarPreview(reader.result);
-      setAvatarFile(file);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   // =========================
-  // Save profile (محلي فقط)
+  // Save profile (localStorage only)
   // =========================
   const handleSave = async () => {
     try {
       setSaving(true);
 
-      let avatarUrl = null;
-
-      // 1. ارفع الصورة على Cloudinary
-      if (avatarFile) {
-        try {
-          setUploadingAvatar(true);
-          avatarUrl = await uploadToCloudinary(avatarFile);
-        } catch (err) {
-          console.error("Avatar upload failed:", err);
-          toast.error(t("profile.uploadAvatarError"));
-          setUploadingAvatar(false);
-          setSaving(false);
-          return;
-        } finally {
-          setUploadingAvatar(false);
-        }
-      }
-
-      // 2. ✅ احفظ محلياً (الـ Backend مش بيدعم التعديل)
       const merged = {
         ...user,
         firstName: form.firstName,
@@ -207,32 +187,35 @@ export default function Profile() {
         language: preferences.language,
         currency: preferences.currency,
         theme: preferences.theme,
-        ...(avatarUrl && { avatar: avatarUrl }),
       };
 
       setUser(merged);
       if (updateUser) updateUser(merged);
 
       // إذا غيّر المستخدم اللغة من التفضيلات، نطبقها فوراً في i18next
-      if (preferences.language === "العربية" && !i18n.language?.startsWith("ar")) {
+      if (
+        preferences.language === "العربية" &&
+        !i18n.language?.startsWith("ar")
+      ) {
         i18n.changeLanguage("ar");
         localStorage.setItem("language", "ar");
-      } else if (preferences.language === "English" && !i18n.language?.startsWith("en")) {
+      } else if (
+        preferences.language === "English" &&
+        !i18n.language?.startsWith("en")
+      ) {
         i18n.changeLanguage("en");
         localStorage.setItem("language", "en");
       }
 
-      // 3. احفظ في الـ cookies
+      // ✅ احفظ في localStorage + cookies
+      localStorage.setItem("profile_cache", JSON.stringify(merged));
       Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
 
-      setAvatarFile(null);
-      if (avatarUrl) setAvatarPreview(avatarUrl);
-
-      toast.success(t("profile.updateSuccess"));
+      toast.success(t("profile.updateSuccess") || "Profile updated");
       setIsEditing(false);
     } catch (err) {
       console.error(err);
-      toast.error(t("profile.updateError"));
+      toast.error(t("profile.updateError") || "Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -259,13 +242,13 @@ export default function Profile() {
     });
 
     setPreferences({
-      language: user?.language || (i18n.language?.startsWith("ar") ? "العربية" : "English"),
+      language:
+        user?.language ||
+        (i18n.language?.startsWith("ar") ? "العربية" : "English"),
       currency: user?.currency || "USD ($)",
       theme: user?.theme || "light",
     });
 
-    setAvatarPreview(user?.avatar || null);
-    setAvatarFile(null);
     setIsEditing(false);
   };
 
@@ -279,18 +262,22 @@ export default function Profile() {
 
   const handleSendOtp = async () => {
     if (!passwordEmail.trim()) {
-      toast.error(t("profile.enterEmailError"));
+      toast.error(t("profile.enterEmailError") || "Please enter your email");
       return;
     }
 
     try {
       setSendingOtp(true);
       await sendChangePasswordOtp({ email: passwordEmail.trim() });
-      toast.success(t("profile.otpSent"));
+      toast.success(t("profile.otpSent") || "OTP sent to your email");
       setPasswordStep("otp");
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || t("profile.otpSendError"));
+      toast.error(
+        err.response?.data?.message ||
+          t("profile.otpSendError") ||
+          "Failed to send OTP"
+      );
     } finally {
       setSendingOtp(false);
     }
@@ -298,11 +285,14 @@ export default function Profile() {
 
   const handleResetPassword = async () => {
     if (!otp.trim()) {
-      toast.error(t("profile.enterOtpError"));
+      toast.error(t("profile.enterOtpError") || "Please enter the OTP");
       return;
     }
     if (newPassword.length < 6) {
-      toast.error(t("profile.passwordLengthError"));
+      toast.error(
+        t("profile.passwordLengthError") ||
+          "Password must be at least 6 characters"
+      );
       return;
     }
 
@@ -313,14 +303,21 @@ export default function Profile() {
         otp: otp.trim(),
         newPassword,
       });
-      toast.success(t("profile.passwordChangeSuccess"));
+      toast.success(
+        t("profile.passwordChangeSuccess") ||
+          "Password changed successfully"
+      );
       setPasswordStep("idle");
       setOtp("");
       setNewPassword("");
       setShowPassword(false);
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || t("profile.passwordChangeError"));
+      toast.error(
+        err.response?.data?.message ||
+          t("profile.passwordChangeError") ||
+          "Failed to change password"
+      );
     } finally {
       setResettingPassword(false);
     }
@@ -339,7 +336,7 @@ export default function Profile() {
   // =========================
   const handleLogout = () => {
     logoutUser();
-    toast.success(t("profile.loggedOut"));
+    toast.success(t("profile.loggedOut") || "Logged out");
     navigate("/login");
   };
 
@@ -357,7 +354,9 @@ export default function Profile() {
   if (!user) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-slate-500 text-lg">{t("profile.pleaseLogin")}</p>
+        <p className="text-slate-500 text-lg">
+          {t("profile.pleaseLogin") || "Please login first"}
+        </p>
       </div>
     );
   }
@@ -374,10 +373,11 @@ export default function Profile() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-xl font-bold text-slate-800">
-              {t("profile.title")}
+              {t("profile.title") || "Account Settings"}
             </h1>
             <p className="text-sm text-slate-500 mt-1">
-              {t("profile.subtitle")}
+              {t("profile.subtitle") ||
+                "Manage your account information and preferences"}
             </p>
           </div>
 
@@ -388,7 +388,7 @@ export default function Profile() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 transition"
             >
               <Pencil size={14} />
-              {t("profile.editProfile")}
+              {t("profile.editProfile") || "Edit Profile"}
             </button>
           )}
         </div>
@@ -396,65 +396,28 @@ export default function Profile() {
         {/* Profile Information */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
           <h2 className="text-base font-bold text-slate-800 mb-6">
-            {t("profile.profileInfo")}
+            {t("profile.profileInfo") || "Profile Information"}
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
-            {/* Avatar */}
+            {/* Avatar — read-only */}
             <div className="flex flex-col items-center">
-              <div className="relative">
-                <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
-                  {avatarPreview ? (
-                    <img
-                      src={avatarPreview}
-                      alt="avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-3xl font-bold">
-                      {(displayName || "U")[0].toUpperCase()}
-                    </span>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => isEditing && fileInputRef.current?.click()}
-                  disabled={!isEditing || uploadingAvatar}
-                  className="absolute -bottom-1 -right-1 rtl:-right-auto rtl:-left-1 w-9 h-9 rounded-full bg-indigo-600 text-white shadow-md flex items-center justify-center hover:bg-indigo-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                  aria-label={t("profile.changeAvatar")}
-                  title={
-                    isEditing ? t("profile.changeAvatar") : t("profile.clickEditFirst")
-                  }
-                >
-                  {uploadingAvatar ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <Camera size={16} />
-                  )}
-                </button>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                />
+              <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <span className="text-white text-3xl font-bold">
+                    {(displayName || "U")[0].toUpperCase()}
+                  </span>
+                )}
               </div>
-
-              <button
-                type="button"
-                onClick={() => isEditing && fileInputRef.current?.click()}
-                disabled={!isEditing || uploadingAvatar}
-                className="mt-3 text-sm text-indigo-600 font-medium hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {uploadingAvatar
-                  ? t("profile.uploading")
-                  : isEditing
-                  ? t("profile.changePhoto")
-                  : t("profile.editToChangePhoto")}
-              </button>
             </div>
 
             {/* Fields */}
@@ -462,7 +425,7 @@ export default function Profile() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                    {t("profile.firstName")}
+                    {t("profile.firstName") || "First name"}
                   </label>
                   <input
                     type="text"
@@ -476,7 +439,7 @@ export default function Profile() {
 
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                    {t("profile.lastName")}
+                    {t("profile.lastName") || "Last name"}
                   </label>
                   <input
                     type="text"
@@ -492,7 +455,7 @@ export default function Profile() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                    {t("profile.email")}
+                    {t("profile.email") || "Email"}
                   </label>
                   <input
                     type="email"
@@ -505,7 +468,7 @@ export default function Profile() {
 
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                    {t("profile.phone")}
+                    {t("profile.phone") || "Phone"}
                   </label>
                   <div className="flex gap-2">
                     <div className="relative">
@@ -538,7 +501,7 @@ export default function Profile() {
 
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  {t("profile.dateOfBirth")}
+                  {t("profile.dateOfBirth") || "Date of birth"}
                 </label>
                 <input
                   type="date"
@@ -557,17 +520,18 @@ export default function Profile() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
           <div className="mb-6">
             <h2 className="text-base font-bold text-slate-800">
-              {t("profile.preferences")}
+              {t("profile.preferences") || "Preferences"}
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              {t("profile.preferencesDesc")}
+              {t("profile.preferencesDesc") ||
+                "Set your preferred language, currency and theme"}
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                {t("profile.language")}
+                {t("profile.language") || "Language"}
               </label>
               <div className="relative">
                 <select
@@ -608,7 +572,7 @@ export default function Profile() {
 
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                {t("profile.currency")}
+                {t("profile.currency") || "Currency"}
               </label>
               <div className="relative">
                 <select
@@ -636,21 +600,25 @@ export default function Profile() {
 
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                {t("profile.theme")}
+                {t("profile.theme") || "Theme"}
               </label>
               <div className="flex items-center bg-slate-100 rounded-xl p-1">
                 {["light", "dark", "auto"].map((themeKey) => {
                   const labelMap = {
-                    light: t("profile.themeLight"),
-                    dark: t("profile.themeDark"),
-                    auto: t("profile.themeAuto"),
+                    light: t("profile.themeLight") || "Light",
+                    dark: t("profile.themeDark") || "Dark",
+                    auto: t("profile.themeAuto") || "Auto",
                   };
                   return (
                     <button
                       key={themeKey}
                       type="button"
                       onClick={() =>
-                        isEditing && setPreferences({ ...preferences, theme: themeKey })
+                        isEditing &&
+                        setPreferences({
+                          ...preferences,
+                          theme: themeKey,
+                        })
                       }
                       disabled={!isEditing}
                       className={`flex-1 py-1.5 text-xs font-medium rounded-lg capitalize transition ${
@@ -673,7 +641,7 @@ export default function Profile() {
           <div className="flex items-center gap-2 mb-2">
             <Lock size={16} className="text-indigo-600" />
             <h2 className="text-base font-bold text-slate-800">
-              {t("profile.changePassword")}
+              {t("profile.changePassword") || "Change Password"}
             </h2>
           </div>
 
@@ -683,18 +651,19 @@ export default function Profile() {
               onClick={handleStartChangePassword}
               className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 transition"
             >
-              {t("profile.changePassword")}
+              {t("profile.changePassword") || "Change Password"}
             </button>
           )}
 
           {passwordStep === "email" && (
             <>
               <p className="text-xs text-slate-500 mb-4">
-                {t("profile.otpInstruction")}
+                {t("profile.otpInstruction") ||
+                  "We'll send an OTP to your email to verify your identity."}
               </p>
               <input
                 type="email"
-                placeholder={t("profile.email")}
+                placeholder={t("profile.email") || "Email"}
                 value={passwordEmail}
                 onChange={(e) => setPasswordEmail(e.target.value)}
                 className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white"
@@ -709,14 +678,14 @@ export default function Profile() {
                   {sendingOtp && (
                     <Loader2 size={14} className="animate-spin" />
                   )}
-                  {t("profile.sendOtp")}
+                  {t("profile.sendOtp") || "Send OTP"}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancelChangePassword}
                   className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition"
                 >
-                  {t("profile.cancel")}
+                  {t("profile.cancel") || "Cancel"}
                 </button>
               </div>
             </>
@@ -726,7 +695,7 @@ export default function Profile() {
             <>
               <input
                 type="text"
-                placeholder={t("profile.enterOtp")}
+                placeholder={t("profile.enterOtp") || "Enter OTP"}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 maxLength={6}
@@ -736,7 +705,7 @@ export default function Profile() {
               <div className="relative mb-4">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder={t("profile.newPassword")}
+                  placeholder={t("profile.newPassword") || "New password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-3 py-2.5 pr-10 rtl:pr-3 rtl:pl-10 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
@@ -760,14 +729,14 @@ export default function Profile() {
                   {resettingPassword && (
                     <Loader2 size={14} className="animate-spin" />
                   )}
-                  {t("profile.resetPassword")}
+                  {t("profile.resetPassword") || "Reset Password"}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancelChangePassword}
                   className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition"
                 >
-                  {t("profile.cancel")}
+                  {t("profile.cancel") || "Cancel"}
                 </button>
               </div>
             </>
@@ -782,7 +751,7 @@ export default function Profile() {
               onClick={handleCancel}
               className="px-5 py-2.5 rounded-xl border border-gray-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition"
             >
-              {t("profile.cancel")}
+              {t("profile.cancel") || "Cancel"}
             </button>
 
             <button
@@ -796,7 +765,7 @@ export default function Profile() {
               ) : (
                 <Save size={14} />
               )}
-              {t("profile.saveChanges")}
+              {t("profile.saveChanges") || "Save Changes"}
             </button>
           </div>
         )}
@@ -808,7 +777,7 @@ export default function Profile() {
           className="w-full flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 transition"
         >
           <LogOut size={16} />
-          {t("profile.logout")}
+          {t("profile.logout") || "Logout"}
         </button>
       </div>
     </div>

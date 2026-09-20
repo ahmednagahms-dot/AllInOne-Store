@@ -2,13 +2,37 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { ArrowLeft, MapPin, CreditCard, PackageX, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  MapPin,
+  CreditCard,
+  PackageX,
+  Loader2,
+} from "lucide-react";
 import { getMyOrderById, cancelMyOrder } from "../api/orders.api";
 import { addCartItem } from "../api/cart.api";
 import { useAuth } from "../context/AuthContext";
-import OrderStatusBadge from "../components/orders/OrderStatusBadge";
 
 const CANCELLABLE_STATUSES = ["pending", "confirmed"];
+
+const STATUS_STYLES = {
+  pending: "bg-amber-50 text-amber-600",
+  confirmed: "bg-blue-50 text-blue-600",
+  processing: "bg-yellow-50 text-yellow-600",
+  shipped: "bg-indigo-50 text-indigo-600",
+  delivered: "bg-emerald-50 text-emerald-600",
+  cancelled: "bg-red-50 text-red-600",
+  paid: "bg-emerald-50 text-emerald-600",
+  unpaid: "bg-amber-50 text-amber-600",
+};
+
+function getItemImage(item) {
+  const product = item.product || item;
+  const img = product.images?.[0];
+  if (!img) return product.image || "/Background+Border.svg";
+  if (typeof img === "string") return img;
+  return img.url || product.image || "/Background+Border.svg";
+}
 
 export default function OrderDetails() {
   const { t, i18n } = useTranslation();
@@ -33,7 +57,9 @@ export default function OrderDetails() {
       setOrder(found);
     } catch (err) {
       console.error(err);
-      setError(t("orderDetails.loadError"));
+      setError(
+        t("orderDetails.loadError") || "Failed to load order details"
+      );
     } finally {
       setLoading(false);
     }
@@ -49,14 +75,24 @@ export default function OrderDetails() {
   }, [authLoading, isAuthenticated, fetchOrder, navigate]);
 
   const handleCancelOrder = async () => {
-    if (!window.confirm(t("orderDetails.cancelConfirm"))) return;
+    const confirmMsg =
+      t("orderDetails.cancelConfirm") ||
+      "Are you sure you want to cancel this order?";
+    if (!window.confirm(confirmMsg)) return;
+
     setCancelling(true);
     try {
       await cancelMyOrder(id);
-      toast.success(t("orderDetails.cancelSuccess"));
+      toast.success(
+        t("orderDetails.cancelSuccess") || "Order cancelled successfully"
+      );
       fetchOrder();
     } catch (err) {
-      toast.error(err.response?.data?.message || t("orderDetails.cancelError"));
+      toast.error(
+        err.response?.data?.message ||
+          t("orderDetails.cancelError") ||
+          "Failed to cancel order"
+      );
     } finally {
       setCancelling(false);
     }
@@ -69,80 +105,103 @@ export default function OrderDetails() {
       await Promise.all(
         order.items.map((item) =>
           addCartItem({
-            productId: item.product?._id || item.productId || item._id,
+            productId:
+              item.product?._id ||
+              item.productId ||
+              item.product ||
+              item._id,
             quantity: item.quantity || 1,
           })
         )
       );
-      toast.success(t("orderDetails.buyAgainSuccess"));
+      toast.success(
+        t("orderDetails.buyAgainSuccess") || "Items added to cart"
+      );
       navigate("/cart");
     } catch (err) {
-      toast.error(t("orderDetails.buyAgainError"));
+      console.error(err);
+      toast.error(
+        t("orderDetails.buyAgainError") || "Failed to add items to cart"
+      );
     } finally {
       setBuyingAgain(false);
     }
   };
 
+  // ===== Loading =====
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
       </div>
     );
   }
 
+  // ===== Error =====
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-4">
-        <PackageX className="w-10 h-10 text-danger" />
+        <PackageX className="w-10 h-10 text-red-500" />
         <p className="text-slate-600">{error}</p>
         <button
           onClick={fetchOrder}
-          className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 cursor-pointer"
+          className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 cursor-pointer"
         >
-          {t("orderDetails.tryAgain")}
+          {t("orderDetails.tryAgain") || "Try Again"}
         </button>
       </div>
     );
   }
 
+  // ===== Not Found =====
   if (!order) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-4">
         <PackageX className="w-10 h-10 text-slate-400" />
-        <p className="text-slate-600">{t("orderDetails.notFound")}</p>
+        <p className="text-slate-600">
+          {t("orderDetails.notFound") || "Order not found"}
+        </p>
         <Link
           to="/orders"
-          className="text-primary-600 text-sm font-medium hover:underline"
+          className="text-blue-600 text-sm font-medium hover:underline"
         >
-          {t("orderDetails.backToOrders")}
+          {t("orderDetails.backToOrders") || "Back to My Orders"}
         </Link>
       </div>
     );
   }
 
+  // ===== Data Extraction =====
   const orderNumber = order.orderNumber || order._id;
   const createdAt = order.createdAt || order.date;
-  const orderStatus = order.status;
-  const paymentStatus = order.isPaid ? "paid" : order.paymentStatus || "unpaid";
-  const items = order.items || order.products || [];
+  const orderStatus = (order.status || "pending").toLowerCase();
+  const paymentStatus = (
+    order.isPaid ? "paid" : order.paymentStatus || "unpaid"
+  ).toLowerCase();
+  const items = order.items || order.products || order.orderItems || [];
   const shippingAddress = order.shippingAddress || order.address || {};
   const paymentMethod = order.paymentMethod || "cash";
   const subtotal = Number(order.subtotal ?? order.itemsPrice ?? 0);
   const discount = Number(order.discount ?? order.discountAmount ?? 0);
-  const shippingFee = Number(order.shippingFee ?? order.shippingPrice ?? 0);
+  const shippingFee = Number(
+    order.shippingFee ?? order.shippingPrice ?? 0
+  );
   const total = Number(
-    order.total ?? order.totalPrice ?? subtotal - discount + shippingFee
+    order.totalPrice ??
+      order.total ??
+      subtotal - discount + shippingFee
   );
-  const canCancel = CANCELLABLE_STATUSES.includes(
-    String(orderStatus).toLowerCase()
-  );
+  const canCancel = CANCELLABLE_STATUSES.includes(orderStatus);
+
   const formattedDate = createdAt
-    ? new Date(createdAt).toLocaleDateString(isArabic ? "ar-EG" : "en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+    ? new Date(createdAt).toLocaleDateString(
+        isArabic ? "ar-EG" : "en-US",
+        {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }
+      )
     : "-";
 
   return (
@@ -153,54 +212,75 @@ export default function OrderDetails() {
         className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-6"
       >
         <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-        <span>{t("orderDetails.backToOrders")}</span>
+        <span>
+          {t("orderDetails.backToOrders") || "Back to My Orders"}
+        </span>
       </Link>
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {t("orderDetails.orderTitle", { number: orderNumber })}
+            {t("orderDetails.orderTitle", {
+              number: orderNumber?.slice?.(-6)?.toUpperCase() || orderNumber,
+            }) ||
+              `Order #${
+                orderNumber?.slice?.(-6)?.toUpperCase() || orderNumber
+              }`}
           </h1>
           <p className="text-sm text-slate-500 mt-1">{formattedDate}</p>
         </div>
         <div className="flex items-center gap-2">
-          <OrderStatusBadge status={paymentStatus} />
-          <OrderStatusBadge status={orderStatus} />
+          <span
+            className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${
+              STATUS_STYLES[paymentStatus] || "bg-gray-100 text-gray-600"
+            }`}
+          >
+            {paymentStatus}
+          </span>
+          <span
+            className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${
+              STATUS_STYLES[orderStatus] || "bg-gray-100 text-gray-600"
+            }`}
+          >
+            {orderStatus}
+          </span>
         </div>
       </div>
 
-      {/* Items Section */}
+      {/* Items */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-6">
         <h2 className="font-semibold text-slate-900 mb-4">
-          {t("orderDetails.itemsTitle", { count: items.length })}
+          {t("orderDetails.itemsTitle", { count: items.length }) ||
+            `Items (${items.length})`}
         </h2>
         <div className="divide-y divide-slate-100">
           {items.map((item, idx) => {
             const product = item.product || item;
-            const image =
-              product.images?.[0]?.url ||
-              product.images?.[0] ||
-              product.image ||
-              "/placeholder.png";
             const lineTotal =
-              (item.price || product.price || 0) * (item.quantity || 1);
+              (item.price || product.price || 0) *
+              (item.quantity || 1);
+
             return (
               <div
                 key={item._id || idx}
                 className="flex items-center gap-4 py-4"
               >
                 <img
-                  src={image}
+                  src={getItemImage(item)}
                   alt={product.name || "product"}
                   className="w-16 h-16 rounded-lg object-cover bg-slate-50 border border-slate-100 shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.src = "/Background+Border.svg";
+                  }}
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-slate-900 truncate">
                     {product.name || "Product"}
                   </p>
                   <p className="text-sm text-slate-500">
-                    {t("orderDetails.quantity")} {item.quantity || 1}
+                    {t("orderDetails.quantity") || "Qty"}:{" "}
+                    {item.quantity || 1}
                   </p>
                 </div>
                 <p className="font-semibold text-slate-900 shrink-0">
@@ -214,81 +294,90 @@ export default function OrderDetails() {
 
       {/* Shipping & Payment Grid */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
+        {/* Shipping Address */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
           <h2 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-primary-500" />
-            <span>{t("orderDetails.shippingAddress")}</span>
+            <MapPin className="w-4 h-4 text-blue-600" />
+            <span>
+              {t("orderDetails.shippingAddress") || "Shipping Address"}
+            </span>
           </h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             {shippingAddress.fullName || shippingAddress.name || "-"}
             <br />
-            {shippingAddress.street || shippingAddress.address || ""}
+            {shippingAddress.address || shippingAddress.street || ""}
             {shippingAddress.city ? `, ${shippingAddress.city}` : ""}
+            <br />
+            {shippingAddress.country || ""}{" "}
+            {shippingAddress.postalCode
+              ? ` - ${shippingAddress.postalCode}`
+              : ""}
             <br />
             {shippingAddress.phone || ""}
           </p>
         </div>
 
+        {/* Payment */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
           <h2 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-primary-500" />
-            <span>{t("orderDetails.payment")}</span>
+            <CreditCard className="w-4 h-4 text-blue-600" />
+            <span>{t("orderDetails.payment") || "Payment"}</span>
           </h2>
           <p className="text-sm text-slate-600 capitalize mb-4">
             {paymentMethod === "cash"
-              ? t("orderDetails.cashOnDelivery")
+              ? t("orderDetails.cashOnDelivery") || "Cash on Delivery"
               : paymentMethod}
           </p>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-slate-500">
-              <span>{t("orderDetails.subtotal")}</span>
+              <span>{t("orderDetails.subtotal") || "Subtotal"}</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
             {discount > 0 && (
-              <div className="flex justify-between text-success">
-                <span>{t("orderDetails.discount")}</span>
+              <div className="flex justify-between text-emerald-600">
+                <span>{t("orderDetails.discount") || "Discount"}</span>
                 <span>-${discount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between text-slate-500">
-              <span>{t("orderDetails.shipping")}</span>
+              <span>{t("orderDetails.shipping") || "Shipping"}</span>
               <span>
                 {shippingFee > 0
                   ? `$${shippingFee.toFixed(2)}`
-                  : t("orderDetails.freeShipping")}
+                  : t("orderDetails.freeShipping") || "Free"}
               </span>
             </div>
             <div className="flex justify-between font-semibold text-slate-900 pt-2 border-t border-slate-100">
-              <span>{t("orderDetails.total")}</span>
+              <span>{t("orderDetails.total") || "Total"}</span>
               <span>${total.toFixed(2)}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {/* Actions */}
       <div className="flex flex-wrap gap-3">
         {canCancel && (
           <button
             type="button"
             onClick={handleCancelOrder}
             disabled={cancelling}
-            className="px-4 py-2.5 rounded-lg border border-danger text-danger text-sm font-medium hover:bg-danger/5 disabled:opacity-50 cursor-pointer"
+            className="px-4 py-2.5 rounded-lg border border-red-500 text-red-600 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition cursor-pointer"
           >
             {cancelling
-              ? t("orderDetails.cancelling")
-              : t("orderDetails.cancelOrder")}
+              ? t("orderDetails.cancelling") || "Cancelling..."
+              : t("orderDetails.cancelOrder") || "Cancel Order"}
           </button>
         )}
         <button
           type="button"
           onClick={handleBuyAgain}
           disabled={buyingAgain || items.length === 0}
-          className="px-4 py-2.5 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 cursor-pointer"
+          className="px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition cursor-pointer"
         >
           {buyingAgain
-            ? t("orderDetails.adding")
-            : t("orderDetails.buyAgain")}
+            ? t("orderDetails.adding") || "Adding..."
+            : t("orderDetails.buyAgain") || "Buy Again"}
         </button>
       </div>
     </div>
