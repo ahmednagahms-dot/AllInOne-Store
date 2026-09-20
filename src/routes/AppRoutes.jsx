@@ -13,6 +13,7 @@ import VerifyOtp from "../components/auth/VerifyOtp";
 import Home from "../pages/Home";
 import Shop from "../pages/Shop";
 import Cart from "../pages/Cart";
+import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
 import Profile from "../pages/Profile";
 import ProductDetail from "../pages/ProductDetail";
@@ -62,6 +63,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <Cart />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <Wishlist />
             </ProtectedRoute>
           }
         />
