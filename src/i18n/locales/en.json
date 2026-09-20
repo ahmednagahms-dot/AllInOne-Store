@@ -1,0 +1,165 @@
+{
+  "common": {
+    "viewAll": "View All",
+    "loading": "Loading...",
+    "search": "Search"
+  },
+  "nav": {
+    "freeShippingNotice": "Free shipping on orders over $50",
+    "trackOrder": "Track Order",
+    "help": "Help",
+    "home": "Home",
+    "shop": "Shop",
+    "orders": "My Orders",
+    "wishlist": "Wishlist",
+    "searchPlaceholder": "Search for products, brands and more...",
+    "searchMobilePlaceholder": "Search for products...",
+    "welcome": "Welcome",
+    "hi": "Hi,",
+    "user": "User",
+    "profile": "My Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "signUp": "Sign Up"
+  },
+  "hero": {
+    "slides": {
+      "1": {
+        "badge": "New Arrival",
+        "title": "Upgrade Your Style with the Latest Tech",
+        "highlight": "Latest Tech",
+        "description": "Discover the newest smartphones, laptops and accessories with unbeatable deals and fast doorstep delivery."
+      },
+      "2": {
+        "badge": "Smart Electronics",
+        "title": "Upgrade Your World with Smart Electronics",
+        "highlight": "Smart Electronics",
+        "description": "Explore premium electronics designed to make your everyday life smarter, easier, and more stylish."
+      },
+      "3": {
+        "badge": "Best Deals",
+        "title": "Premium Products at Unbeatable Prices",
+        "highlight": "Unbeatable Prices",
+        "description": "Shop our curated collection of top-rated products with free shipping on orders over $50."
+      }
+    },
+    "shopNow": "Shop Now",
+    "exploreCollections": "Explore Collections",
+    "upTo": "Up to",
+    "off": "Off",
+    "benefits": {
+      "qualityTitle": "Premium Quality",
+      "qualitySub": "Guaranteed",
+      "deliveryTitle": "Fast Delivery",
+      "deliverySub": "2–5 Business Days",
+      "returnsTitle": "Easy Returns",
+      "returnsSub": "30 Days"
+    }
+  },
+  "categories": {
+    "tag": "Explore",
+    "title": "Shop by Category",
+    "items": {
+      "electronics": "Electronics",
+      "fashion": "Fashion",
+      "home": "Home & Living",
+      "beauty": "Beauty & Care",
+      "mobiles": "Mobiles",
+      "laptops": "Laptops",
+      "watches": "Watches",
+      "gaming": "Gaming"
+    }
+  },
+  "featured": {
+    "tag": "Featured",
+    "title": "Featured Products",
+    "subtitle": "Discover our most popular products",
+    "empty": "No featured products available at the moment",
+    "error": "Failed to load products. Please try again."
+  },
+  "offer": {
+    "badge": "Limited Time Offer",
+    "title": "Up to 50% Off Top Brands",
+    "description": "Don't miss out on our biggest sale of the season. Premium electronics at record low prices.",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "shopSale": "Shop the Sale",
+    "offerEnded": "Offer Ended"
+  },
+  "bestSellers": {
+    "tag": "Popular",
+    "title": "Best Sellers",
+    "subtitle": "Our customers' favorite picks",
+    "empty": "No products available at the moment",
+    "error": "Failed to load products"
+  },
+  "whyUs": {
+    "tag": "Why Us",
+    "title": "Why Shop With Us",
+    "subtitle": "We make your shopping experience simple, safe, and enjoyable.",
+    "features": {
+      "security": {
+        "title": "Secure Shopping",
+        "desc": "Your information and payments are always protected."
+      },
+      "delivery": {
+        "title": "Fast Delivery",
+        "desc": "Get your orders delivered quickly and safely."
+      },
+      "support": {
+        "title": "24/7 Support",
+        "desc": "Our support team is always here to help you."
+      },
+      "returns": {
+        "title": "Easy Returns",
+        "desc": "Simple and hassle-free returns when you need them."
+      }
+    }
+  },
+  "reviews": {
+    "tag": "Testimonials",
+    "title": "What Our Customers Say",
+    "subtitle": "See what our customers have to say about their shopping experience.",
+    "anonymous": "Anonymous Customer",
+    "verifiedBuyer": "Verified Buyer",
+    "customer": "Customer"
+  },
+  "newsletter": {
+    "title": "Subscribe to Our Newsletter",
+    "subtitle": "Stay updated with the latest products, exclusive offers, and special discounts delivered straight to your inbox.",
+    "placeholder": "Enter your email address",
+    "button": "Subscribe",
+    "privacy": "No spam. Unsubscribe anytime."
+  },
+  "productCard": {
+    "noImage": "No Image",
+    "new": "New",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to Cart",
+    "adding": "Adding...",
+    "addedToCart": "Added to cart",
+    "addedToWishlist": "Added to wishlist",
+    "removedFromWishlist": "Removed from wishlist",
+    "loginRequired": "Please log in first"
+  },
+  "footer": {
+    "desc": "Your one-stop destination for the latest technology, premium products, and everything you need to upgrade your lifestyle.",
+    "quickLinks": "Quick Links",
+    "customerCare": "Customer Care",
+    "legal": "Legal",
+    "contactUs": "Contact Us",
+    "trackOrder": "Track Order",
+    "shipping": "Shipping & Delivery",
+    "returns": "Returns & Refunds",
+    "faqs": "FAQs",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "cookie": "Cookie Policy",
+    "accessibility": "Accessibility",
+    "rights": "All rights reserved.",
+    "securePayment": "Secure Payment",
+    "secureShopping": "100% Secure Shopping"
+  }
+}

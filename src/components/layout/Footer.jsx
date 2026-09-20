@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ShieldCheck, CreditCard } from "lucide-react";
 
 const STORE_LOGO_URL =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="w-full bg-slate-900 text-white">
       <div className="mx-auto max-w-[1200px] px-5 py-12 sm:px-6 lg:py-14">
@@ -24,8 +27,7 @@ export default function Footer() {
             </Link>
 
             <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-slate-400">
-              Your one-stop destination for the latest technology, premium
-              products, and everything you need to upgrade your lifestyle.
+              {t("footer.desc")}
             </p>
 
             {/* Social */}
@@ -44,13 +46,15 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-sm font-semibold text-white">Quick Links</h3>
+            <h3 className="text-sm font-semibold text-white">
+              {t("footer.quickLinks")}
+            </h3>
             <ul className="mt-5 space-y-3">
               {[
-                { label: "Home", to: "/" },
-                { label: "Shop", to: "/shop" },
-                { label: "My Orders", to: "/orders" },
-                { label: "Wishlist", to: "/wishlist" },
+                { label: t("nav.home"), to: "/" },
+                { label: t("nav.shop"), to: "/shop" },
+                { label: t("nav.orders"), to: "/orders" },
+                { label: t("nav.wishlist"), to: "/wishlist" },
               ].map((link) => (
                 <li key={link.to}>
                   <Link
@@ -66,14 +70,16 @@ export default function Footer() {
 
           {/* Customer Care */}
           <div>
-            <h3 className="text-sm font-semibold text-white">Customer Care</h3>
+            <h3 className="text-sm font-semibold text-white">
+              {t("footer.customerCare")}
+            </h3>
             <ul className="mt-5 space-y-3">
               {[
-                "Contact Us",
-                "Track Order",
-                "Shipping & Delivery",
-                "Returns & Refunds",
-                "FAQs",
+                t("footer.contactUs"),
+                t("footer.trackOrder"),
+                t("footer.shipping"),
+                t("footer.returns"),
+                t("footer.faqs"),
               ].map((item) => (
                 <li key={item}>
                   <span className="cursor-pointer text-sm text-slate-400 transition hover:text-white">
@@ -86,13 +92,15 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-sm font-semibold text-white">Legal</h3>
+            <h3 className="text-sm font-semibold text-white">
+              {t("footer.legal")}
+            </h3>
             <ul className="mt-5 space-y-3">
               {[
-                "Privacy Policy",
-                "Terms & Conditions",
-                "Cookie Policy",
-                "Accessibility",
+                t("footer.privacy"),
+                t("footer.terms"),
+                t("footer.cookie"),
+                t("footer.accessibility"),
               ].map((item) => (
                 <li key={item}>
                   <span className="cursor-pointer text-sm text-slate-400 transition hover:text-white">
@@ -110,18 +118,18 @@ export default function Footer() {
         {/* Bottom */}
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} AllInOne. All rights reserved.
+            © {new Date().getFullYear()} AllInOne. {t("footer.rights")}
           </p>
 
           <div className="flex flex-wrap items-center gap-5">
             <div className="flex items-center gap-2 text-slate-400">
               <CreditCard size={16} strokeWidth={1.7} />
-              <span className="text-sm">Secure Payment</span>
+              <span className="text-sm">{t("footer.securePayment")}</span>
             </div>
 
             <div className="flex items-center gap-2 text-slate-400">
               <ShieldCheck size={16} strokeWidth={1.7} />
-              <span className="text-sm">100% Secure Shopping</span>
+              <span className="text-sm">{t("footer.secureShopping")}</span>
             </div>
 
             <div className="flex items-center gap-1.5">

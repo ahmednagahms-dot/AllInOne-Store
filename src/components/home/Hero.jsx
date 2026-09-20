@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
   ChevronLeft,
@@ -74,11 +75,18 @@ function HighlightedTitle({ title, highlight }) {
 }
 
 export default function Hero() {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language?.startsWith("ar");
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   const slide = SLIDES[index];
   const total = SLIDES.length;
+
+  const currentBadge = t(`hero.slides.${slide.id}.badge`, { defaultValue: slide.badge });
+  const currentTitle = t(`hero.slides.${slide.id}.title`, { defaultValue: slide.title });
+  const currentHighlight = t(`hero.slides.${slide.id}.highlight`, { defaultValue: slide.highlight });
+  const currentDescription = t(`hero.slides.${slide.id}.description`, { defaultValue: slide.description });
 
   const next = useCallback(() => {
     setIndex((i) => (i + 1) % total);
@@ -103,24 +111,24 @@ export default function Hero() {
           onMouseLeave={() => setIsPaused(false)}
         >
           <div className="grid min-h-[420px] grid-cols-1 items-center lg:grid-cols-2">
-            {/* Left */}
+            {/* Content Side */}
             <div className="relative z-10 px-6 py-10 sm:px-10 md:px-12 lg:px-14 lg:py-12">
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary-500">
-                  {slide.badge}
+                  {currentBadge}
                 </span>
               </div>
 
               <h1 className="max-w-[520px] text-3xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-4xl lg:text-[42px]">
                 <HighlightedTitle
-                  title={slide.title}
-                  highlight={slide.highlight}
+                  title={currentTitle}
+                  highlight={currentHighlight}
                 />
               </h1>
 
               <p className="mt-4 max-w-[460px] text-sm leading-relaxed text-gray-500 sm:text-[15px]">
-                {slide.description}
+                {currentDescription}
               </p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -128,79 +136,79 @@ export default function Hero() {
                   to="/shop"
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary-500 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-600"
                 >
-                  Shop Now
-                  <ArrowRight size={16} />
+                  {t("hero.shopNow")}
+                  <ArrowRight size={16} className="rtl:rotate-180" />
                 </Link>
                 <Link
                   to="/shop"
                   className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-500 bg-white px-6 text-sm font-semibold text-primary-500 transition hover:bg-primary-50"
                 >
-                  Explore Collections
+                  {t("hero.exploreCollections")}
                 </Link>
               </div>
 
               <div className="mt-8 grid max-w-[520px] grid-cols-1 gap-4 border-t border-primary-100 pt-6 sm:grid-cols-3">
                 <Benefit
                   icon={ShieldCheck}
-                  title="Premium Quality"
-                  subtitle="Guaranteed"
+                  title={t("hero.benefits.qualityTitle")}
+                  subtitle={t("hero.benefits.qualitySub")}
                 />
                 <Benefit
                   icon={Truck}
-                  title="Fast Delivery"
-                  subtitle="2–5 Business Days"
+                  title={t("hero.benefits.deliveryTitle")}
+                  subtitle={t("hero.benefits.deliverySub")}
                 />
                 <Benefit
                   icon={RotateCcw}
-                  title="Easy Returns"
-                  subtitle="30 Days"
+                  title={t("hero.benefits.returnsTitle")}
+                  subtitle={t("hero.benefits.returnsSub")}
                 />
               </div>
             </div>
 
-            {/* Right */}
+            {/* Media Side */}
             <div className="relative flex min-h-[300px] items-center justify-center px-8 pb-10 pt-4 lg:min-h-[420px] lg:pb-0">
-              <div className="absolute right-[8%] top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full bg-white/60 sm:h-[320px] sm:w-[320px] lg:h-[360px] lg:w-[360px]" />
+              <div className="absolute right-[8%] rtl:right-auto rtl:left-[8%] top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full bg-white/60 sm:h-[320px] sm:w-[320px] lg:h-[360px] lg:w-[360px]" />
 
               <div className="relative z-10 h-[240px] w-[240px] sm:h-[280px] sm:w-[280px] lg:h-[310px] lg:w-[310px]">
                 <img
                   key={slide.id}
                   src={slide.image}
-                  alt={slide.title}
+                  alt={currentTitle}
                   className="h-full w-full object-contain drop-shadow-xl transition duration-500"
                 />
               </div>
 
-              <div className="absolute right-[10%] top-[10%] z-20 flex h-16 w-16 rotate-6 items-center justify-center rounded-full bg-primary-500 text-center text-white shadow-lg sm:h-[72px] sm:w-[72px]">
+              <div className="absolute right-[10%] rtl:right-auto rtl:left-[10%] top-[10%] z-20 flex h-16 w-16 rotate-6 rtl:-rotate-6 items-center justify-center rounded-full bg-primary-500 text-center text-white shadow-lg sm:h-[72px] sm:w-[72px]">
                 <div>
                   <p className="text-[9px] font-bold uppercase text-white/80">
-                    Up to
+                    {t("hero.upTo")}
                   </p>
                   <p className="text-lg font-extrabold leading-none">
                     {slide.discount}
                   </p>
-                  <p className="text-[8px] font-semibold uppercase">Off</p>
+                  <p className="text-[8px] font-semibold uppercase">{t("hero.off")}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Arrows */}
+          {/* Navigation Arrows */}
           <button
             type="button"
-            onClick={prev}
+            onClick={isRTL ? next : prev}
             aria-label="Previous"
-            className="absolute left-3 top-1/2 z-30 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-800 shadow-md transition hover:bg-primary-500 hover:text-white sm:flex"
+            className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 z-30 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-800 shadow-md transition hover:bg-primary-500 hover:text-white sm:flex cursor-pointer"
           >
-            <ChevronLeft size={16} />
+            {isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
           <button
             type="button"
-            onClick={next}
+            onClick={isRTL ? prev : next}
             aria-label="Next"
-            className="absolute right-3 top-1/2 z-30 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-800 shadow-md transition hover:bg-primary-500 hover:text-white sm:flex"
+            className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 z-30 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-800 shadow-md transition hover:bg-primary-500 hover:text-white sm:flex cursor-pointer"
           >
-            <ChevronRight size={16} />
+            {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
 
           {/* Dots */}
@@ -210,7 +218,7 @@ export default function Hero() {
                 key={i}
                 onClick={() => setIndex(i)}
                 aria-label={`Slide ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${
+                className={`h-1.5 rounded-full transition-all cursor-pointer ${
                   i === index
                     ? "w-5 bg-primary-500"
                     : "w-1.5 bg-slate-300 hover:bg-slate-400"
