@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ChevronUp,
   ChevronDown,
@@ -16,19 +17,22 @@ import {
 } from "lucide-react";
 
 export default function ShopSidebar({
-  products,
-  selectedCategories,
+  products = [],
+  selectedCategories = [],
   setSelectedCategories,
-  selectedSubcategories, 
+  selectedSubcategories = [],
   setSelectedSubcategories,
-  priceRange,
+  priceRange = { min: 0, max: 5000 },
   setPriceRange,
-  selectedRating,
+  selectedRating = 0,
   setSelectedRating,
-  availability, setAvailability,
-  selectedDiscount, 
-  setSelectedDiscount
+  availability = [],
+  setAvailability,
+  selectedDiscount = 0,
+  setSelectedDiscount,
 }) {
+  const { t, i18n } = useTranslation();
+
   const [openSections, setOpenSections] = useState({
     categories: true,
     subcategories: true,
@@ -37,97 +41,151 @@ export default function ShopSidebar({
     availability: true,
     discount: true,
   });
+
   const toggleSection = (sec) =>
     setOpenSections((prev) => ({ ...prev, [sec]: !prev[sec] }));
 
   const [showAllSubcats, setShowAllSubcats] = useState(false);
 
-  const inStockCount = products.filter(p => (p.stock || 0) > 5).length;
-  const lowStockCount = products.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 5).length;
-  const outOfStockCount = products.filter(p => (p.stock || 0) <= 0).length;
+  const inStockCount = products.filter((p) => (p.stock || 0) > 5).length;
+  const lowStockCount = products.filter(
+    (p) => (p.stock || 0) > 0 && (p.stock || 0) <= 5,
+  ).length;
+  const outOfStockCount = products.filter((p) => (p.stock || 0) <= 0).length;
 
   const getDiscountPct = (p) => {
     if (!p.discountPrice || p.discountPrice >= p.price) return 0;
     return Math.round(((p.price - p.discountPrice) / p.price) * 100);
   };
-  
+
   const discountTiers = [
-    { label: '50% or more', value: 50 },
-    { label: '30% or more', value: 30 },
-    { label: '20% or more', value: 20 },
-    { label: '10% or more', value: 10 },
-  ].map(tier => ({
+    { labelKey: "shop.sidebar.discount50", value: 50 },
+    { labelKey: "shop.sidebar.discount30", value: 30 },
+    { labelKey: "shop.sidebar.discount20", value: 20 },
+    { labelKey: "shop.sidebar.discount10", value: 10 },
+  ].map((tier) => ({
     ...tier,
-    count: products.filter(p => getDiscountPct(p) >= tier.value).length
+    count: products.filter((p) => getDiscountPct(p) >= tier.value).length,
   }));
 
   const iconDictionary = {
-    'electronics': Monitor,
-    'phones': Smartphone,
-    'home': Home,
-    'fashion': ShoppingBag,
-    'beauty & care': Smile,
-    'sports': Zap,
-    'toys & games': Gamepad2,
-    'books': Book,
-    'accessories': Smartphone,
+    electronics: Monitor,
+    phones: Smartphone,
+    mobiles: Smartphone,
+    home: Home,
+    fashion: ShoppingBag,
+    "beauty & care": Smile,
+    beauty: Smile,
+    sports: Zap,
+    "toys & games": Gamepad2,
+    gaming: Gamepad2,
+    books: Book,
+    accessories: Tag,
   };
 
-  // 2. استخراج الأقسام الأساسية أوتوماتيك من الداتا الحقيقية
-  const allCategories = [...new Set(products.map(p => {
-    const cat = typeof p.category === 'object' ? p.category?.name : p.category;
-    return cat ? cat.toLowerCase() : null;
-  }).filter(Boolean))];
+  const categoryNameMap = {
+    electronics: "electronics",
+    phones: "phones",
+    mobiles: "mobiles",
+    home: "home",
+    "home & living": "home",
+    fashion: "fashion",
+    "beauty & care": "beauty",
+    beauty: "beauty",
+    sports: "sports",
+    "toys & games": "toys",
+    gaming: "gaming",
+    books: "books",
+    accessories: "accessories",
+    watches: "watches",
+    laptops: "laptops",
+  };
 
-  // 3. بناء مصفوفة الأقسام (الاسم، الأيقونة، العدد)
-  let dynamicCategoryMap = allCategories.map(catName => {
-    // لو القسم ليه أيقونة في القاموس هياخدها، لو ملوش (قسم جديد) هياخد شكل التاج 🏷️
-    const IconComponent = iconDictionary[catName] || Tag; 
-    
+  const getCategoryTitle = (catName) => {
+    if (!catName) return "";
+    const lower = catName.toLowerCase().trim();
+    if (lower === "others") return t("shop.sidebar.others");
+    const key = categoryNameMap[lower] || lower;
+    if (i18n.exists(`categories.items.${key}`)) {
+      return t(`categories.items.${key}`);
+    }
+    return catName;
+  };
+
+  // 1. Categories
+  const allCategories = [
+    ...new Set(
+      products
+        .map((p) => {
+          const cat =
+            typeof p.category === "object" ? p.category?.name : p.category;
+          return cat ? cat.toLowerCase() : null;
+        })
+        .filter(Boolean),
+    ),
+  ];
+
+  let dynamicCategoryMap = allCategories.map((catName) => {
+    const IconComponent = iconDictionary[catName] || Tag;
     return {
       name: catName,
       icon: IconComponent,
-      count: products.filter(p => {
-        const pCat = typeof p.category === 'object' ? p.category?.name : p.category;
+      count: products.filter((p) => {
+        const pCat =
+          typeof p.category === "object" ? p.category?.name : p.category;
         return pCat?.toLowerCase() === catName;
-      }).length
+      }).length,
     };
   });
 
-  // 4. حارس الأقسام (Others) للمنتجات اللي هتيجي بدون قسم
-  const uncategorizedCount = products.filter(p => {
-    const pCat = typeof p.category === 'object' ? p.category?.name : p.category;
-    return !pCat; // لو مفيش category خالص
+  const uncategorizedCount = products.filter((p) => {
+    const pCat =
+      typeof p.category === "object" ? p.category?.name : p.category;
+    return !pCat;
   }).length;
 
   if (uncategorizedCount > 0) {
     dynamicCategoryMap.push({
-      name: 'others',
-      icon: Package, // أيقونة صندوق للمنتجات غير المصنفة
-      count: uncategorizedCount
+      name: "others",
+      icon: Package,
+      count: uncategorizedCount,
     });
   }
 
+  // 2. Subcategories
+  const allSubcategories = [
+    ...new Set(
+      products
+        .map((p) =>
+          typeof p.subcategory === "object"
+            ? p.subcategory?.name
+            : p.subcategory,
+        )
+        .filter(Boolean),
+    ),
+  ];
 
-  const allSubcategories = [...new Set(products.map(p => typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory).filter(Boolean))];
-
-  let dynamicSubcategories = allSubcategories.map(subName => ({
+  let dynamicSubcategories = allSubcategories.map((subName) => ({
     name: subName,
-    count: products.filter(p => {
-      const pSub = typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory;
+    count: products.filter((p) => {
+      const pSub =
+        typeof p.subcategory === "object"
+          ? p.subcategory?.name
+          : p.subcategory;
       return pSub?.toLowerCase() === subName.toLowerCase();
-    }).length
+    }).length,
   }));
 
-  const othersCount = products.filter(p => {
-    const pSub = typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory;
+  const othersCount = products.filter((p) => {
+    const pSub =
+      typeof p.subcategory === "object" ? p.subcategory?.name : p.subcategory;
     return !pSub;
   }).length;
 
   if (othersCount > 0) {
     dynamicSubcategories.push({
-      name: 'Others',
-      count: othersCount
+      name: "Others",
+      count: othersCount,
     });
   }
 
@@ -142,6 +200,7 @@ export default function ShopSidebar({
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
     );
   };
+
   const handleAvailabilityChange = (status) => {
     setAvailability((prev) =>
       prev.includes(status)
@@ -149,6 +208,7 @@ export default function ShopSidebar({
         : [...prev, status],
     );
   };
+
   const clearFilters = () => {
     setSelectedCategories([]);
     setSelectedSubcategories([]);
@@ -160,7 +220,7 @@ export default function ShopSidebar({
 
   const SectionHeader = ({ title, section }) => (
     <div
-      className="flex items-center justify-between cursor-pointer mb-4"
+      className="flex items-center justify-between cursor-pointer mb-4 select-none"
       onClick={() => toggleSection(section)}
     >
       <h3 className="font-bold text-gray-900 text-[15px]">{title}</h3>
@@ -173,26 +233,47 @@ export default function ShopSidebar({
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-4 shadow-sm w-full lg:w-72 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-4 shadow-sm w-full max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+      {/* 1. Categories */}
       <div className="mb-6 border-b border-gray-100 pb-6">
-        <SectionHeader title="Categories" section="categories" />
+        <SectionHeader
+          title={t("shop.sidebar.categories")}
+          section="categories"
+        />
         {openSections.categories && (
           <div className="space-y-3.5">
-            {dynamicCategoryMap.map(cat => (
-              <label key={cat.name} className="flex items-center justify-between cursor-pointer group">
+            {dynamicCategoryMap.map((cat) => (
+              <label
+                key={cat.name}
+                className="flex items-center justify-between cursor-pointer group"
+              >
                 <div className="flex items-center gap-3">
                   <div className="relative flex items-center justify-center">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={selectedCategories.includes(cat.name)}
                       onChange={() => handleCategoryChange(cat.name)}
-                      className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" 
+                      className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer"
                     />
-                    <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <svg
+                      className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
                   </div>
-                  <cat.icon size={16} className="text-gray-400 group-hover:text-blue-600 transition" />
-                  {/* ضفنا capitalize هنا */}
-                  <span className="text-sm text-gray-600 group-hover:text-gray-900 transition capitalize">{cat.name}</span>
+                  <cat.icon
+                    size={16}
+                    className="text-gray-400 group-hover:text-blue-600 transition shrink-0"
+                  />
+                  <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">
+                    {getCategoryTitle(cat.name)}
+                  </span>
                 </div>
                 <span className="text-xs text-gray-400">({cat.count})</span>
               </label>
@@ -203,44 +284,88 @@ export default function ShopSidebar({
 
       {/* 2. Subcategories */}
       <div className="mb-6 border-b border-gray-100 pb-6">
-        <SectionHeader title="Subcategories" section="subcategories" />
+        <SectionHeader
+          title={t("shop.sidebar.subcategories")}
+          section="subcategories"
+        />
         {openSections.subcategories && (
           <div>
             <div className="space-y-3.5 mb-3">
-              {(showAllSubcats ? dynamicSubcategories : dynamicSubcategories.slice(0, 5)).map(sub => (
-                <label key={sub.name} className="flex items-center justify-between cursor-pointer group">
+              {(showAllSubcats
+                ? dynamicSubcategories
+                : dynamicSubcategories.slice(0, 5)
+              ).map((sub) => (
+                <label
+                  key={sub.name}
+                  className="flex items-center justify-between cursor-pointer group"
+                >
                   <div className="flex items-center gap-3">
                     <div className="relative flex items-center justify-center">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedSubcategories?.includes(sub.name.toLowerCase())}
+                      <input
+                        type="checkbox"
+                        checked={selectedSubcategories?.includes(
+                          sub.name.toLowerCase(),
+                        )}
                         onChange={() => {
                           const lowerSub = sub.name.toLowerCase();
-                          setSelectedSubcategories(prev => 
-                            prev.includes(lowerSub) ? prev.filter(c => c !== lowerSub) : [...prev, lowerSub]
+                          setSelectedSubcategories((prev) =>
+                            prev.includes(lowerSub)
+                              ? prev.filter((c) => c !== lowerSub)
+                              : [...prev, lowerSub],
                           );
                         }}
-                        className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" 
+                        className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer"
                       />
-                      <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      <svg
+                        className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
                     </div>
-                    <span className="text-sm text-gray-600 group-hover:text-gray-900 transition capitalize">{sub.name}</span>
+                    <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">
+                      {sub.name.toLowerCase() === "others"
+                        ? t("shop.sidebar.others")
+                        : sub.name}
+                    </span>
                   </div>
                   <span className="text-xs text-gray-400">({sub.count})</span>
                 </label>
               ))}
             </div>
-            <button onClick={() => setShowAllSubcats(!showAllSubcats)} className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
-              {showAllSubcats ? 'Show less' : 'Show more'} <ChevronDown size={14} className={showAllSubcats ? "rotate-180" : ""} />
-            </button>
+            {dynamicSubcategories.length > 5 && (
+              <button
+                type="button"
+                onClick={() => setShowAllSubcats(!showAllSubcats)}
+                className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>
+                  {showAllSubcats
+                    ? t("shop.sidebar.showLess")
+                    : t("shop.sidebar.showMore")}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${
+                    showAllSubcats ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            )}
           </div>
         )}
       </div>
 
+      {/* 3. Price */}
       <div className="mb-6 border-b border-gray-100 pb-6">
-        <SectionHeader title="Price" section="price" />
+        <SectionHeader title={t("shop.sidebar.price")} section="price" />
         {openSections.price && (
-          <div>
+          <div dir="ltr" className="text-left">
             <div className="flex items-center gap-3 mb-4">
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
@@ -255,6 +380,7 @@ export default function ShopSidebar({
                   className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
                 />
               </div>
+              <span className="text-gray-400 text-sm font-medium">-</span>
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
                   $
@@ -324,8 +450,9 @@ export default function ShopSidebar({
         )}
       </div>
 
+      {/* 4. Rating */}
       <div className="mb-6 border-b border-gray-100 pb-6">
-        <SectionHeader title="Rating" section="rating" />
+        <SectionHeader title={t("shop.sidebar.rating")} section="rating" />
         {openSections.rating && (
           <div className="space-y-3.5">
             {[5, 4, 3].map((stars) => (
@@ -372,7 +499,9 @@ export default function ShopSidebar({
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-gray-600">& up</span>
+                  <span className="text-sm text-gray-600">
+                    {t("shop.sidebar.andUp")}
+                  </span>
                 </div>
               </label>
             ))}
@@ -382,28 +511,64 @@ export default function ShopSidebar({
 
       {/* 5. Availability */}
       <div className="mb-6 border-b border-gray-100 pb-6">
-        <SectionHeader title="Availability" section="availability" />
+        <SectionHeader
+          title={t("shop.sidebar.availability")}
+          section="availability"
+        />
         {openSections.availability && (
           <div className="space-y-3.5">
             <label className="flex items-center justify-between cursor-pointer group">
               <div className="flex items-center gap-3">
                 <div className="relative flex items-center justify-center">
-                  <input type="checkbox" checked={availability.includes('in-stock')} onChange={() => handleAvailabilityChange('in-stock')} className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" />
-                  <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <input
+                    type="checkbox"
+                    checked={availability.includes("in-stock")}
+                    onChange={() => handleAvailabilityChange("in-stock")}
+                    className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer"
+                  />
+                  <svg
+                    className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
                 </div>
-                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">In Stock</span>
+                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">
+                  {t("shop.sidebar.inStock")}
+                </span>
               </div>
               <span className="text-xs text-gray-400">({inStockCount})</span>
             </label>
-            
-            {/* 👇 قسم الـ Low Stock الجديد */}
+
             <label className="flex items-center justify-between cursor-pointer group">
               <div className="flex items-center gap-3">
                 <div className="relative flex items-center justify-center">
-                  <input type="checkbox" checked={availability.includes('low-stock')} onChange={() => handleAvailabilityChange('low-stock')} className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer" />
-                  <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <input
+                    type="checkbox"
+                    checked={availability.includes("low-stock")}
+                    onChange={() => handleAvailabilityChange("low-stock")}
+                    className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer"
+                  />
+                  <svg
+                    className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
                 </div>
-                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">Low Stock</span>
+                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">
+                  {t("shop.sidebar.lowStock")}
+                </span>
               </div>
               <span className="text-xs text-gray-400">({lowStockCount})</span>
             </label>
@@ -411,10 +576,27 @@ export default function ShopSidebar({
             <label className="flex items-center justify-between cursor-pointer group">
               <div className="flex items-center gap-3">
                 <div className="relative flex items-center justify-center">
-                  <input type="checkbox" checked={availability.includes('out-of-stock')} onChange={() => handleAvailabilityChange('out-of-stock')} className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-red-500 checked:border-red-500 transition-all cursor-pointer" />
-                  <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <input
+                    type="checkbox"
+                    checked={availability.includes("out-of-stock")}
+                    onChange={() => handleAvailabilityChange("out-of-stock")}
+                    className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-red-500 checked:border-red-500 transition-all cursor-pointer"
+                  />
+                  <svg
+                    className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
                 </div>
-                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">Out of Stock</span>
+                <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">
+                  {t("shop.sidebar.outOfStock")}
+                </span>
               </div>
               <span className="text-xs text-gray-400">({outOfStockCount})</span>
             </label>
@@ -422,24 +604,46 @@ export default function ShopSidebar({
         )}
       </div>
 
-      {/* 6. Discount (النسخة الاحترافية) */}
+      {/* 6. Discount */}
       <div className="mb-6">
-        <SectionHeader title="Discount" section="discount" />
+        <SectionHeader
+          title={t("shop.sidebar.discount")}
+          section="discount"
+        />
         {openSections.discount && (
           <div className="space-y-3.5">
-            {discountTiers.map(tier => (
-              <label key={tier.value} className="flex items-center justify-between cursor-pointer group">
+            {discountTiers.map((tier) => (
+              <label
+                key={tier.value}
+                className="flex items-center justify-between cursor-pointer group"
+              >
                 <div className="flex items-center gap-3">
                   <div className="relative flex items-center justify-center">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedDiscount === tier.value} 
-                      onChange={() => setSelectedDiscount(selectedDiscount === tier.value ? 0 : tier.value)} 
-                      className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" 
+                    <input
+                      type="checkbox"
+                      checked={selectedDiscount === tier.value}
+                      onChange={() =>
+                        setSelectedDiscount(
+                          selectedDiscount === tier.value ? 0 : tier.value,
+                        )
+                      }
+                      className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer"
                     />
-                    <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <svg
+                      className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
                   </div>
-                  <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">{tier.label}</span>
+                  <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">
+                    {t(tier.labelKey)}
+                  </span>
                 </div>
                 <span className="text-xs text-gray-400">({tier.count})</span>
               </label>
@@ -448,11 +652,13 @@ export default function ShopSidebar({
         )}
       </div>
 
+      {/* Clear Filters Button */}
       <button
+        type="button"
         onClick={clearFilters}
-        className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:border-gray-300 hover:bg-gray-50 transition shadow-sm text-sm"
+        className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:border-gray-300 hover:bg-gray-50 transition shadow-sm text-sm cursor-pointer"
       >
-        Clear Filters
+        {t("shop.sidebar.clearFilters")}
       </button>
     </div>
   );

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 const STATUS_STYLES = {
   paid: { label: "Paid", classes: "bg-success/10 text-success" },
   unpaid: { label: "Unpaid", classes: "bg-warning/10 text-warning" },
@@ -10,13 +12,16 @@ const STATUS_STYLES = {
 };
 
 export default function OrderStatusBadge({ status }) {
+  const { t } = useTranslation();
   if (!status) return null;
   const key = String(status).toLowerCase();
   const config = STATUS_STYLES[key] || { label: status, classes: "bg-slate-100 text-slate-600" };
+  const label = t(`orders.tabs.${key}`, { defaultValue: config.label });
+
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${config.classes}`}>
       <span className="w-1.5 h-1.5 rounded-full bg-current" />
-      {config.label}
+      {label}
     </span>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getMyOrders, cancelMyOrder } from "../api/orders.api";
 import { toast } from "react-toastify";
 import {
@@ -9,13 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const STATUS_TABS = [
-  { key: "all", label: "All" },
-  { key: "processing", label: "Processing" },
-  { key: "shipped", label: "Shipped" },
-  { key: "delivered", label: "Delivered" },
-  { key: "cancelled", label: "Cancelled" },
-];
+const STATUS_KEYS = ["all", "processing", "shipped", "delivered", "cancelled"];
 
 const STATUS_STYLES = {
   processing: "bg-warning/10 text-warning",
@@ -37,6 +32,9 @@ function getOrderStatus(order) {
 }
 
 export default function Orders() {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language?.startsWith("ar");
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,7 +50,7 @@ export default function Orders() {
       setOrders(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error(err);
-      setError("Failed to load your orders");
+      setError(t("orders.loadOrdersFailed"));
     } finally {
       setLoading(false);
     }
@@ -63,15 +61,15 @@ export default function Orders() {
   }, []);
 
   const handleCancel = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+    if (!window.confirm(t("orders.cancelConfirm"))) return;
     setCancellingId(orderId);
     try {
       await cancelMyOrder(orderId);
-      toast.success("Order cancelled");
+      toast.success(t("orders.orderCancelledSuccess"));
       await fetchOrders();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to cancel order");
+      toast.error(t("orders.orderCancelFailed"));
     } finally {
       setCancellingId(null);
     }
@@ -98,13 +96,13 @@ export default function Orders() {
         <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center">
           <AlertTriangle className="text-danger" size={28} />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">Something went wrong</h2>
-        <p className="text-gray-500 max-w-sm">We couldn't load your orders.</p>
+        <h2 className="text-xl font-bold text-gray-900">{t("orders.errorTitle")}</h2>
+        <p className="text-gray-500 max-w-sm">{t("orders.errorSubtitle")}</p>
         <button
           onClick={fetchOrders}
-          className="px-6 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
+          className="px-6 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition cursor-pointer"
         >
-          Try Again
+          {t("orders.tryAgain")}
         </button>
       </div>
     );
@@ -113,25 +111,27 @@ export default function Orders() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+          {t("orders.title")}
+        </h1>
         <p className="text-gray-500 mt-1">
-          {orders.length} {orders.length === 1 ? "order" : "orders"}
+          {t("orders.orderCount", { count: orders.length })}
         </p>
       </div>
 
       {/* Status Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
-        {STATUS_TABS.map((tab) => (
+        {STATUS_KEYS.map((key) => (
           <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
-              activeTab === tab.key
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer ${
+              activeTab === key
                 ? "bg-primary-500 text-white"
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
           >
-            {tab.label}
+            {t(`orders.tabs.${key}`)}
           </button>
         ))}
       </div>
@@ -144,17 +144,17 @@ export default function Orders() {
           </div>
           <h2 className="text-lg font-bold text-gray-900">
             {activeTab === "all"
-              ? "You haven't placed any orders yet"
-              : "No orders with this status"}
+              ? t("orders.emptyTitle")
+              : t("orders.emptyFilterTitle")}
           </h2>
           <p className="text-gray-500 max-w-sm">
-            Products you order will appear here.
+            {t("orders.emptySubtitle")}
           </p>
           <Link
             to="/shop"
             className="mt-2 px-6 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
           >
-            Explore Products
+            {t("orders.exploreProducts")}
           </Link>
         </div>
       ) : (
@@ -167,19 +167,20 @@ export default function Orders() {
             return (
               <div
                 key={order._id}
-                className="bg-white border border-gray-100 rounded-2xl p-5"
+                className="bg-white border border-gray-100 rounded-2xl p-5 shadow-xs"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                   <div>
                     <p className="font-medium text-gray-900">
-                      Order #{order._id?.slice(-6).toUpperCase()}
+                      {t("orders.orderNumber")}{order._id?.slice(-6).toUpperCase()}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString("en-US")
+                        ? new Date(order.createdAt).toLocaleDateString(
+                            isArabic ? "ar-EG" : "en-US"
+                          )
                         : ""}{" "}
-                      · {items.length}{" "}
-                      {items.length === 1 ? "item" : "items"}
+                      · {t("orders.itemCount", { count: items.length })}
                     </p>
                   </div>
                   <span
@@ -187,7 +188,7 @@ export default function Orders() {
                       STATUS_STYLES[status] || "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {STATUS_TABS.find((t) => t.key === status)?.label || status}
+                    {t(`orders.tabs.${status}`, { defaultValue: status })}
                   </span>
                 </div>
 
@@ -228,21 +229,22 @@ export default function Orders() {
                   <div className="flex items-center gap-3">
                     {canCancel && (
                       <button
+                        type="button"
                         onClick={() => handleCancel(order._id)}
                         disabled={cancellingId === order._id}
-                        className="text-sm text-danger hover:underline disabled:opacity-50"
+                        className="text-sm text-danger hover:underline disabled:opacity-50 cursor-pointer"
                       >
                         {cancellingId === order._id
-                          ? "Cancelling..."
-                          : "Cancel Order"}
+                          ? t("orders.cancelling")
+                          : t("orders.cancelOrder")}
                       </button>
                     )}
                     <Link
                       to={`/orders/${order._id}`}
                       className="flex items-center gap-1 text-sm text-primary-500 font-medium hover:underline"
                     >
-                      View Order
-                      <ChevronRight size={14} />
+                      {t("orders.viewOrder")}
+                      <ChevronRight size={14} className="rtl:rotate-180" />
                     </Link>
                   </div>
                 </div>

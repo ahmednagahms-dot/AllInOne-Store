@@ -1,12 +1,31 @@
-import React from 'react';
-import { ShieldCheck, Truck, RefreshCcw, Headset } from 'lucide-react';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { ShieldCheck, Truck, RefreshCcw, Headset } from "lucide-react";
 
 export default function ShopFeatures() {
+  const { t } = useTranslation();
+
   const features = [
-    { icon: ShieldCheck, title: 'Secure Payment', subtitle: 'SSL Encrypted' },
-    { icon: Truck, title: 'Fast Delivery', subtitle: 'Orders over $50' },
-    { icon: RefreshCcw, title: 'Easy Returns', subtitle: '30 Days Hassle Free' },
-    { icon: Headset, title: 'Customer Support', subtitle: "We're here to help" }
+    {
+      icon: ShieldCheck,
+      title: t("shop.features.securePaymentTitle"),
+      subtitle: t("shop.features.securePaymentSub"),
+    },
+    {
+      icon: Truck,
+      title: t("shop.features.fastDeliveryTitle"),
+      subtitle: t("shop.features.fastDeliverySub"),
+    },
+    {
+      icon: RefreshCcw,
+      title: t("shop.features.easyReturnsTitle"),
+      subtitle: t("shop.features.easyReturnsSub"),
+    },
+    {
+      icon: Headset,
+      title: t("shop.features.supportTitle"),
+      subtitle: t("shop.features.supportSub"),
+    },
   ];
 
   return (
@@ -18,7 +37,9 @@ export default function ShopFeatures() {
               <feature.icon size={24} strokeWidth={1.5} />
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 text-[15px]">{feature.title}</h4>
+              <h4 className="font-bold text-gray-900 text-[15px]">
+                {feature.title}
+              </h4>
               <p className="text-gray-400 text-sm mt-0.5">{feature.subtitle}</p>
             </div>
           </div>
