@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import Cookies from "js-cookie";
 import {
@@ -22,6 +23,7 @@ import {
 import { toast } from "react-toastify";
 
 export default function Profile() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { logoutUser, updateUser } = useAuth();
 
@@ -43,7 +45,7 @@ export default function Profile() {
   });
 
   const [preferences, setPreferences] = useState({
-    language: "English",
+    language: i18n.language?.startsWith("ar") ? "العربية" : "English",
     currency: "USD ($)",
     theme: "light",
   });
@@ -78,6 +80,10 @@ export default function Profile() {
           cached = {};
         }
 
+        const currentLangLabel = i18n.language?.startsWith("ar")
+          ? "العربية"
+          : "English";
+
         const merged = {
           ...cached,
           ...(userData || {}),
@@ -85,7 +91,7 @@ export default function Profile() {
           firstName: userData?.firstName || cached?.firstName || "",
           lastName: userData?.lastName || cached?.lastName || "",
           username: userData?.username || cached?.username || "",
-          language: userData?.language || cached?.language || "English",
+          language: currentLangLabel,
           currency: userData?.currency || cached?.currency || "USD ($)",
           theme: userData?.theme || cached?.theme || "light",
           dateOfBirth: userData?.dateOfBirth || cached?.dateOfBirth || "",
@@ -114,7 +120,7 @@ export default function Profile() {
         setPasswordEmail(merged?.email || "");
 
         setPreferences({
-          language: merged?.language || "English",
+          language: currentLangLabel,
           currency: merged?.currency || "USD ($)",
           theme: merged?.theme || "light",
         });
@@ -123,14 +129,22 @@ export default function Profile() {
         setIsEditing(false);
       } catch (err) {
         console.error(err);
-        toast.error("Failed to load profile");
+        toast.error(t("profile.loadError"));
       } finally {
         setLoading(false);
       }
     };
 
     load();
-  }, []);
+  }, [i18n.language, t]);
+
+  // Keep preferences language synchronized with global i18n
+  useEffect(() => {
+    setPreferences((prev) => ({
+      ...prev,
+      language: i18n.language?.startsWith("ar") ? "العربية" : "English",
+    }));
+  }, [i18n.language]);
 
   // =========================
   // Avatar
@@ -140,7 +154,7 @@ export default function Profile() {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image must be less than 2MB");
+      toast.error(t("profile.imageSizeError"));
       e.target.value = "";
       return;
     }
@@ -174,7 +188,7 @@ export default function Profile() {
           avatarUrl = await uploadToCloudinary(avatarFile);
         } catch (err) {
           console.error("Avatar upload failed:", err);
-          toast.error("Failed to upload avatar");
+          toast.error(t("profile.uploadAvatarError"));
           setUploadingAvatar(false);
           setSaving(false);
           return;
@@ -199,17 +213,26 @@ export default function Profile() {
       setUser(merged);
       if (updateUser) updateUser(merged);
 
+      // إذا غيّر المستخدم اللغة من التفضيلات، نطبقها فوراً في i18next
+      if (preferences.language === "العربية" && !i18n.language?.startsWith("ar")) {
+        i18n.changeLanguage("ar");
+        localStorage.setItem("language", "ar");
+      } else if (preferences.language === "English" && !i18n.language?.startsWith("en")) {
+        i18n.changeLanguage("en");
+        localStorage.setItem("language", "en");
+      }
+
       // 3. احفظ في الـ cookies
       Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
 
       setAvatarFile(null);
       if (avatarUrl) setAvatarPreview(avatarUrl);
 
-      toast.success("Profile updated");
+      toast.success(t("profile.updateSuccess"));
       setIsEditing(false);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update profile");
+      toast.error(t("profile.updateError"));
     } finally {
       setSaving(false);
     }
@@ -236,7 +259,7 @@ export default function Profile() {
     });
 
     setPreferences({
-      language: user?.language || "English",
+      language: user?.language || (i18n.language?.startsWith("ar") ? "العربية" : "English"),
       currency: user?.currency || "USD ($)",
       theme: user?.theme || "light",
     });
@@ -256,18 +279,18 @@ export default function Profile() {
 
   const handleSendOtp = async () => {
     if (!passwordEmail.trim()) {
-      toast.error("Please enter your email");
+      toast.error(t("profile.enterEmailError"));
       return;
     }
 
     try {
       setSendingOtp(true);
       await sendChangePasswordOtp({ email: passwordEmail.trim() });
-      toast.success("OTP sent to your email");
+      toast.success(t("profile.otpSent"));
       setPasswordStep("otp");
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to send OTP");
+      toast.error(err.response?.data?.message || t("profile.otpSendError"));
     } finally {
       setSendingOtp(false);
     }
@@ -275,11 +298,11 @@ export default function Profile() {
 
   const handleResetPassword = async () => {
     if (!otp.trim()) {
-      toast.error("Please enter the OTP");
+      toast.error(t("profile.enterOtpError"));
       return;
     }
     if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error(t("profile.passwordLengthError"));
       return;
     }
 
@@ -290,14 +313,14 @@ export default function Profile() {
         otp: otp.trim(),
         newPassword,
       });
-      toast.success("Password changed successfully");
+      toast.success(t("profile.passwordChangeSuccess"));
       setPasswordStep("idle");
       setOtp("");
       setNewPassword("");
       setShowPassword(false);
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to change password");
+      toast.error(err.response?.data?.message || t("profile.passwordChangeError"));
     } finally {
       setResettingPassword(false);
     }
@@ -316,7 +339,7 @@ export default function Profile() {
   // =========================
   const handleLogout = () => {
     logoutUser();
-    toast.success("Logged out");
+    toast.success(t("profile.loggedOut"));
     navigate("/login");
   };
 
@@ -334,7 +357,7 @@ export default function Profile() {
   if (!user) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-slate-500 text-lg">Please login first</p>
+        <p className="text-slate-500 text-lg">{t("profile.pleaseLogin")}</p>
       </div>
     );
   }
@@ -345,16 +368,16 @@ export default function Profile() {
       : user.username || user.name || "User";
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-6 px-4 sm:px-6">
+    <div className="min-h-screen bg-slate-50 py-6 px-4 sm:px-6">
       <div className="max-w-[1000px] mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-xl font-bold text-slate-800 dark:text-white">
-              Account Settings
+            <h1 className="text-xl font-bold text-slate-800">
+              {t("profile.title")}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Manage your account information and preferences
+            <p className="text-sm text-slate-500 mt-1">
+              {t("profile.subtitle")}
             </p>
           </div>
 
@@ -362,25 +385,25 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 transition"
             >
               <Pencil size={14} />
-              Edit Profile
+              {t("profile.editProfile")}
             </button>
           )}
         </div>
 
         {/* Profile Information */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-6">
-          <h2 className="text-base font-bold text-slate-800 dark:text-white mb-6">
-            Profile Information
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+          <h2 className="text-base font-bold text-slate-800 mb-6">
+            {t("profile.profileInfo")}
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
             {/* Avatar */}
             <div className="flex flex-col items-center">
               <div className="relative">
-                <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white dark:ring-slate-700 shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+                <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
                   {avatarPreview ? (
                     <img
                       src={avatarPreview}
@@ -398,10 +421,10 @@ export default function Profile() {
                   type="button"
                   onClick={() => isEditing && fileInputRef.current?.click()}
                   disabled={!isEditing || uploadingAvatar}
-                  className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-indigo-600 text-white shadow-md flex items-center justify-center hover:bg-indigo-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                  aria-label="Change avatar"
+                  className="absolute -bottom-1 -right-1 rtl:-right-auto rtl:-left-1 w-9 h-9 rounded-full bg-indigo-600 text-white shadow-md flex items-center justify-center hover:bg-indigo-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label={t("profile.changeAvatar")}
                   title={
-                    isEditing ? "Change avatar" : "Click Edit Profile first"
+                    isEditing ? t("profile.changeAvatar") : t("profile.clickEditFirst")
                   }
                 >
                   {uploadingAvatar ? (
@@ -427,10 +450,10 @@ export default function Profile() {
                 className="mt-3 text-sm text-indigo-600 font-medium hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {uploadingAvatar
-                  ? "Uploading..."
+                  ? t("profile.uploading")
                   : isEditing
-                  ? "Change Photo"
-                  : "Edit to change photo"}
+                  ? t("profile.changePhoto")
+                  : t("profile.editToChangePhoto")}
               </button>
             </div>
 
@@ -438,8 +461,8 @@ export default function Profile() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                    First name
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                    {t("profile.firstName")}
                   </label>
                   <input
                     type="text"
@@ -447,13 +470,13 @@ export default function Profile() {
                     value={form.firstName}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500 bg-white dark:bg-slate-900 dark:text-white"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 disabled:text-slate-500 bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                    Last name
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                    {t("profile.lastName")}
                   </label>
                   <input
                     type="text"
@@ -461,34 +484,34 @@ export default function Profile() {
                     value={form.lastName}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500 bg-white dark:bg-slate-900 dark:text-white"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 disabled:text-slate-500 bg-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                    Email
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                    {t("profile.email")}
                   </label>
                   <input
                     type="email"
                     name="email"
                     value={form.email}
                     disabled
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none bg-slate-50 dark:bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none bg-slate-50 text-slate-500 cursor-not-allowed"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                    Phone
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                    {t("profile.phone")}
                   </label>
                   <div className="flex gap-2">
                     <div className="relative">
                       <select
                         disabled={!isEditing}
-                        className="appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500"
+                        className="appearance-none px-3 py-2.5 pr-8 rtl:pr-3 rtl:pl-8 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white disabled:bg-slate-50 disabled:text-slate-500"
                       >
                         <option>+20</option>
                         <option>+1</option>
@@ -497,7 +520,7 @@ export default function Profile() {
                       </select>
                       <ChevronDown
                         size={14}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                        className="absolute right-2 rtl:right-auto rtl:left-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                       />
                     </div>
                     <input
@@ -506,15 +529,16 @@ export default function Profile() {
                       value={form.phone}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500 bg-white dark:bg-slate-900 dark:text-white"
+                      dir="ltr"
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 disabled:text-slate-500 bg-white"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                  Date of birth
+                <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                  {t("profile.dateOfBirth")}
                 </label>
                 <input
                   type="date"
@@ -522,7 +546,7 @@ export default function Profile() {
                   value={form.dateOfBirth}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500 bg-white dark:bg-slate-900 dark:text-white"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 disabled:text-slate-500 bg-white"
                 />
               </div>
             </div>
@@ -530,47 +554,61 @@ export default function Profile() {
         </div>
 
         {/* Preferences */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
           <div className="mb-6">
-            <h2 className="text-base font-bold text-slate-800 dark:text-white">
-              Preferences
+            <h2 className="text-base font-bold text-slate-800">
+              {t("profile.preferences")}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Set your preferred language, currency and theme
+            <p className="text-xs text-slate-500 mt-1">
+              {t("profile.preferencesDesc")}
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                Language
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                {t("profile.language")}
               </label>
               <div className="relative">
                 <select
                   value={preferences.language}
-                  onChange={(e) =>
-                    setPreferences({
-                      ...preferences,
-                      language: e.target.value,
-                    })
-                  }
+                  onChange={(e) => {
+                    const newLang = e.target.value;
+                    setPreferences((prev) => ({
+                      ...prev,
+                      language: newLang,
+                    }));
+                    if (newLang === "العربية") {
+                      i18n.changeLanguage("ar");
+                      localStorage.setItem("language", "ar");
+                    } else if (newLang === "English") {
+                      i18n.changeLanguage("en");
+                      localStorage.setItem("language", "en");
+                    }
+                  }}
                   disabled={!isEditing}
-                  className="w-full appearance-none px-3 py-2.5 pr-9 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500"
+                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white disabled:bg-slate-50 disabled:text-slate-500"
                 >
-                  <option>English</option>
-                  <option>العربية</option>
-                  <option>Français</option>
+                  <option value="English">
+                    {t("profile.languageEnglish") || "English"}
+                  </option>
+                  <option value="العربية">
+                    {t("profile.languageArabic") || "العربية"}
+                  </option>
+                  <option value="Français">
+                    {t("profile.languageFrench") || "Français"}
+                  </option>
                 </select>
                 <ChevronDown
                   size={14}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                Currency
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                {t("profile.currency")}
               </label>
               <div className="relative">
                 <select
@@ -582,7 +620,7 @@ export default function Profile() {
                     })
                   }
                   disabled={!isEditing}
-                  className="w-full appearance-none px-3 py-2.5 pr-9 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white disabled:bg-slate-50 dark:disabled:bg-slate-700/50 disabled:text-slate-500"
+                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white disabled:bg-slate-50 disabled:text-slate-500"
                 >
                   <option>USD ($)</option>
                   <option>EGP (E£)</option>
@@ -591,44 +629,51 @@ export default function Profile() {
                 </select>
                 <ChevronDown
                   size={14}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                Theme
+              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                {t("profile.theme")}
               </label>
-              <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
-                {["light", "dark", "auto"].map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() =>
-                      isEditing && setPreferences({ ...preferences, theme: t })
-                    }
-                    disabled={!isEditing}
-                    className={`flex-1 py-1.5 text-xs font-medium rounded-lg capitalize transition ${
-                      preferences.theme === t
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                    } ${!isEditing ? "cursor-not-allowed opacity-70" : ""}`}
-                  >
-                    {t}
-                  </button>
-                ))}
+              <div className="flex items-center bg-slate-100 rounded-xl p-1">
+                {["light", "dark", "auto"].map((themeKey) => {
+                  const labelMap = {
+                    light: t("profile.themeLight"),
+                    dark: t("profile.themeDark"),
+                    auto: t("profile.themeAuto"),
+                  };
+                  return (
+                    <button
+                      key={themeKey}
+                      type="button"
+                      onClick={() =>
+                        isEditing && setPreferences({ ...preferences, theme: themeKey })
+                      }
+                      disabled={!isEditing}
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-lg capitalize transition ${
+                        preferences.theme === themeKey
+                          ? "bg-indigo-600 text-white shadow-sm"
+                          : "text-slate-600 hover:text-slate-900"
+                      } ${!isEditing ? "cursor-not-allowed opacity-70" : ""}`}
+                    >
+                      {labelMap[themeKey] || themeKey}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
         </div>
 
         {/* Change Password */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Lock size={16} className="text-indigo-600" />
-            <h2 className="text-base font-bold text-slate-800 dark:text-white">
-              Change Password
+            <h2 className="text-base font-bold text-slate-800">
+              {t("profile.changePassword")}
             </h2>
           </div>
 
@@ -636,23 +681,23 @@ export default function Profile() {
             <button
               type="button"
               onClick={handleStartChangePassword}
-              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"
+              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 transition"
             >
-              Change Password
+              {t("profile.changePassword")}
             </button>
           )}
 
           {passwordStep === "email" && (
             <>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                We&apos;ll send an OTP to your email to verify your identity.
+              <p className="text-xs text-slate-500 mb-4">
+                {t("profile.otpInstruction")}
               </p>
               <input
                 type="email"
-                placeholder="Email"
+                placeholder={t("profile.email")}
                 value={passwordEmail}
                 onChange={(e) => setPasswordEmail(e.target.value)}
-                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white"
+                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white"
               />
               <div className="flex gap-3">
                 <button
@@ -664,14 +709,14 @@ export default function Profile() {
                   {sendingOtp && (
                     <Loader2 size={14} className="animate-spin" />
                   )}
-                  Send OTP
+                  {t("profile.sendOtp")}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancelChangePassword}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium transition"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition"
                 >
-                  Cancel
+                  {t("profile.cancel")}
                 </button>
               </div>
             </>
@@ -681,25 +726,25 @@ export default function Profile() {
             <>
               <input
                 type="text"
-                placeholder="Enter OTP"
+                placeholder={t("profile.enterOtp")}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 maxLength={6}
-                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white"
+                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white"
               />
 
               <div className="relative mb-4">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="New password"
+                  placeholder={t("profile.newPassword")}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 pr-10 rounded-xl border border-gray-200 dark:border-slate-600 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-900 dark:text-white [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
+                  className="w-full px-3 py-2.5 pr-10 rtl:pr-3 rtl:pl-10 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -715,14 +760,14 @@ export default function Profile() {
                   {resettingPassword && (
                     <Loader2 size={14} className="animate-spin" />
                   )}
-                  Reset Password
+                  {t("profile.resetPassword")}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancelChangePassword}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium transition"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition"
                 >
-                  Cancel
+                  {t("profile.cancel")}
                 </button>
               </div>
             </>
@@ -735,9 +780,9 @@ export default function Profile() {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              className="px-5 py-2.5 rounded-xl border border-gray-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition"
             >
-              Cancel
+              {t("profile.cancel")}
             </button>
 
             <button
@@ -751,7 +796,7 @@ export default function Profile() {
               ) : (
                 <Save size={14} />
               )}
-              Save Changes
+              {t("profile.saveChanges")}
             </button>
           </div>
         )}
@@ -760,10 +805,10 @@ export default function Profile() {
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/50 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+          className="w-full flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 transition"
         >
           <LogOut size={16} />
-          Logout
+          {t("profile.logout")}
         </button>
       </div>
     </div>
