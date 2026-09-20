@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Heart, ShoppingCart, Star, ImageOff } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -62,6 +63,7 @@ function getPricing(product) {
 }
 
 export default function ProductCard({ product }) {
+  const { t } = useTranslation();
   const [imageError, setImageError] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
 
@@ -93,15 +95,15 @@ export default function ProductCard({ product }) {
     try {
       if (liked) {
         await removeFromWishlist(productId);
-        toast.success("Removed from wishlist");
+        toast.success(t("productCard.removedFromWishlist"));
       } else {
         await addToWishlist(productId);
-        toast.success("Added to wishlist");
+        toast.success(t("productCard.addedToWishlist"));
       }
     } catch (err) {
       console.error(err);
       toast.error(
-        err.response?.data?.message || "Please log in first"
+        err.response?.data?.message || t("productCard.loginRequired")
       );
     }
   };
@@ -115,11 +117,11 @@ export default function ProductCard({ product }) {
     try {
       setCartLoading(true);
       await addToCart(productId, 1);
-      toast.success("Added to cart");
+      toast.success(t("productCard.addedToCart"));
     } catch (err) {
       console.error(err);
       toast.error(
-        err.response?.data?.message || "Please log in first"
+        err.response?.data?.message || t("productCard.loginRequired")
       );
     } finally {
       setCartLoading(false);
@@ -145,7 +147,7 @@ export default function ProductCard({ product }) {
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-300">
               <ImageOff size={32} />
-              <span className="text-xs text-slate-400">No Image</span>
+              <span className="text-xs text-slate-400">{t("productCard.noImage")}</span>
             </div>
           )}
         </Link>
@@ -155,7 +157,7 @@ export default function ProductCard({ product }) {
           type="button"
           onClick={handleWishlist}
           aria-label="Add to wishlist"
-          className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition ${
+          className={`absolute right-3 rtl:right-auto rtl:left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition cursor-pointer ${
             liked
               ? "bg-red-500 text-white"
               : "bg-white text-slate-500 hover:bg-[#5046E5] hover:text-white"
@@ -166,15 +168,15 @@ export default function ProductCard({ product }) {
 
         {/* Discount */}
         {discount > 0 && (
-          <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+          <span className="absolute left-3 rtl:left-auto rtl:right-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-semibold text-white shadow-sm dir-ltr">
             -{discount}%
           </span>
         )}
 
         {/* Out of stock */}
         {stock === 0 && (
-          <span className="absolute bottom-3 left-3 rounded-full bg-slate-800/90 px-2.5 py-1 text-[11px] font-semibold text-white">
-            Out of Stock
+          <span className="absolute bottom-3 left-3 rtl:left-auto rtl:right-3 rounded-full bg-slate-800/90 px-2.5 py-1 text-[11px] font-semibold text-white">
+            {t("productCard.outOfStock")}
           </span>
         )}
       </div>
@@ -202,14 +204,14 @@ export default function ProductCard({ product }) {
             </span>
           ) : (
             <span className="text-xs font-medium text-slate-400">
-              {rating || "New"}
+              {rating || t("productCard.new")}
             </span>
           )}
         </div>
 
         {/* Name */}
         <Link to={productId ? `/products/${productId}` : "#"}>
-          <h3 className="line-clamp-2 min-h-[40px] text-sm font-semibold text-[#0F172A] hover:text-[#5046E5] transition">
+          <h3 className="line-clamp-2 min-h-[40px] text-sm font-semibold text-[#0F172A] hover:text-[#5046E5] transition text-start">
             {name}
           </h3>
         </Link>
@@ -231,14 +233,14 @@ export default function ProductCard({ product }) {
           type="button"
           onClick={handleAddToCart}
           disabled={stock === 0 || cartLoading}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4338CA] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4338CA] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 cursor-pointer"
         >
           <ShoppingCart size={17} />
           {stock === 0
-            ? "Out of Stock"
+            ? t("productCard.outOfStock")
             : cartLoading
-            ? "Adding..."
-            : "Add to Cart"}
+            ? t("productCard.adding")
+            : t("productCard.addToCart")}
         </button>
       </div>
     </div>

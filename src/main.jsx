@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import App from "./App.jsx";
+import "./i18n/config.js";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(

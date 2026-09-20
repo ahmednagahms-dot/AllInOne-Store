@@ -1,7 +1,38 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Quote, Star, User, AlertCircle } from "lucide-react";
 import { getAllReviews } from "../../api/reviews.api";
 import fallbackReviews from "../../data/reviews";
+
+const arabicFallbackReviews = [
+  {
+    id: 1,
+    name: "أحمد محمد",
+    role: "مشتري موثّق",
+    review:
+      "تجربة تسوق رائعة! وصل المنتج بسرعة وكان مطابقاً تماماً للوصف وجودته ممتازة جداً.",
+    rating: 5,
+    avatar: "أم",
+  },
+  {
+    id: 2,
+    name: "سارة علي",
+    role: "مشترية موثّقة",
+    review:
+      "جودة عالية وخدمة عملاء راقية وسريعة الاستجابة. بالتأكيد سأكرر تجربة الشراء من هنا.",
+    rating: 5,
+    avatar: "سع",
+  },
+  {
+    id: 3,
+    name: "عمر حسن",
+    role: "مشتري موثّق",
+    review:
+      "المتجر سهل وسلس في الاستخدام وطلبي وصل بحالة ممتازة ومغلف بإتقان. تجربة موفقة للغاية.",
+    rating: 5,
+    avatar: "عح",
+  },
+];
 
 /* =========================================================
    نجوم التقييم بأمان
@@ -30,16 +61,18 @@ function RatingStars({ rating = 5 }) {
    بطاقة مراجعة
 ========================================================= */
 function ReviewCard({ review }) {
+  const { t } = useTranslation();
+
   const name =
     review.name ||
     review.user?.name ||
     review.customerName ||
-    "عميل مجهول";
+    t("reviews.anonymous");
 
   const role =
     review.role ||
     review.user?.role ||
-    (review.verified ? "Verified Buyer" : "عميل");
+    (review.verified ? t("reviews.verifiedBuyer") : t("reviews.customer"));
 
   const text =
     review.review || review.text || review.comment || review.content || "";
@@ -54,8 +87,8 @@ function ReviewCard({ review }) {
 
   return (
     <div className="relative flex flex-col rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-      <div className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] text-[#5046E5]">
-        <Quote size={17} />
+      <div className="absolute right-5 rtl:right-auto rtl:left-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] text-[#5046E5]">
+        <Quote size={17} className="rtl:rotate-180" />
       </div>
 
       <RatingStars rating={rating} />
@@ -148,12 +181,15 @@ function extractReviews(response) {
    المكوّن الرئيسي
 ========================================================= */
 function CustomerReviews() {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language?.startsWith("ar");
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
+    const defaultList = isArabic ? arabicFallbackReviews : fallbackReviews;
 
     const fetchReviews = async () => {
       try {
@@ -164,16 +200,14 @@ function CustomerReviews() {
           if (list.length > 0) {
             setReviews(list.slice(0, 3));
           } else {
-            // الـ API رجع فاضي → نستخدم البيانات الثابتة
-            setReviews(fallbackReviews.slice(0, 3));
+            setReviews(defaultList.slice(0, 3));
           }
         }
       } catch (err) {
         console.error("Reviews fetch error:", err);
         if (isMounted) {
-          // فشل الـ API → fallback
-          setReviews(fallbackReviews.slice(0, 3));
-          setError(null); // مش هنعرض error لأن عندنا fallback
+          setReviews(defaultList.slice(0, 3));
+          setError(null);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -185,9 +219,8 @@ function CustomerReviews() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isArabic]);
 
-  // لو مفيش مراجعات خالص، منعرضش السكشن
   if (!loading && reviews.length === 0) return null;
 
   return (
@@ -196,15 +229,15 @@ function CustomerReviews() {
         {/* ============ Header ============ */}
         <div className="mx-auto mb-10 max-w-2xl text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[#5046E5]">
-            Testimonials
+            {t("reviews.tag")}
           </p>
 
           <h2 className="text-3xl font-bold text-[#0F172A]">
-            What Our Customers Say
+            {t("reviews.title")}
           </h2>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            See what our customers have to say about their shopping experience.
+            {t("reviews.subtitle")}
           </p>
         </div>
 

@@ -12,11 +12,14 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../ui/LanguageSwitcher";
 
 const STORE_LOGO_URL =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,10 +75,11 @@ export default function Navbar() {
       {/* Top Bar */}
       <div className="bg-primary-500 text-white text-sm py-2 hidden sm:block">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <p>Free shipping on orders over $50</p>
-          <div className="flex gap-6">
-            <span className="cursor-pointer hover:underline">Track Order</span>
-            <span className="cursor-pointer hover:underline">Help</span>
+          <p>{t("nav.freeShippingNotice")}</p>
+          <div className="flex items-center gap-6">
+            <span className="cursor-pointer hover:underline">{t("nav.trackOrder")}</span>
+            <span className="cursor-pointer hover:underline">{t("nav.help")}</span>
+            <LanguageSwitcher className="bg-white/95 text-gray-800" />
           </div>
         </div>
       </div>
@@ -98,16 +102,16 @@ export default function Navbar() {
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-7">
             <NavLink to="/" className={navLinkClass} end>
-              Home
+              {t("nav.home")}
             </NavLink>
             <NavLink to="/shop" className={navLinkClass}>
-              Shop
+              {t("nav.shop")}
             </NavLink>
             <NavLink to="/orders" className={navLinkClass}>
-              My Orders
+              {t("nav.orders")}
             </NavLink>
             <NavLink to="/wishlist" className={navLinkClass}>
-              Wishlist
+              {t("nav.wishlist")}
             </NavLink>
           </nav>
 
@@ -121,13 +125,13 @@ export default function Navbar() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for products, brands and more..."
+                placeholder={t("nav.searchPlaceholder")}
                 className="w-full pl-4 pr-11 py-2.5 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
               <button
                 type="submit"
-                aria-label="Search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-500"
+                aria-label={t("common.search")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-500 rtl:right-auto rtl:left-3"
               >
                 <Search size={18} />
               </button>
@@ -180,13 +184,13 @@ export default function Navbar() {
                   />
                   <div className="hidden xl:block text-xs">
                     <span className="text-gray-400 block font-normal">
-                      Welcome
+                      {t("nav.welcome")}
                     </span>
                     <span className="font-bold text-gray-800 block">
-                      Hi,{" "}
+                      {t("nav.hi")}{" "}
                       {user?.username?.split(" ")[0] ||
                         user?.name?.split(" ")[0] ||
-                        "User"}
+                        t("nav.user")}
                     </span>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-400 hidden xl:block" />
@@ -196,36 +200,36 @@ export default function Navbar() {
                 {isUserMenuOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-lg py-2 z-50"
+                    className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-lg py-2 z-50"
                   >
                     <Link
                       to="/profile"
                       onClick={() => setIsUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-start"
                     >
-                      My Profile
+                      {t("nav.profile")}
                     </Link>
                     <Link
                       to="/orders"
                       onClick={() => setIsUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-start"
                     >
-                      My Orders
+                      {t("nav.orders")}
                     </Link>
                     <Link
                       to="/wishlist"
                       onClick={() => setIsUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-start"
                     >
-                      Wishlist
+                      {t("nav.wishlist")}
                     </Link>
                     <hr className="my-1 border-gray-100" />
                     <button
                       onClick={handleLogout}
-                      className="w-full text-right px-4 py-2.5 text-sm text-danger hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full text-start px-4 py-2.5 text-sm text-danger hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
                     >
                       <LogOut size={16} />
-                      Logout
+                      {t("nav.logout")}
                     </button>
                   </div>
                 )}
@@ -236,13 +240,13 @@ export default function Navbar() {
                   to="/login"
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-500"
                 >
-                  Login
+                  {t("nav.login")}
                 </Link>
                 <Link
                   to="/register"
                   className="px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 text-white rounded-xl shadow-sm"
                 >
-                  Sign Up
+                  {t("nav.signUp")}
                 </Link>
               </div>
             )}
@@ -264,20 +268,26 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-white">
           <div className="container mx-auto px-4 py-4 space-y-1">
+            {/* Mobile Language Switcher */}
+            <div className="pb-3 flex justify-between items-center border-b border-gray-100">
+              <span className="text-xs text-gray-500">{t("nav.freeShippingNotice")}</span>
+              <LanguageSwitcher />
+            </div>
+
             {/* Mobile Search */}
-            <form onSubmit={handleSearch} className="mb-4">
+            <form onSubmit={handleSearch} className="my-3">
               <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for products..."
-                  className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder={t("nav.searchMobilePlaceholder")}
+                  className="w-full pl-4 pr-10 rtl:pr-4 rtl:pl-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <button
                   type="submit"
-                  aria-label="Search"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  aria-label={t("common.search")}
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 >
                   <Search size={18} />
                 </button>
@@ -294,7 +304,7 @@ export default function Navbar() {
                 }`
               }
             >
-              Home
+              {t("nav.home")}
             </NavLink>
             <NavLink
               to="/shop"
@@ -305,7 +315,7 @@ export default function Navbar() {
                 }`
               }
             >
-              Shop
+              {t("nav.shop")}
             </NavLink>
             <NavLink
               to="/orders"
@@ -316,7 +326,7 @@ export default function Navbar() {
                 }`
               }
             >
-              My Orders
+              {t("nav.orders")}
             </NavLink>
             <NavLink
               to="/wishlist"
@@ -327,7 +337,7 @@ export default function Navbar() {
                 }`
               }
             >
-              Wishlist
+              {t("nav.wishlist")}
             </NavLink>
             <NavLink
               to="/cart"
@@ -338,7 +348,7 @@ export default function Navbar() {
                 }`
               }
             >
-              Cart
+              {t("nav.orders")}
             </NavLink>
 
             {!isAuthenticated ? (
@@ -348,22 +358,22 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className="flex-1 text-center py-2.5 bg-primary-500 text-white rounded-xl font-medium"
                 >
-                  Login
+                  {t("nav.login")}
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileOpen(false)}
                   className="flex-1 text-center py-2.5 border border-primary-500 text-primary-500 rounded-xl font-medium"
                 >
-                  Sign Up
+                  {t("nav.signUp")}
                 </Link>
               </div>
             ) : (
               <button
                 onClick={handleLogout}
-                className="w-full text-right py-2.5 text-danger font-medium"
+                className="w-full text-start py-2.5 text-danger font-medium cursor-pointer"
               >
-                Logout
+                {t("nav.logout")}
               </button>
             )}
           </div>

@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api from "../api/axios";
 import ProductCard from "../components/products/ProductCard";
 import Pagination from "../components/ui/Pagination";
 import ProductToolbar from "../components/products/ProductToolbar";
 import ShopSidebar from "../components/products/ShopSidebar";
 import ShopFeatures from "../components/products/ShopFeatures";
-import { Search } from "lucide-react";
-import { ChevronRight } from "lucide-react";
+import { Search, ChevronRight, X } from "lucide-react";
 
 const ShopImage =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1789752545/swhfkjpwjhblaonheeo5.png";
 
 export default function Shop() {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language?.startsWith("ar");
+
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +25,7 @@ export default function Shop() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("");
   const [viewMode, setViewMode] = useState("grid");
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState([]);
@@ -34,7 +39,6 @@ export default function Shop() {
       setLoading(true);
       try {
         const response = await api.get(`/products?limit=1000`);
-        console.log(response);
         let fetchedProducts = [];
         if (Array.isArray(response.data)) fetchedProducts = response.data;
         else if (Array.isArray(response.data?.products))
@@ -57,7 +61,7 @@ export default function Shop() {
 
     if (searchQuery) {
       result = result.filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()),
+        p.name?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -65,7 +69,7 @@ export default function Shop() {
       result = result.filter((p) => {
         const sub =
           typeof p.subcategory === "object"
-            ? p.subcategory.name
+            ? p.subcategory?.name
             : p.subcategory;
         if (!sub) {
           return selectedSubcategories.includes("others");
@@ -77,7 +81,7 @@ export default function Shop() {
     if (selectedCategories.length > 0) {
       result = result.filter((p) => {
         const cat =
-          typeof p.category === "object" ? p.category.name : p.category;
+          typeof p.category === "object" ? p.category?.name : p.category;
         return selectedCategories.includes(cat?.toLowerCase());
       });
     }
@@ -100,17 +104,17 @@ export default function Shop() {
     }
 
     if (availability.length > 0) {
-      result = result.filter(p => {
+      result = result.filter((p) => {
         const st = p.stock || 0;
-        if (availability.includes('in-stock') && st > 5) return true;
-        if (availability.includes('low-stock') && st > 0 && st <= 5) return true;
-        if (availability.includes('out-of-stock') && st <= 0) return true;
+        if (availability.includes("in-stock") && st > 5) return true;
+        if (availability.includes("low-stock") && st > 0 && st <= 5) return true;
+        if (availability.includes("out-of-stock") && st <= 0) return true;
         return false;
       });
     }
 
     if (selectedDiscount > 0) {
-      result = result.filter(p => {
+      result = result.filter((p) => {
         if (!p.discountPrice || p.discountPrice >= p.price) return false;
         const pct = Math.round(((p.price - p.discountPrice) / p.price) * 100);
         return pct >= selectedDiscount;
@@ -160,58 +164,73 @@ export default function Shop() {
     selectedDiscount,
   ]);
 
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategories([]);
+    setSelectedSubcategories([]);
+    setPriceRange({ min: 0, max: 5000 });
+    setSelectedRating(0);
+    setAvailability([]);
+    setSelectedDiscount(0);
+  };
+
   return (
     <div className="min-h-screen bg-white pb-12">
+      {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-6 flex items-center gap-2 text-sm">
-        <a href="/" className="text-gray-400 hover:text-blue-600 transition">
-          Home
-        </a>
-        <ChevronRight size={14} className="text-gray-300" />
-        <span className="text-gray-800 font-medium">Shop</span>
+        <Link to="/" className="text-gray-400 hover:text-blue-600 transition">
+          {t("nav.home")}
+        </Link>
+        <ChevronRight size={14} className="text-gray-300 rtl:rotate-180" />
+        <span className="text-gray-800 font-medium">{t("nav.shop")}</span>
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="bg-[#f4f7fb] border border-1 border-blue-100 rounded-[2rem] p-6 sm:p-8 lg:p-12 mb-8 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden gap-8 lg:gap-0">
-          <div className="z-10 w-full lg:w-1/2 text-center lg:text-left">
+        {/* Banner */}
+        <div className="bg-[#f4f7fb] border border-blue-100 rounded-[2rem] p-6 sm:p-8 lg:p-12 mb-8 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden gap-8 lg:gap-0">
+          <div className="z-10 w-full lg:w-1/2 text-center lg:text-start">
             <h1 className="text-4xl lg:text-5xl font-extrabold text-[#111827] mb-3 lg:mb-4 tracking-tight">
-              Shop
+              {t("shop.title")}
             </h1>
             <p className="text-gray-500 text-base lg:text-lg mb-1 max-w-xl mx-auto lg:mx-0">
-              Discover amazing products, great deals and the latest trends.
+              {t("shop.subtitle")}
             </p>
             <p className="text-gray-500 text-base lg:text-lg">
-              We found{" "}
-              <span className="font-bold text-gray-800">
-                {filteredProducts.length}
-              </span>{" "}
-              products for you.
+              {t("shop.productsFound", { count: filteredProducts.length })}
             </p>
           </div>
 
-          <div className="z-10 w-full lg:w-1/2 flex items-center justify-center lg:justify-end gap-6 sm:gap-4 lg:ms-52">
+          <div className="z-10 w-full lg:w-1/2 flex items-center justify-center lg:justify-end gap-6 sm:gap-4 lg:ms-24">
             <div
-              className="flex flex-col transform -rotate-12 text-[#424750] opacity-90 text-3xl sm:text-4xl lg:text-[2.5rem]"
-              style={{ fontFamily: "'Caveat', cursive", lineHeight: "1.1" }}
+              className={`flex flex-col transform ${
+                isArabic ? "rotate-6" : "-rotate-12"
+              } text-[#424750] opacity-90 text-2xl sm:text-3xl lg:text-[2.2rem] select-none`}
+              style={{
+                fontFamily: isArabic ? "'Cairo', sans-serif" : "'Caveat', cursive",
+                lineHeight: "1.2",
+              }}
             >
-              <span className="ml-2 lg:ml-4">Better</span>
-              <span className="ml-5 lg:ml-8">Choices</span>
-              <span className="-ml-1 lg:-ml-2">Brighter</span>
-              <span className="ml-4 lg:ml-6">Days</span>
+              <span className="ms-2 lg:ms-4">{t("shop.floatingText.line1")}</span>
+              <span className="ms-5 lg:ms-8">{t("shop.floatingText.line2")}</span>
+              <span className="-ms-1 lg:-ms-2">{t("shop.floatingText.line3")}</span>
+              <span className="ms-4 lg:ms-6">{t("shop.floatingText.line4")}</span>
             </div>
 
             <div className="relative group flex-shrink-0">
               <div className="absolute inset-0 bg-blue-200/50 rounded-2xl lg:rounded-3xl blur-lg lg:blur-xl transform translate-y-2 lg:translate-y-3 scale-95 group-hover:scale-100 transition-all duration-500"></div>
               <img
                 src={ShopImage}
-                alt="Workspace"
+                alt="Shop workspace"
                 className="relative z-10 w-56 sm:w-80 lg:w-96 h-36 sm:h-44 lg:h-52 object-cover rounded-[1rem] lg:rounded-[1.5rem] border-2 border-white/60 shadow-sm"
               />
             </div>
           </div>
         </div>
 
+        {/* Content grid */}
         <div className="flex flex-col lg:flex-row gap-8">
-          <aside className="w-full lg:w-auto flex-shrink-0">
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block w-72 flex-shrink-0">
             <ShopSidebar
               products={allProducts}
               selectedCategories={selectedCategories}
@@ -229,6 +248,45 @@ export default function Shop() {
             />
           </aside>
 
+          {/* Mobile Sidebar Modal */}
+          {mobileFilterOpen && (
+            <div className="fixed inset-0 z-50 flex lg:hidden">
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+                onClick={() => setMobileFilterOpen(false)}
+              />
+              <div className="relative ms-auto w-full max-w-xs h-full bg-white shadow-2xl flex flex-col z-10">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900">{t("shop.filter")}</h3>
+                  <button
+                    onClick={() => setMobileFilterOpen(false)}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 cursor-pointer"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="p-4 overflow-y-auto flex-1">
+                  <ShopSidebar
+                    products={allProducts}
+                    selectedCategories={selectedCategories}
+                    setSelectedCategories={setSelectedCategories}
+                    selectedSubcategories={selectedSubcategories}
+                    setSelectedSubcategories={setSelectedSubcategories}
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                    selectedRating={selectedRating}
+                    setSelectedRating={setSelectedRating}
+                    availability={availability}
+                    setAvailability={setAvailability}
+                    selectedDiscount={selectedDiscount}
+                    setSelectedDiscount={setSelectedDiscount}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Main Product Area */}
           <main className="w-full flex-1">
             <ProductToolbar
               searchQuery={searchQuery}
@@ -237,11 +295,12 @@ export default function Shop() {
               setSortOption={setSortOption}
               viewMode={viewMode}
               setViewMode={setViewMode}
+              onFilterToggle={() => setMobileFilterOpen(true)}
             />
 
             {loading ? (
               <div className="text-center py-20 text-gray-500 font-semibold animate-pulse">
-                Loading products...
+                {t("shop.loadingProducts")}
               </div>
             ) : displayedProducts.length > 0 ? (
               <>
@@ -256,7 +315,7 @@ export default function Shop() {
                     <div
                       key={product._id || product.id}
                       className="animate-fade-in-up"
-                      style={{ animationDelay: `${index * 0.1}s` }}
+                      style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <ProductCard product={product} viewMode={viewMode} />
                     </div>
@@ -275,30 +334,24 @@ export default function Shop() {
                   <Search size={28} strokeWidth={2} />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  No results found
+                  {t("shop.noResultsTitle")}
                 </h3>
                 <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
-                  Try adjusting your search or browse our categories.
+                  {t("shop.noResultsSubtitle")}
                 </p>
                 <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedCategories([]);
-                    setPriceRange({ min: 0, max: 5000 });
-                    setSelectedRating(0);
-                    setAvailability([]);
-                    selectedDiscount(0);
-                  }}
-                  className="px-6 py-2.5 bg-white border border-gray-200 text-blue-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition shadow-sm"
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="px-6 py-2.5 bg-white border border-gray-200 text-blue-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition shadow-sm cursor-pointer"
                 >
-                  Browse Categories
+                  {t("shop.clearFilters")}
                 </button>
               </div>
             )}
           </main>
         </div>
+
         <ShopFeatures />
-        
       </div>
     </div>
   );

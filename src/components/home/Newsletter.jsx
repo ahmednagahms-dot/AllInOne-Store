@@ -1,66 +1,68 @@
+import { useTranslation } from "react-i18next";
 import { Mail, ArrowRight } from "lucide-react";
 
 function Newsletter() {
-    return (
-        <section className="w-full bg-white py-16">
-        <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
-            <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] px-6 py-10 sm:px-10 lg:px-16">
-            {/* Decorative Circles */}
-            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#5046E5]/20" />
-            <div className="absolute -bottom-20 left-20 h-40 w-40 rounded-full bg-[#5046E5]/10" />
+  const { t } = useTranslation();
 
-            <div className="relative z-10 mx-auto max-w-3xl text-center">
-                {/* Icon */}
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5046E5] text-white">
-                <Mail size={25} />
-                </div>
+  return (
+    <section className="w-full bg-white py-16">
+      <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
+        <div className="relative overflow-hidden rounded-3xl bg-[#0F172A] px-6 py-10 sm:px-10 lg:px-16">
+          {/* Decorative Circles */}
+          <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#5046E5]/20" />
+          <div className="absolute -bottom-20 left-20 h-40 w-40 rounded-full bg-[#5046E5]/10" />
 
-                {/* Heading */}
-                <h2 className="text-3xl font-bold text-white sm:text-4xl">
-                Subscribe to Our Newsletter
-                </h2>
-
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                Stay updated with the latest products, exclusive offers, and
-                special discounts delivered straight to your inbox.
-                </p>
-
-                {/* Form */}
-                <form
-                onSubmit={(event) => event.preventDefault()}
-                className="mx-auto mt-7 flex max-w-xl flex-col gap-3 sm:flex-row"
-                >
-                <div className="relative flex-1">
-                    <Mail
-                    size={18}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
-
-                    <input
-                    type="email"
-                    placeholder="Enter your email address"
-                    className="h-12 w-full rounded-xl border border-slate-600 bg-white px-11 text-sm text-[#0F172A] outline-none transition placeholder:text-slate-400 focus:border-[#5046E5] focus:ring-2 focus:ring-[#5046E5]/20"
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-6 text-sm font-semibold text-white transition hover:bg-[#4338CA]"
-                >
-                    Subscribe
-                    <ArrowRight size={17} />
-                </button>
-                </form>
-
-                {/* Small Text */}
-                <p className="mt-4 text-xs text-slate-400">
-                No spam. Unsubscribe anytime.
-                </p>
+          <div className="relative z-10 mx-auto max-w-3xl text-center">
+            {/* Icon */}
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5046E5] text-white">
+              <Mail size={25} />
             </div>
-            </div>
+
+            {/* Heading */}
+            <h2 className="text-3xl font-bold text-white sm:text-4xl">
+              {t("newsletter.title")}
+            </h2>
+
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+              {t("newsletter.subtitle")}
+            </p>
+
+            {/* Form */}
+            <form
+              onSubmit={(event) => event.preventDefault()}
+              className="mx-auto mt-7 flex max-w-xl flex-col gap-3 sm:flex-row"
+            >
+              <div className="relative flex-1">
+                <Mail
+                  size={18}
+                  className="absolute left-4 rtl:left-auto rtl:right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  type="email"
+                  placeholder={t("newsletter.placeholder")}
+                  className="h-12 w-full rounded-xl border border-slate-600 bg-white px-11 text-sm text-[#0F172A] outline-none transition placeholder:text-slate-400 focus:border-[#5046E5] focus:ring-2 focus:ring-[#5046E5]/20"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-6 text-sm font-semibold text-white transition hover:bg-[#4338CA] cursor-pointer"
+              >
+                {t("newsletter.button")}
+                <ArrowRight size={17} className="rtl:rotate-180" />
+              </button>
+            </form>
+
+            {/* Small Text */}
+            <p className="mt-4 text-xs text-slate-400">
+              {t("newsletter.privacy")}
+            </p>
+          </div>
         </div>
-        </section>
-    );
+      </div>
+    </section>
+  );
 }
 
 export default Newsletter;

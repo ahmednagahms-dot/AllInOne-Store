@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getMyOrders, cancelMyOrder } from "../api/orders.api";
 import { toast } from "react-toastify";
 import {
@@ -54,6 +55,9 @@ function getOrderImage(item) {
 }
 
 export default function Orders() {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language?.startsWith("ar");
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -74,7 +78,9 @@ export default function Orders() {
       setOrders(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error(err);
-      setError("Failed to load your orders");
+      setError(
+        t("orders.loadOrdersFailed") || "Failed to load your orders"
+      );
     } finally {
       setLoading(false);
     }
@@ -82,20 +88,28 @@ export default function Orders() {
 
   useEffect(() => {
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCancel = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel this order?"))
-      return;
+    const confirmMsg =
+      t("orders.cancelConfirm") ||
+      "Are you sure you want to cancel this order?";
+    if (!window.confirm(confirmMsg)) return;
+
     setCancellingId(orderId);
     try {
       await cancelMyOrder(orderId);
-      toast.success("Order cancelled");
+      toast.success(
+        t("orders.orderCancelledSuccess") || "Order cancelled"
+      );
       await fetchOrders();
     } catch (err) {
       console.error(err);
       toast.error(
-        err.response?.data?.message || "Failed to cancel order"
+        err.response?.data?.message ||
+          t("orders.orderCancelFailed") ||
+          "Failed to cancel order"
       );
     } finally {
       setCancellingId(null);
@@ -124,16 +138,17 @@ export default function Orders() {
           <AlertTriangle className="text-red-500" size={28} />
         </div>
         <h2 className="text-xl font-bold text-gray-900">
-          Something went wrong
+          {t("orders.errorTitle") || "Something went wrong"}
         </h2>
         <p className="text-gray-500 max-w-sm">
-          We couldn't load your orders.
+          {t("orders.errorSubtitle") ||
+            "We couldn't load your orders."}
         </p>
         <button
           onClick={fetchOrders}
-          className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+          className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition cursor-pointer"
         >
-          Try Again
+          {t("orders.tryAgain") || "Try Again"}
         </button>
       </div>
     );
@@ -143,10 +158,13 @@ export default function Orders() {
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          My Orders
+          {t("orders.title") || "My Orders"}
         </h1>
         <p className="text-gray-500 mt-1">
-          {orders.length} {orders.length === 1 ? "order" : "orders"}
+          {t("orders.orderCount", { count: orders.length }) ||
+            `${orders.length} ${
+              orders.length === 1 ? "order" : "orders"
+            }`}
         </p>
       </div>
 
@@ -156,13 +174,15 @@ export default function Orders() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer ${
               activeTab === tab.key
                 ? "bg-blue-600 text-white shadow-sm"
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
           >
-            {tab.label}
+            {t(`orders.tabs.${tab.key}`, {
+              defaultValue: tab.label,
+            })}
           </button>
         ))}
       </div>
@@ -175,17 +195,20 @@ export default function Orders() {
           </div>
           <h2 className="text-lg font-bold text-gray-900">
             {activeTab === "all"
-              ? "You haven't placed any orders yet"
-              : "No orders with this status"}
+              ? t("orders.emptyTitle") ||
+                "You haven't placed any orders yet"
+              : t("orders.emptyFilterTitle") ||
+                "No orders with this status"}
           </h2>
           <p className="text-gray-500 max-w-sm">
-            Products you order will appear here.
+            {t("orders.emptySubtitle") ||
+              "Products you order will appear here."}
           </p>
           <Link
             to="/shop"
             className="mt-2 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
           >
-            Explore Products
+            {t("orders.exploreProducts") || "Explore Products"}
           </Link>
         </div>
       ) : (
@@ -204,12 +227,13 @@ export default function Orders() {
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                   <div>
                     <p className="font-medium text-gray-900">
-                      Order #{order._id?.slice(-6).toUpperCase()}
+                      {t("orders.orderNumber") || "Order #"}
+                      {order._id?.slice(-6).toUpperCase()}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {order.createdAt
                         ? new Date(order.createdAt).toLocaleDateString(
-                            "en-US",
+                            isArabic ? "ar-EG" : "en-US",
                             {
                               month: "short",
                               day: "numeric",
@@ -217,8 +241,11 @@ export default function Orders() {
                             }
                           )
                         : ""}{" "}
-                      · {items.length}{" "}
-                      {items.length === 1 ? "item" : "items"}
+                      ·{" "}
+                      {t("orders.itemCount", { count: items.length }) ||
+                        `${items.length} ${
+                          items.length === 1 ? "item" : "items"
+                        }`}
                     </p>
                   </div>
                   <span
@@ -227,7 +254,9 @@ export default function Orders() {
                       "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {status}
+                    {t(`orders.tabs.${status}`, {
+                      defaultValue: status,
+                    })}
                   </span>
                 </div>
 
@@ -265,21 +294,25 @@ export default function Orders() {
                   <div className="flex items-center gap-3">
                     {canCancel && (
                       <button
+                        type="button"
                         onClick={() => handleCancel(order._id)}
                         disabled={cancellingId === order._id}
-                        className="text-sm text-red-600 hover:underline disabled:opacity-50 font-medium"
+                        className="text-sm text-red-600 hover:underline disabled:opacity-50 font-medium cursor-pointer"
                       >
                         {cancellingId === order._id
-                          ? "Cancelling..."
-                          : "Cancel Order"}
+                          ? t("orders.cancelling") || "Cancelling..."
+                          : t("orders.cancelOrder") || "Cancel Order"}
                       </button>
                     )}
                     <Link
                       to={`/orders/${order._id}`}
                       className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:underline"
                     >
-                      View Order
-                      <ChevronRight size={14} />
+                      {t("orders.viewOrder") || "View Order"}
+                      <ChevronRight
+                        size={14}
+                        className="rtl:rotate-180"
+                      />
                     </Link>
                   </div>
                 </div>
