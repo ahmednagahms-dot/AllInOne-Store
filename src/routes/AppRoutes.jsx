@@ -13,6 +13,7 @@ import VerifyOtp from "../components/auth/VerifyOtp";
 import Home from "../pages/Home";
 import Shop from "../pages/Shop";
 import Cart from "../pages/Cart";
+import Checkout from "../pages/Checkout";
 import Profile from "../pages/Profile";
 import ProductDetail from "../pages/ProductDetail";
 import Orders from "../pages/Orders";
@@ -63,14 +64,25 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
-          path="/Profile"
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
           element={
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/orders"
           element={
@@ -79,6 +91,7 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/orders/:id"
           element={

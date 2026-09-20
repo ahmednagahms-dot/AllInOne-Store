@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Cookies from "js-cookie";
@@ -7,9 +7,7 @@ import {
   sendChangePasswordOtp,
   verifyChangePasswordOtp,
 } from "../api/auth.api";
-import { uploadToCloudinary } from "../utils/upload";
 import {
-  Camera,
   Lock,
   Loader2,
   Save,
@@ -29,10 +27,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [avatarFile, setAvatarFile] = useState(null);
-  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -57,7 +51,7 @@ export default function Profile() {
   const [resettingPassword, setResettingPassword] = useState(false);
 
   // =========================
-  // Load profile (getMe + cache merge)
+  // Load profile (getMe + localStorage merge)
   // =========================
   useEffect(() => {
     const load = async () => {
@@ -70,30 +64,50 @@ export default function Profile() {
           console.warn("getMe failed, using cache only:", err?.message);
         }
 
+        // ✅ اجيب الكاش من localStorage
         let cached = {};
         try {
-          const cachedStr = Cookies.get("store_user");
+          const cachedStr = localStorage.getItem("profile_cache");
           cached = cachedStr ? JSON.parse(cachedStr) : {};
         } catch {
           cached = {};
         }
 
+        // ✅ دالة مساعدة: تفرّق بين "قيمة فاضية" و "مفيش قيمة"
+        const pickValue = (apiValue, cachedValue, fallback = "") => {
+          if (apiValue !== undefined && apiValue !== null && apiValue !== "")
+            return apiValue;
+          if (
+            cachedValue !== undefined &&
+            cachedValue !== null &&
+            cachedValue !== ""
+          )
+            return cachedValue;
+          return fallback;
+        };
+
+        // ✅ الـ merge: الأولوية للـ API، بس لو فاضي → الكاش
         const merged = {
           ...cached,
           ...(userData || {}),
-          avatar: userData?.avatar || cached?.avatar || null,
-          firstName: userData?.firstName || cached?.firstName || "",
-          lastName: userData?.lastName || cached?.lastName || "",
-          username: userData?.username || cached?.username || "",
-          language: userData?.language || cached?.language || "English",
-          currency: userData?.currency || cached?.currency || "USD ($)",
-          theme: userData?.theme || cached?.theme || "light",
-          dateOfBirth: userData?.dateOfBirth || cached?.dateOfBirth || "",
+          // حقول الـ API (بياخد من الكاش لو الـ API فاضي)
+          avatar: pickValue(userData?.avatar, cached?.avatar, null),
+          firstName: pickValue(userData?.firstName, cached?.firstName, ""),
+          lastName: pickValue(userData?.lastName, cached?.lastName, ""),
+          username: pickValue(userData?.username, cached?.username, ""),
+          email: pickValue(userData?.email, cached?.email, ""),
+          role: pickValue(userData?.role, cached?.role, "customer"),
+          // ✅ حقول الكاش (الأولوية للكاش لأن الـ API مش بيرجعهم)
+          phone: cached?.phone || userData?.phone || "",
+          dateOfBirth: cached?.dateOfBirth || userData?.dateOfBirth || "",
+          language: cached?.language || userData?.language || "English",
+          currency: cached?.currency || userData?.currency || "USD ($)",
+          theme: cached?.theme || userData?.theme || "light",
         };
 
         setUser(merged);
-        setAvatarPreview(merged?.avatar || null);
 
+        // ✅ افصل الاسم
         const fullName =
           merged?.firstName && merged?.lastName
             ? `${merged.firstName} ${merged.lastName}`
@@ -119,7 +133,10 @@ export default function Profile() {
           theme: merged?.theme || "light",
         });
 
+        // ✅ احفظ النسخة المدمجة في localStorage + cookies
+        localStorage.setItem("profile_cache", JSON.stringify(merged));
         Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
+
         setIsEditing(false);
       } catch (err) {
         console.error(err);
@@ -132,58 +149,17 @@ export default function Profile() {
     load();
   }, []);
 
-  // =========================
-  // Avatar
-  // =========================
-  const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image must be less than 2MB");
-      e.target.value = "";
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarPreview(reader.result);
-      setAvatarFile(file);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   // =========================
-  // Save profile (محلي فقط)
+  // Save profile (localStorage only)
   // =========================
   const handleSave = async () => {
     try {
       setSaving(true);
 
-      let avatarUrl = null;
-
-      // 1. ارفع الصورة على Cloudinary
-      if (avatarFile) {
-        try {
-          setUploadingAvatar(true);
-          avatarUrl = await uploadToCloudinary(avatarFile);
-        } catch (err) {
-          console.error("Avatar upload failed:", err);
-          toast.error("Failed to upload avatar");
-          setUploadingAvatar(false);
-          setSaving(false);
-          return;
-        } finally {
-          setUploadingAvatar(false);
-        }
-      }
-
-      // 2. ✅ احفظ محلياً (الـ Backend مش بيدعم التعديل)
       const merged = {
         ...user,
         firstName: form.firstName,
@@ -193,17 +169,14 @@ export default function Profile() {
         language: preferences.language,
         currency: preferences.currency,
         theme: preferences.theme,
-        ...(avatarUrl && { avatar: avatarUrl }),
       };
 
       setUser(merged);
       if (updateUser) updateUser(merged);
 
-      // 3. احفظ في الـ cookies
+      // ✅ احفظ في localStorage + cookies
+      localStorage.setItem("profile_cache", JSON.stringify(merged));
       Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
-
-      setAvatarFile(null);
-      if (avatarUrl) setAvatarPreview(avatarUrl);
 
       toast.success("Profile updated");
       setIsEditing(false);
@@ -241,8 +214,6 @@ export default function Profile() {
       theme: user?.theme || "light",
     });
 
-    setAvatarPreview(user?.avatar || null);
-    setAvatarFile(null);
     setIsEditing(false);
   };
 
@@ -377,61 +348,24 @@ export default function Profile() {
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
-            {/* Avatar */}
+            {/* Avatar — read-only */}
             <div className="flex flex-col items-center">
-              <div className="relative">
-                <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white dark:ring-slate-700 shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
-                  {avatarPreview ? (
-                    <img
-                      src={avatarPreview}
-                      alt="avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-3xl font-bold">
-                      {(displayName || "U")[0].toUpperCase()}
-                    </span>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => isEditing && fileInputRef.current?.click()}
-                  disabled={!isEditing || uploadingAvatar}
-                  className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-indigo-600 text-white shadow-md flex items-center justify-center hover:bg-indigo-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                  aria-label="Change avatar"
-                  title={
-                    isEditing ? "Change avatar" : "Click Edit Profile first"
-                  }
-                >
-                  {uploadingAvatar ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <Camera size={16} />
-                  )}
-                </button>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                />
+              <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white dark:ring-slate-700 shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <span className="text-white text-3xl font-bold">
+                    {(displayName || "U")[0].toUpperCase()}
+                  </span>
+                )}
               </div>
-
-              <button
-                type="button"
-                onClick={() => isEditing && fileInputRef.current?.click()}
-                disabled={!isEditing || uploadingAvatar}
-                className="mt-3 text-sm text-indigo-600 font-medium hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {uploadingAvatar
-                  ? "Uploading..."
-                  : isEditing
-                  ? "Change Photo"
-                  : "Edit to change photo"}
-              </button>
             </div>
 
             {/* Fields */}

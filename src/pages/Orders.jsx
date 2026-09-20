@@ -11,6 +11,8 @@ import {
 
 const STATUS_TABS = [
   { key: "all", label: "All" },
+  { key: "pending", label: "Pending" },
+  { key: "confirmed", label: "Confirmed" },
   { key: "processing", label: "Processing" },
   { key: "shipped", label: "Shipped" },
   { key: "delivered", label: "Delivered" },
@@ -18,22 +20,37 @@ const STATUS_TABS = [
 ];
 
 const STATUS_STYLES = {
-  processing: "bg-warning/10 text-warning",
-  shipped: "bg-primary-50 text-primary-600",
-  delivered: "bg-success/10 text-success",
-  cancelled: "bg-danger/10 text-danger",
+  pending: "bg-amber-50 text-amber-600",
+  confirmed: "bg-blue-50 text-blue-600",
+  processing: "bg-yellow-50 text-yellow-600",
+  shipped: "bg-indigo-50 text-indigo-600",
+  delivered: "bg-emerald-50 text-emerald-600",
+  cancelled: "bg-red-50 text-red-600",
 };
 
 function getOrderItems(order) {
-  return order.items || order.products || [];
+  return order.items || order.products || order.orderItems || [];
 }
 
 function getOrderTotal(order) {
-  return order.total ?? order.totalPrice ?? order.totalAmount ?? 0;
+  return (
+    order.totalPrice ??
+    order.total ??
+    order.totalAmount ??
+    0
+  );
 }
 
 function getOrderStatus(order) {
-  return (order.status || "processing").toLowerCase();
+  return (order.status || "pending").toLowerCase();
+}
+
+function getOrderImage(item) {
+  const product = item.product || item;
+  const img = product.images?.[0];
+  if (!img) return product.image || "/Background+Border.svg";
+  if (typeof img === "string") return img;
+  return img.url || product.image || "/Background+Border.svg";
 }
 
 export default function Orders() {
@@ -48,7 +65,12 @@ export default function Orders() {
     setError(null);
     try {
       const { data } = await getMyOrders();
-      const list = data.orders || data.data || data || [];
+      const list =
+        data.orders ||
+        data.data?.orders ||
+        data.data ||
+        data ||
+        [];
       setOrders(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error(err);
@@ -63,7 +85,8 @@ export default function Orders() {
   }, []);
 
   const handleCancel = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+    if (!window.confirm("Are you sure you want to cancel this order?"))
+      return;
     setCancellingId(orderId);
     try {
       await cancelMyOrder(orderId);
@@ -71,7 +94,9 @@ export default function Orders() {
       await fetchOrders();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to cancel order");
+      toast.error(
+        err.response?.data?.message || "Failed to cancel order"
+      );
     } finally {
       setCancellingId(null);
     }
@@ -86,7 +111,7 @@ export default function Orders() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="animate-spin text-primary-500" size={40} />
+        <Loader2 className="animate-spin text-blue-600" size={40} />
       </div>
     );
   }
@@ -95,14 +120,18 @@ export default function Orders() {
   if (error) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center px-4">
-        <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center">
-          <AlertTriangle className="text-danger" size={28} />
+        <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+          <AlertTriangle className="text-red-500" size={28} />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">Something went wrong</h2>
-        <p className="text-gray-500 max-w-sm">We couldn't load your orders.</p>
+        <h2 className="text-xl font-bold text-gray-900">
+          Something went wrong
+        </h2>
+        <p className="text-gray-500 max-w-sm">
+          We couldn't load your orders.
+        </p>
         <button
           onClick={fetchOrders}
-          className="px-6 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
+          className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
         >
           Try Again
         </button>
@@ -111,23 +140,25 @@ export default function Orders() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+          My Orders
+        </h1>
         <p className="text-gray-500 mt-1">
           {orders.length} {orders.length === 1 ? "order" : "orders"}
         </p>
       </div>
 
       {/* Status Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-1 px-1">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
               activeTab === tab.key
-                ? "bg-primary-500 text-white"
+                ? "bg-blue-600 text-white shadow-sm"
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
           >
@@ -139,8 +170,8 @@ export default function Orders() {
       {/* ===== Empty State ===== */}
       {filteredOrders.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-          <div className="w-20 h-20 rounded-full bg-primary-50 flex items-center justify-center">
-            <Package className="text-primary-500" size={32} />
+          <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
+            <Package className="text-blue-600" size={32} />
           </div>
           <h2 className="text-lg font-bold text-gray-900">
             {activeTab === "all"
@@ -152,7 +183,7 @@ export default function Orders() {
           </p>
           <Link
             to="/shop"
-            className="mt-2 px-6 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition"
+            className="mt-2 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
           >
             Explore Products
           </Link>
@@ -162,12 +193,13 @@ export default function Orders() {
           {filteredOrders.map((order) => {
             const items = getOrderItems(order);
             const status = getOrderStatus(order);
-            const canCancel = status === "processing";
+            const canCancel =
+              status === "pending" || status === "confirmed";
 
             return (
               <div
                 key={order._id}
-                className="bg-white border border-gray-100 rounded-2xl p-5"
+                className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                   <div>
@@ -176,46 +208,51 @@ export default function Orders() {
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString("en-US")
+                        ? new Date(order.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            }
+                          )
                         : ""}{" "}
                       · {items.length}{" "}
                       {items.length === 1 ? "item" : "items"}
                     </p>
                   </div>
                   <span
-                    className={`text-xs font-medium px-3 py-1.5 rounded-full ${
-                      STATUS_STYLES[status] || "bg-gray-100 text-gray-600"
+                    className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${
+                      STATUS_STYLES[status] ||
+                      "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {STATUS_TABS.find((t) => t.key === status)?.label || status}
+                    {status}
                   </span>
                 </div>
 
                 {/* Item thumbnails */}
                 {items.length > 0 && (
                   <div className="flex items-center gap-2 mb-4">
-                    {items.slice(0, 4).map((item, idx) => {
-                      const product = item.product || item;
-                      const img =
-                        product.images?.[0]?.url ||
-                        product.image ||
-                        "https://via.placeholder.com/60?text=No+Image";
-                      return (
-                        <div
-                          key={idx}
-                          className="w-12 h-12 rounded-lg overflow-hidden bg-gray-50 border border-gray-100"
-                        >
-                          <img
-                            src={img}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      );
-                    })}
+                    {items.slice(0, 4).map((item, idx) => (
+                      <div
+                        key={item._id || idx}
+                        className="w-12 h-12 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0"
+                      >
+                        <img
+                          src={getOrderImage(item)}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              "/Background+Border.svg";
+                          }}
+                        />
+                      </div>
+                    ))}
                     {items.length > 4 && (
-                      <span className="text-xs text-gray-400">
-                        +{items.length - 4}
+                      <span className="text-xs text-gray-400 ml-1">
+                        +{items.length - 4} more
                       </span>
                     )}
                   </div>
@@ -230,7 +267,7 @@ export default function Orders() {
                       <button
                         onClick={() => handleCancel(order._id)}
                         disabled={cancellingId === order._id}
-                        className="text-sm text-danger hover:underline disabled:opacity-50"
+                        className="text-sm text-red-600 hover:underline disabled:opacity-50 font-medium"
                       >
                         {cancellingId === order._id
                           ? "Cancelling..."
@@ -239,7 +276,7 @@ export default function Orders() {
                     )}
                     <Link
                       to={`/orders/${order._id}`}
-                      className="flex items-center gap-1 text-sm text-primary-500 font-medium hover:underline"
+                      className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:underline"
                     >
                       View Order
                       <ChevronRight size={14} />
