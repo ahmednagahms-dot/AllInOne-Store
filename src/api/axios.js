@@ -2,13 +2,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://e-commerce-api-3wara.vercel.app",
-<<<<<<< HEAD
-  baseURL :"/api",
- withCredentials : true,
-=======
+  baseURL: "/api",
   withCredentials: true,
->>>>>>> bea2942cca817471a2d0b8fbfd0ca66fb8142fc3
 });
 
 // Request Interceptor -> Add token
