@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { checkoutSchema } from "../schema/checkoutSchema";
+import { useTranslation } from "react-i18next";
+import { getCheckoutSchema } from "../schema/checkoutSchema";
 import { getCart, applyCoupon } from "../api/cart.api";
 import { createOrder } from "../api/orders.api";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 
 export default function Checkout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [cartItems, setCartItems] = useState([]);
@@ -25,7 +27,7 @@ export default function Checkout() {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(checkoutSchema),
+    resolver: yupResolver(getCheckoutSchema(t)),
     defaultValues: {
       deliveryMethod: "standard",
       paymentMethod: "cash",
@@ -52,7 +54,7 @@ export default function Checkout() {
           [];
 
         if (!Array.isArray(items) || items.length === 0) {
-          toast.info("Your cart is empty");
+          toast.info(t("checkout.cartEmpty"));
           navigate("/cart");
           return;
         }
@@ -61,7 +63,7 @@ export default function Checkout() {
       } catch (err) {
         console.error("Failed to load cart:", err);
         toast.error(
-          err.response?.data?.message || "Failed to load cart"
+          err.response?.data?.message || t("checkout.loadCartError")
         );
         navigate("/cart");
       } finally {
@@ -70,7 +72,7 @@ export default function Checkout() {
     };
 
     loadCart();
-  }, [navigate]);
+  }, [navigate, t]);
 
   // =========================
   // Calculations
@@ -99,8 +101,6 @@ export default function Checkout() {
     try {
       setLoading(true);
 
-      // ✅ الـ Backend بياخد الـ items من cart المستخدم
-      // بنبعت بس shippingAddress + paymentMethod
       const orderData = {
         shippingAddress: {
           fullName: data.fullName,
@@ -118,7 +118,7 @@ export default function Checkout() {
       const res = await createOrder(orderData);
       console.log("Order Response:", res?.data);
 
-      toast.success("Order placed successfully!");
+      toast.success(t("checkout.orderSuccess"));
 
       const orderId = res?.data?.order?._id;
       if (orderId) {
@@ -133,7 +133,7 @@ export default function Checkout() {
       const errorMsg =
         error.response?.data?.errors?.join(", ") ||
         error.response?.data?.message ||
-        "Failed to place order";
+        t("checkout.orderError");
 
       toast.error(errorMsg);
     } finally {
@@ -146,7 +146,7 @@ export default function Checkout() {
   // =========================
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
-      toast.error("Please enter a coupon code");
+      toast.error(t("checkout.enterCoupon"));
       return;
     }
 
@@ -163,17 +163,17 @@ export default function Checkout() {
         0;
 
       if (discountValue <= 0) {
-        toast.error("Coupon applied but no discount value");
+        toast.error(t("checkout.couponNoDiscount"));
         return;
       }
 
       setDiscount(discountValue);
       setCouponApplied(true);
-      toast.success("Coupon applied successfully!");
+      toast.success(t("checkout.couponSuccess"));
     } catch (err) {
       console.error("Coupon error:", err);
       toast.error(
-        err.response?.data?.message || "Invalid coupon code"
+        err.response?.data?.message || t("checkout.couponInvalid")
       );
     } finally {
       setCouponLoading(false);
@@ -184,7 +184,7 @@ export default function Checkout() {
     setCouponApplied(false);
     setDiscount(0);
     setCouponCode("");
-    toast.info("Coupon removed");
+    toast.info(t("checkout.couponRemoved"));
   };
 
   // =========================
@@ -204,12 +204,12 @@ export default function Checkout() {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 flex flex-col items-center justify-center gap-4 transition-colors duration-200">
-        <p className="text-gray-500 dark:text-slate-400 text-lg">Your cart is empty</p>
+        <p className="text-gray-500 dark:text-slate-400 text-lg">{t("checkout.cartEmptyMessage")}</p>
         <button
           onClick={() => navigate("/shop")}
           className="px-6 py-2.5 bg-[#5046E5] text-white rounded-xl font-medium hover:bg-[#4338CA] transition cursor-pointer"
         >
-          Continue Shopping
+          {t("checkout.continueShopping")}
         </button>
       </div>
     );
@@ -221,10 +221,10 @@ export default function Checkout() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-slate-100">
-            Checkout
+            {t("checkout.title")}
           </h1>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
-            Complete your order details below
+            {t("checkout.subtitle")}
           </p>
         </div>
 
@@ -253,10 +253,10 @@ export default function Checkout() {
                 </div>
                 <div>
                   <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
-                    Shipping Information
+                    {t("checkout.shippingInfo")}
                   </h2>
                   <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-                    Please enter your shipping details
+                    {t("checkout.shippingInfoDesc")}
                   </p>
                 </div>
               </div>
@@ -264,12 +264,12 @@ export default function Checkout() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
-                    Full Name *
+                    {t("checkout.fullName")}
                   </label>
                   <input
                     type="text"
                     {...register("fullName")}
-                    placeholder="Enter your full name"
+                    placeholder={t("checkout.fullNamePlaceholder")}
                     className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.fullName && (
@@ -280,12 +280,12 @@ export default function Checkout() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
-                    Email Address *
+                    {t("checkout.email")}
                   </label>
                   <input
                     type="email"
                     {...register("email")}
-                    placeholder="Enter your email address"
+                    placeholder={t("checkout.emailPlaceholder")}
                     className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.email && (
@@ -296,12 +296,12 @@ export default function Checkout() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
-                    Phone Number *
+                    {t("checkout.phone")}
                   </label>
                   <input
                     type="text"
                     {...register("phone")}
-                    placeholder="Enter your phone number"
+                    placeholder={t("checkout.phonePlaceholder")}
                     className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.phone && (
@@ -312,32 +312,32 @@ export default function Checkout() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
-                    Country *
+                    {t("checkout.country")}
                   </label>
                   <select
                     {...register("country")}
                     className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100"
                   >
-                    <option value="Egypt" className="dark:bg-slate-900">Egypt</option>
-                    <option value="Saudi Arabia" className="dark:bg-slate-900">Saudi Arabia</option>
+                    <option value="Egypt" className="dark:bg-slate-900">{t("checkout.countries.egypt")}</option>
+                    <option value="Saudi Arabia" className="dark:bg-slate-900">{t("checkout.countries.saudiArabia")}</option>
                     <option value="United Arab Emirates" className="dark:bg-slate-900">
-                      United Arab Emirates
+                      {t("checkout.countries.uae")}
                     </option>
-                    <option value="Jordan" className="dark:bg-slate-900">Jordan</option>
-                    <option value="Kuwait" className="dark:bg-slate-900">Kuwait</option>
-                    <option value="Qatar" className="dark:bg-slate-900">Qatar</option>
-                    <option value="United States" className="dark:bg-slate-900">United States</option>
-                    <option value="United Kingdom" className="dark:bg-slate-900">United Kingdom</option>
+                    <option value="Jordan" className="dark:bg-slate-900">{t("checkout.countries.jordan")}</option>
+                    <option value="Kuwait" className="dark:bg-slate-900">{t("checkout.countries.kuwait")}</option>
+                    <option value="Qatar" className="dark:bg-slate-900">{t("checkout.countries.qatar")}</option>
+                    <option value="United States" className="dark:bg-slate-900">{t("checkout.countries.us")}</option>
+                    <option value="United Kingdom" className="dark:bg-slate-900">{t("checkout.countries.uk")}</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
-                    City *
+                    {t("checkout.city")}
                   </label>
                   <input
                     type="text"
                     {...register("city")}
-                    placeholder="Enter your city"
+                    placeholder={t("checkout.cityPlaceholder")}
                     className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.city && (
@@ -348,12 +348,12 @@ export default function Checkout() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
-                    Postal Code *
+                    {t("checkout.postalCode")}
                   </label>
                   <input
                     type="text"
                     {...register("postalCode")}
-                    placeholder="Enter your postal code"
+                    placeholder={t("checkout.postalCodePlaceholder")}
                     className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.postalCode && (
@@ -364,12 +364,12 @@ export default function Checkout() {
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
-                    Address *
+                    {t("checkout.address")}
                   </label>
                   <input
                     type="text"
                     {...register("address")}
-                    placeholder="Enter your street address"
+                    placeholder={t("checkout.addressPlaceholder")}
                     className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.address && (
@@ -380,12 +380,12 @@ export default function Checkout() {
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
-                    Apartment, Suite, etc. (Optional)
+                    {t("checkout.apartment")}
                   </label>
                   <input
                     type="text"
                     {...register("apartment")}
-                    placeholder="Enter apartment or suite details"
+                    placeholder={t("checkout.apartmentPlaceholder")}
                     className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                 </div>
@@ -412,10 +412,10 @@ export default function Checkout() {
                 </div>
                 <div>
                   <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
-                    Delivery
+                    {t("checkout.delivery")}
                   </h2>
                   <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-                    Choose your preferred delivery option
+                    {t("checkout.deliveryDesc")}
                   </p>
                 </div>
               </div>
@@ -437,13 +437,13 @@ export default function Checkout() {
                     />
                     <div>
                       <p className="font-medium text-xs text-gray-900 dark:text-slate-100">
-                        Standard Delivery{" "}
-                        <span className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10px] px-2 py-0.5 rounded-full ml-2 font-medium">
-                          Free
+                        {t("checkout.standardDelivery")}{" "}
+                        <span className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10px] px-2 py-0.5 rounded-full mx-2 font-medium">
+                          {t("checkout.free")}
                         </span>
                       </p>
                       <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
-                        3 - 5 business days
+                        {t("checkout.standardDuration")}
                       </p>
                     </div>
                   </div>
@@ -465,13 +465,13 @@ export default function Checkout() {
                     />
                     <div>
                       <p className="font-medium text-xs text-gray-900 dark:text-slate-100">
-                        Express Delivery{" "}
-                        <span className="text-gray-800 dark:text-slate-200 font-medium ml-1">
+                        {t("checkout.expressDelivery")}{" "}
+                        <span className="text-gray-800 dark:text-slate-200 font-medium mx-1">
                           $6.99
                         </span>
                       </p>
                       <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
-                        1 - 2 business days
+                        {t("checkout.expressDuration")}
                       </p>
                     </div>
                   </div>
@@ -500,10 +500,10 @@ export default function Checkout() {
                   </div>
                   <div>
                     <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
-                      Payment
+                      {t("checkout.payment")}
                     </h2>
                     <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-                      Select your payment method
+                      {t("checkout.paymentDesc")}
                     </p>
                   </div>
                 </div>
@@ -524,10 +524,10 @@ export default function Checkout() {
                     className="hidden"
                   />
                   <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
-                    Credit Card
+                    {t("checkout.creditCard")}
                   </p>
                   <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
-                    Visa, Mastercard
+                    {t("checkout.creditCardDesc")}
                   </p>
                 </label>
                 <label
@@ -544,10 +544,10 @@ export default function Checkout() {
                     className="hidden"
                   />
                   <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
-                    Digital Wallet
+                    {t("checkout.digitalWallet")}
                   </p>
                   <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
-                    Apple / Google Pay
+                    {t("checkout.digitalWalletDesc")}
                   </p>
                 </label>
                 <label
@@ -564,10 +564,10 @@ export default function Checkout() {
                     className="hidden"
                   />
                   <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
-                    Cash on Delivery
+                    {t("checkout.cashOnDelivery")}
                   </p>
                   <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
-                    Pay upon delivery
+                    {t("checkout.cashOnDeliveryDesc")}
                   </p>
                 </label>
               </div>
@@ -575,16 +575,16 @@ export default function Checkout() {
               {selectedPaymentMethod === "card" && (
                 <div className="space-y-4 pt-2">
                   <h3 className="text-xs font-medium text-gray-700 dark:text-slate-300 uppercase tracking-wider">
-                    Card Information
+                    {t("checkout.cardInfo")}
                   </h3>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
-                      Cardholder Name *
+                      {t("checkout.cardHolder")}
                     </label>
                     <input
                       type="text"
                       {...register("cardHolder")}
-                      placeholder="Enter cardholder name"
+                      placeholder={t("checkout.cardHolderPlaceholder")}
                       className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
                     {errors.cardHolder && (
@@ -595,12 +595,12 @@ export default function Checkout() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
-                      Card Number *
+                      {t("checkout.cardNumber")}
                     </label>
                     <input
                       type="text"
                       {...register("cardNumber")}
-                      placeholder="Enter card number"
+                      placeholder={t("checkout.cardNumberPlaceholder")}
                       className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
                     {errors.cardNumber && (
@@ -612,12 +612,12 @@ export default function Checkout() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
-                        Expiry Date *
+                        {t("checkout.expiryDate")}
                       </label>
                       <input
                         type="text"
                         {...register("expiryDate")}
-                        placeholder="MM/YY"
+                        placeholder={t("checkout.expiryDatePlaceholder")}
                         className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                       {errors.expiryDate && (
@@ -628,12 +628,12 @@ export default function Checkout() {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
-                        CVV *
+                        {t("checkout.cvv")}
                       </label>
                       <input
                         type="password"
                         {...register("cvv")}
-                        placeholder="CVV"
+                        placeholder={t("checkout.cvvPlaceholder")}
                         className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                       {errors.cvv && (
@@ -649,20 +649,20 @@ export default function Checkout() {
               {selectedPaymentMethod === "wallet" && (
                 <div className="space-y-4 pt-2">
                   <h3 className="text-xs font-medium text-gray-700 dark:text-slate-300 uppercase tracking-wider">
-                    Digital Wallet Information
+                    {t("checkout.walletInfo")}
                   </h3>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
-                      Wallet Phone Number / Account ID *
+                      {t("checkout.walletNumber")}
                     </label>
                     <input
                       type="text"
                       {...register("walletNumber")}
-                      placeholder="Enter wallet phone number"
+                      placeholder={t("checkout.walletNumberPlaceholder")}
                       className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
                     <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-1">
-                      Enter the mobile number registered with your wallet
+                      {t("checkout.walletHint")}
                     </p>
                   </div>
                 </div>
@@ -672,12 +672,12 @@ export default function Checkout() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 dark:bg-indigo-600 text-white py-4 rounded-2xl font-medium text-sm hover:bg-blue-700 dark:hover:bg-indigo-500 transition shadow-lg shadow-blue-600/20 dark:shadow-indigo-600/30 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 dark:bg-indigo-600 text-white py-4 rounded-2xl font-medium text-sm hover:bg-blue-700 dark:hover:bg-indigo-500 transition shadow-lg shadow-blue-600/20 dark:shadow-indigo-600/30 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               {loading
-                ? "Processing..."
-                : `Pay Now – $${total.toFixed(2)}`}
+                ? t("checkout.processing")
+                : t("checkout.payNow", { amount: total.toFixed(2) })}
             </button>
           </div>
 
@@ -685,19 +685,19 @@ export default function Checkout() {
           <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800 h-fit space-y-6">
             <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-800 pb-4">
               <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
-                Order Summary
+                {t("checkout.orderSummary")}
               </h2>
               <button
                 type="button"
                 onClick={() => navigate("/cart")}
                 className="text-xs text-blue-600 dark:text-indigo-400 cursor-pointer font-medium hover:underline"
               >
-                Edit Cart
+                {t("checkout.editCart")}
               </button>
             </div>
 
             <p className="text-xs text-gray-400 dark:text-slate-500">
-              {cartItems.length} items in your cart
+              {t("checkout.itemsInCart", { count: cartItems.length })}
             </p>
 
             <div className="space-y-4 divide-y divide-gray-100 dark:divide-slate-800">
@@ -733,7 +733,7 @@ export default function Checkout() {
                         </p>
                       )}
                       <p className="text-[11px] text-gray-400 dark:text-slate-500">
-                        Qty: {item.quantity || 1}
+                        {t("checkout.qty")} {item.quantity || 1}
                       </p>
                     </div>
                     <span className="font-medium text-xs text-gray-900 dark:text-slate-200">
@@ -746,25 +746,25 @@ export default function Checkout() {
 
             <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-2.5 text-xs">
               <div className="flex justify-between text-gray-500 dark:text-slate-400">
-                <span>Subtotal</span>
+                <span>{t("checkout.subtotal")}</span>
                 <span className="font-medium text-gray-800 dark:text-slate-200">
                   ${subtotal.toFixed(2)}
                 </span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
-                  <span>Discount</span>
+                  <span>{t("checkout.discount")}</span>
                   <span>-${discount.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between text-gray-500 dark:text-slate-400">
-                <span>Shipping</span>
+                <span>{t("checkout.shipping")}</span>
                 <span className="font-medium text-gray-800 dark:text-slate-200">
-                  {shippingCost === 0 ? "Free" : `$${shippingCost}`}
+                  {shippingCost === 0 ? t("checkout.free") : `$${shippingCost}`}
                 </span>
               </div>
               <div className="flex justify-between text-gray-500 dark:text-slate-400">
-                <span>Estimated Tax (14%)</span>
+                <span>{t("checkout.tax")}</span>
                 <span className="font-medium text-gray-800 dark:text-slate-200">
                   ${tax.toFixed(2)}
                 </span>
@@ -773,7 +773,7 @@ export default function Checkout() {
 
             <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-between items-center">
               <span className="font-semibold text-sm text-gray-900 dark:text-slate-100">
-                Total
+                {t("checkout.total")}
               </span>
               <span className="font-semibold text-base text-gray-900 dark:text-slate-100">
                 ${total.toFixed(2)}
@@ -796,14 +796,14 @@ export default function Checkout() {
                     d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                   />
                 </svg>
-                Have a coupon code?
+                {t("checkout.haveCoupon")}
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
-                  placeholder="Enter coupon code"
+                  placeholder={t("checkout.couponPlaceholder")}
                   disabled={couponApplied}
                   className="flex-1 p-3 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-indigo-500 bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 disabled:bg-slate-100 dark:disabled:bg-slate-800/50 disabled:cursor-not-allowed"
                 />
@@ -811,21 +811,21 @@ export default function Checkout() {
                   <button
                     type="button"
                     onClick={handleRemoveCoupon}
-                    className="bg-red-100 dark:bg-rose-950/60 text-red-600 dark:text-rose-400 px-4 py-3 rounded-2xl text-xs font-medium hover:bg-red-200 dark:hover:bg-rose-900/60 transition"
+                    className="bg-red-100 dark:bg-rose-950/60 text-red-600 dark:text-rose-400 px-4 py-3 rounded-2xl text-xs font-medium hover:bg-red-200 dark:hover:bg-rose-900/60 transition cursor-pointer"
                   >
-                    Remove
+                    {t("checkout.remove")}
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleApplyCoupon}
                     disabled={couponLoading}
-                    className="bg-blue-600 dark:bg-indigo-600 text-white px-4 py-3 rounded-2xl text-xs font-medium hover:bg-blue-700 dark:hover:bg-indigo-500 transition disabled:opacity-60 flex items-center gap-1"
+                    className="bg-blue-600 dark:bg-indigo-600 text-white px-4 py-3 rounded-2xl text-xs font-medium hover:bg-blue-700 dark:hover:bg-indigo-500 transition disabled:opacity-60 flex items-center gap-1 cursor-pointer"
                   >
                     {couponLoading && (
                       <Loader2 size={12} className="animate-spin" />
                     )}
-                    Apply
+                    {t("checkout.apply")}
                   </button>
                 )}
               </div>
@@ -849,10 +849,10 @@ export default function Checkout() {
                   </div>
                   <div>
                     <h5 className="font-medium text-xs text-emerald-900 dark:text-emerald-300">
-                      Coupon applied successfully!
+                      {t("checkout.couponAppliedSuccess")}
                     </h5>
                     <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
-                      You saved ${discount.toFixed(2)}
+                      {t("checkout.youSaved", { amount: discount.toFixed(2) })}
                     </p>
                   </div>
                 </div>
