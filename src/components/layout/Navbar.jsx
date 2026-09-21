@@ -69,7 +69,8 @@ export default function Navbar() {
     `font-medium transition ${
       isActive ? "text-primary-500" : "text-gray-600 hover:text-primary-500"
     }`;
-
+   const STORE_LOGO_URL =
+  "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
       {/* Top Bar */}
@@ -88,16 +89,16 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-18 gap-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img
-              src={STORE_LOGO_URL}
-              alt="ShopEase"
-              className="h-9 w-auto object-contain"
-            />
-            <span className="text-xl font-bold text-gray-900 hidden sm:block">
-              ShopEase
-            </span>
-          </Link>
+          <Link to="/" className="inline-flex items-center gap-2.5">
+                        <img
+                          src={STORE_LOGO_URL}
+                          alt="AllInOne"
+                          className="h-9 w-auto object-contain"
+                        />
+                        <span className="text-lg font-bold tracking-tight text-black">
+                          AllIn<span className="text-primary-500">One</span>
+                        </span>
+                      </Link>
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-7">
@@ -110,9 +111,7 @@ export default function Navbar() {
             <NavLink to="/orders" className={navLinkClass}>
               {t("nav.orders")}
             </NavLink>
-            <NavLink to="/wishlist" className={navLinkClass}>
-              {t("nav.wishlist")}
-            </NavLink>
+          
           </nav>
 
           {/* Search - Desktop */}
