@@ -141,7 +141,7 @@ export default function Hero() {
                 </Link>
                 <Link
                   to="/shop"
-                  className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-500 bg-white dark:bg-slate-800 px-6 text-sm font-semibold text-primary-500 dark:text-indigo-400 transition hover:bg-primary-50 dark:hover:bg-slate-700"
+                  className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-500 bg-white dark:bg-slate-900 px-6 text-sm font-semibold text-primary-500 dark:text-indigo-400 transition hover:bg-primary-50 dark:hover:bg-slate-800"
                 >
                   {t("hero.exploreCollections")}
                 </Link>
