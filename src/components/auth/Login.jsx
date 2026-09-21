@@ -76,8 +76,156 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex flex-col items-center justify-center p-4 md:p-8 font-sans relative">
+      {/* Scoped animation styles — orchestrated entrance + independent floating badges */}
+      <style>{`
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(14px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes blinkDot {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        @keyframes shakeError {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-4px); }
+          75% { transform: translateX(4px); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        /* Each small badge floats on its own path/timing so the group never moves in sync */
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0) translateX(0); box-shadow: 0 6px 12px -4px rgba(43, 100, 246, 0.22); }
+          50% { transform: translateY(-7px) translateX(1px); box-shadow: 0 18px 24px -8px rgba(43, 100, 246, 0.38); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0) translateX(0); box-shadow: 0 6px 12px -4px rgba(99, 102, 241, 0.20); }
+          50% { transform: translateY(-5px) translateX(-2px); box-shadow: 0 14px 20px -8px rgba(99, 102, 241, 0.34); }
+        }
+        @keyframes floatC {
+          0%, 100% { transform: translateY(0); box-shadow: 0 5px 10px -4px rgba(43, 100, 246, 0.18); }
+          50% { transform: translateY(-4px); box-shadow: 0 12px 18px -6px rgba(43, 100, 246, 0.30); }
+        }
+        @keyframes floatD {
+          0%, 100% { transform: translateY(0); box-shadow: 0 5px 10px -4px rgba(30, 142, 62, 0.18); }
+          50% { transform: translateY(-6px); box-shadow: 0 15px 20px -7px rgba(30, 142, 62, 0.32); }
+        }
+
+        .anim-in {
+          opacity: 0;
+          animation: fadeSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .anim-delay-1 { animation-delay: 0.05s; }
+        .anim-delay-2 { animation-delay: 0.15s; }
+        .anim-delay-3 { animation-delay: 0.25s; }
+        .anim-delay-4 { animation-delay: 0.35s; }
+        .anim-delay-5 { animation-delay: 0.45s; }
+        .anim-delay-6 { animation-delay: 0.55s; }
+
+        /* Independent, out-of-phase floating: different duration + delay per badge */
+        .float-a { animation: floatA 4.8s cubic-bezier(0.45, 0, 0.55, 1) infinite; animation-delay: 0.1s; }
+        .float-b { animation: floatB 5.6s cubic-bezier(0.45, 0, 0.55, 1) infinite; animation-delay: 0.8s; }
+        .float-c { animation: floatC 4.2s cubic-bezier(0.45, 0, 0.55, 1) infinite; animation-delay: 1.4s; }
+        .float-d { animation: floatD 5.1s cubic-bezier(0.45, 0, 0.55, 1) infinite; animation-delay: 0.4s; }
+
+        .blink-dot {
+          animation: blinkDot 1.4s ease-in-out infinite;
+        }
+        .error-enter {
+          animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+                      shakeError 0.4s ease-in-out 0.35s;
+        }
+        .spin-smooth {
+          animation: spin 0.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+        }
+
+        /* Premium text + badge glow */
+        .moment-highlight {
+          color: #2b64f6;
+          text-shadow: 0 5px 18px rgba(43, 100, 246, 0.22);
+        }
+
+        .dark .moment-highlight {
+          color: #818cf8;
+          text-shadow: 0 5px 18px rgba(129, 140, 248, 0.28);
+        }
+
+        .btn-primary {
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                      box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                      background-color 0.2s ease;
+        }
+        .btn-primary:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px -8px rgba(43, 100, 246, 0.45);
+        }
+        .btn-primary:active:not(:disabled) {
+          transform: translateY(0) scale(0.98);
+        }
+        .btn-primary svg {
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-primary:hover:not(:disabled) svg {
+          transform: translateX(4px);
+        }
+        [dir="rtl"] .btn-primary:hover:not(:disabled) svg {
+          transform: translateX(-4px);
+        }
+
+        .input-field {
+          transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+        }
+
+        .social-btn {
+          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                      border-color 0.2s ease, background-color 0.2s ease,
+                      box-shadow 0.2s ease;
+        }
+        .social-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 16px -8px rgba(15, 23, 42, 0.15);
+        }
+        .social-btn:active {
+          transform: translateY(0) scale(0.97);
+        }
+
+        .badge-hover {
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+        }
+        .badge-hover:hover {
+          transform: translateY(-2px) scale(1.03) !important;
+        }
+
+        .logo-hover {
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .logo-hover:hover {
+          transform: scale(1.05);
+        }
+
+        .hero-img {
+          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hero-img:hover {
+          transform: scale(1.04);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .anim-in, .float-a, .float-b, .float-c, .float-d, .blink-dot, .error-enter, .spin-smooth {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+          .btn-primary, .social-btn, .badge-hover, .logo-hover, .hero-img, .input-field {
+            transition: none !important;
+          }
+        }
+      `}</style>
+
       {/* Top Bar with Language Switcher */}
-      <div className="w-full max-w-[1180px] flex justify-end pb-3 gap-2">
+      <div className="anim-in w-full max-w-[1180px] flex justify-end pb-3 gap-2">
         <ThemeToggle />
         <LanguageSwitcher className="ml-2" />
       </div>
@@ -85,10 +233,13 @@ export default function LoginPage() {
       {/* Container */}
       <div className="w-full max-w-[1180px] bg-[#dbe5ff] dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-[32px] grid grid-cols-1 lg:grid-cols-12 overflow-hidden shadow-2xl relative">
         {/* ================ Left Side ================= */}
-        <div className="lg:col-span-6 p-8 md:p-12 flex flex-col justify-between relative bg-[#dde6fe] dark:bg-slate-900/80 border-b lg:border-b-0 lg:border-r rtl:lg:border-r-0 rtl:lg:border-l dark:border-slate-800">
+        <div className="lg:col-span-6 p-8 md:p-12 flex flex-col justify-between relative bg-[#dde6fe] dark:bg-slate-900/80 border-transparent dark:border-slate-800">
           <div>
             {/* Logo */}
-            <Link to="/" className="inline-flex items-center gap-2.5 mb-8">
+            <Link
+              to="/"
+              className="anim-in anim-delay-1 logo-hover inline-flex items-center gap-2.5 mb-8"
+            >
               <img
                 src={STORE_LOGO_URL}
                 alt="AllInOne"
@@ -99,18 +250,20 @@ export default function LoginPage() {
               </span>
             </Link>
 
-            <h1 className="text-3xl md:text-[2.6rem] font-bold text-[#10245A] dark:text-slate-100 mb-3 leading-[1.15] tracking-tight">
+            <h1 className="anim-in anim-delay-2 text-3xl md:text-[2.6rem] font-bold text-[#10245A] dark:text-slate-100 mb-3 leading-[1.15] tracking-tight">
               {t("auth.brandTitle1")}
               <br />
-              {t("auth.brandTitle2")}
+              <span className="moment-highlight">
+                {t("auth.brandTitle2")}
+              </span>
             </h1>
-            <p className="text-[#6b7280] dark:text-slate-400 text-xs md:text-sm leading-relaxed max-w-sm font-medium">
+            <p className="anim-in anim-delay-3 text-[#6b7280] dark:text-slate-400 text-xs md:text-sm leading-relaxed max-w-sm font-medium">
               {t("auth.brandSubtitle")}
             </p>
           </div>
 
-          <div className="relative flex justify-center items-center my-6 py-2">
-            <div className="absolute left-0 rtl:left-auto rtl:right-0 top-0 z-20 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-white dark:border-slate-700 flex items-center gap-1.5">
+          <div className="anim-in anim-delay-4 relative flex justify-center items-center my-6 py-2">
+            <div className="badge-hover float-a absolute left-0 rtl:left-auto rtl:right-0 top-0 z-20 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-white dark:border-slate-700 flex items-center gap-1.5">
               <span className="text-xs">🎧</span>
               <span className="text-[11px] font-bold tracking-wider text-[#0038DC] dark:text-indigo-400">
                 {t("auth.badgeMusic")}
@@ -120,18 +273,18 @@ export default function LoginPage() {
             <img
               src="/Rounded Pedestal & Headphones.svg"
               alt="Headphones with Pedestal"
-              className="w-[300px] h-auto object-cover block"
+              className="hero-img w-[300px] h-auto object-cover block"
             />
 
-            <div className="absolute right-0 rtl:right-auto rtl:left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-white dark:border-slate-700">
+            <div className="badge-hover float-b absolute right-0 rtl:right-auto rtl:left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-white dark:border-slate-700">
               <span className="text-[11px] font-bold tracking-wider text-[#0038DC] dark:text-indigo-400">
                 {t("auth.badgeWay")}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between w-full pt-2">
-            <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-white dark:border-slate-700">
+          <div className="anim-in anim-delay-5 flex items-center justify-between w-full pt-2">
+            <div className="badge-hover float-c bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-white dark:border-slate-700">
               <svg
                 className="w-3.5 h-3.5 text-[#2b64f6] dark:text-indigo-400"
                 fill="currentColor"
@@ -144,8 +297,8 @@ export default function LoginPage() {
               </span>
             </div>
 
-            <div className="bg-[#e6f4ea] dark:bg-emerald-950/50 px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-emerald-100 dark:border-emerald-800/60">
-              <span className="w-2 h-2 rounded-full bg-[#1e8e3e] dark:bg-emerald-400"></span>
+            <div className="badge-hover float-d bg-[#e6f4ea] dark:bg-emerald-950/50 px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-emerald-100 dark:border-emerald-800/60">
+              <span className="blink-dot inline-flex rounded-full w-2 h-2 bg-[#1e8e3e] dark:bg-emerald-400"></span>
               <span className="text-[11px] font-bold text-[#1e8e3e] dark:text-emerald-400">
                 {t("auth.badgeInStock")}
               </span>
@@ -156,20 +309,20 @@ export default function LoginPage() {
         {/* ================= Right Side ================= */}
         <div className="lg:col-span-6 py-12 px-8 md:px-12 flex flex-col justify-center bg-white dark:bg-slate-900 rounded-t-[32px] lg:rounded-t-none lg:rounded-l-[32px] rtl:lg:rounded-l-none rtl:lg:rounded-r-[32px] shadow-2xl relative z-30">
           <div className="max-w-[460px] w-full mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#10245A] dark:text-slate-100 mb-3 tracking-tight">
+            <h2 className="anim-in anim-delay-2 text-4xl md:text-5xl font-bold text-[#10245A] dark:text-slate-100 mb-3 tracking-tight">
               {t("auth.loginTitle")}
             </h2>
-            <p className="text-base text-[#64748b] dark:text-slate-400 mb-6 font-medium">
+            <p className="anim-in anim-delay-3 text-base text-[#64748b] dark:text-slate-400 mb-6 font-medium">
               {t("auth.loginSubtitle")}
             </p>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400 text-xs rounded-xl border border-red-200 dark:border-rose-900/60 font-medium">
+              <div className="error-enter mb-4 p-3 bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400 text-xs rounded-xl border border-red-200 dark:border-rose-900/60 font-medium">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="anim-in anim-delay-4 space-y-5">
               <div>
                 <label className="block text-sm font-bold text-[#334155] dark:text-slate-300 mb-2">
                   {t("auth.emailLabel")}
@@ -181,7 +334,7 @@ export default function LoginPage() {
                   onChange={handleChange}
                   placeholder={t("auth.emailPlaceholder")}
                   required
-                  className="w-full px-5 py-3.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-base text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
+                  className="input-field w-full px-5 py-3.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-base text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 font-medium"
                 />
               </div>
 
@@ -197,12 +350,12 @@ export default function LoginPage() {
                     onChange={handleChange}
                     placeholder={t("auth.passwordPlaceholder")}
                     required
-                    className="w-full px-5 py-3.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-base text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all pr-12 rtl:pr-5 rtl:pl-12 font-medium"
+                    className="input-field w-full px-5 py-3.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-base text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 pr-12 rtl:pr-5 rtl:pl-12 font-medium"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 text-[#94a3b8] dark:text-slate-400 hover:text-[#475569] dark:hover:text-slate-200 transition-colors p-1 cursor-pointer"
+                    className="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 text-[#94a3b8] dark:text-slate-400 hover:text-[#475569] dark:hover:text-slate-200 transition-colors duration-200 p-1 cursor-pointer"
                     aria-label="Toggle password visibility"
                   >
                     <svg
@@ -250,38 +403,63 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 px-6 bg-[#2b64f6] dark:bg-indigo-600 hover:bg-blue-700 dark:hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 dark:shadow-indigo-600/30 active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2.5 text-base mt-2 disabled:opacity-50 cursor-pointer"
+                className="btn-primary w-full py-4 px-6 bg-[#2b64f6] dark:bg-indigo-600 hover:bg-blue-700 dark:hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 dark:shadow-indigo-600/30 flex items-center justify-center gap-2.5 text-base mt-2 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg cursor-pointer"
               >
-                <span>
-                  {loading ? t("auth.signingIn") : t("auth.loginButton")}
-                </span>
-                <svg
-                  className="w-5 h-5 rtl:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.2"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
+                {loading ? (
+                  <>
+                    <svg
+                      className="spin-smooth w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-90"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    <span>{t("auth.signingIn")}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{t("auth.loginButton")}</span>
+                    <svg
+                      className="w-5 h-5 rtl:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.2"
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                      />
+                    </svg>
+                  </>
+                )}
               </button>
             </form>
 
-            <div className="relative my-6 flex items-center justify-center">
+            <div className="anim-in anim-delay-5 relative my-6 flex items-center justify-center">
               <div className="border-t border-[#e2e8f0] dark:border-slate-800 w-full"></div>
               <span className="bg-white dark:bg-slate-900 px-4 text-xs text-[#94a3b8] dark:text-slate-500 absolute font-semibold uppercase tracking-wider">
                 {t("auth.orContinueWith")}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="anim-in anim-delay-6 grid grid-cols-2 gap-4">
               <button
                 type="button"
-                className="flex items-center justify-center gap-2.5 py-3.5 px-4 border-2 border-[#e2e8f0] dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-sm font-bold text-[#334155] dark:text-slate-200 active:scale-[0.98] cursor-pointer"
+                className="social-btn flex items-center justify-center gap-2.5 py-3.5 px-4 border-2 border-[#e2e8f0] dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 text-sm font-bold text-[#334155] dark:text-slate-200 cursor-pointer"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -306,7 +484,7 @@ export default function LoginPage() {
 
               <button
                 type="button"
-                className="flex items-center justify-center gap-2.5 py-3.5 px-4 border-2 border-[#e2e8f0] dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-sm font-bold text-[#334155] dark:text-slate-200 active:scale-[0.98] cursor-pointer"
+                className="social-btn flex items-center justify-center gap-2.5 py-3.5 px-4 border-2 border-[#e2e8f0] dark:border-slate-700 dark:bg-slate-800/80 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 text-sm font-bold text-[#334155] dark:text-slate-200 cursor-pointer"
               >
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                   <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.67-.82 1.12-1.96.99-3.1-.97.04-2.14.65-2.83 1.45-.62.72-1.16 1.88-1.01 3 1.08.08 2.18-.53 2.85-1.35z" />
@@ -315,7 +493,7 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <p className="text-center text-sm text-[#94a3b8] dark:text-slate-400 mt-8 font-medium">
+            <p className="anim-in anim-delay-6 text-center text-sm text-[#94a3b8] dark:text-slate-400 mt-8 font-medium">
               {t("auth.noAccount")}{" "}
               <Link
                 to="/signup"
