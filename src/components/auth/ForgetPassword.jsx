@@ -7,6 +7,9 @@ import {
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 
+const STORE_LOGO_URL =
+  "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
+
 export default function ForgetPassword() {
   const navigate = useNavigate();
 
@@ -51,7 +54,7 @@ export default function ForgetPassword() {
   };
 
   // =========================
-  // Step 2: OTP + New Password (طلب واحد)
+  // Step 2: OTP + New Password
   // =========================
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -90,7 +93,11 @@ export default function ForgetPassword() {
       console.error(err);
       const msg = (err.response?.data?.message || "").toLowerCase();
 
-      if (msg.includes("otp") || msg.includes("invalid") || msg.includes("expired")) {
+      if (
+        msg.includes("otp") ||
+        msg.includes("invalid") ||
+        msg.includes("expired")
+      ) {
         setError("Invalid or expired OTP. Please check and try again.");
       } else {
         setError(
@@ -129,36 +136,29 @@ export default function ForgetPassword() {
     setConfirmPassword("");
     setStep("email");
   };
-  const STORE_LOGO_URL =
-  "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
 
   return (
     <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex items-center justify-center p-4 md:p-6 font-sans relative overflow-hidden">
+      {/* Decorative blobs */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#2b64f6]/10 dark:bg-indigo-500/10 blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#0038DC]/10 dark:bg-indigo-700/10 blur-[120px] pointer-events-none"></div>
 
       <div className="w-full max-w-[500px] bg-white dark:bg-slate-900 rounded-[32px] p-8 md:p-12 shadow-2xl shadow-blue-900/5 border border-[#e2e8f0]/80 dark:border-slate-800 relative z-10">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2.5 mb-8">
-
+        {/* Logo — AllInOne only */}
+        <div className="flex items-center justify-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5">
-                                    <img
-                                      src={STORE_LOGO_URL}
-                                      alt="AllInOne"
-                                      className="h-9 w-auto object-contain"
-                                    />
-                                    <span className="text-lg font-bold tracking-tight text-black">
-                                      AllIn<span className="text-primary-500">One</span>
-                                    </span>
-                                  </Link>
-
-          <span className="p-2.5 bg-[#eff4ff] dark:bg-slate-800 rounded-2xl shadow-sm text-lg border border-[#dbe5ff] dark:border-slate-700">
-            🛍️
-          </span>
-          <span className="text-[#0038DC] dark:text-indigo-400 font-extrabold text-2xl tracking-tight">
-            ShopEase
-          </span>
-
+            <img
+              src={STORE_LOGO_URL}
+              alt="AllInOne"
+              className="h-10 w-auto object-contain"
+            />
+            <span className="text-xl font-bold tracking-tight text-black dark:text-white">
+              AllIn
+              <span className="text-[#2b64f6] dark:text-indigo-400">
+                One
+              </span>
+            </span>
+          </Link>
         </div>
 
         {/* Title */}
@@ -299,7 +299,9 @@ export default function ForgetPassword() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94a3b8] dark:text-slate-400 hover:text-[#475569] dark:hover:text-slate-200"
                 >
                   {showConfirmPassword ? (

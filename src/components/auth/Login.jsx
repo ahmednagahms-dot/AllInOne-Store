@@ -7,6 +7,9 @@ import Cookies from "js-cookie";
 import LanguageSwitcher from "../ui/LanguageSwitcher";
 import ThemeToggle from "../ui/ThemeToggle";
 
+const STORE_LOGO_URL =
+  "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
+
 export default function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -70,8 +73,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-  const STORE_LOGO_URL =
-  "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
 
   return (
     <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex flex-col items-center justify-center p-4 md:p-8 font-sans relative">
@@ -87,30 +88,18 @@ export default function LoginPage() {
         <div className="lg:col-span-6 p-8 md:p-12 flex flex-col justify-between relative bg-[#dde6fe] dark:bg-slate-900/80 border-b lg:border-b-0 lg:border-r rtl:lg:border-r-0 rtl:lg:border-l dark:border-slate-800">
           <div>
             {/* Logo */}
-
-            <Link to="/" className="inline-flex items-center gap-2.5">
-                          <img
-                            src={STORE_LOGO_URL}
-                            alt="AllInOne"
-                            className="h-9 w-auto object-contain"
-                          />
-                          <span className="text-lg font-bold tracking-tight text-black">
-                            AllIn<span className="text-primary-500">One</span>
-                          </span>
-                        </Link>
-            <h1 className="text-3xl md:text-[2.6rem] font-bold text-[#10245A] mb-3 leading-[1.15] tracking-tight">
-
-            <Link to="/" className="inline-flex items-center gap-2.5 text-[#2b64f6] dark:text-indigo-400 font-bold text-xl mb-8">
-              <span className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm text-base">
-                🛍️
-              </span>
-              <span className="text-[#0038DC] dark:text-indigo-400 font-bold text-xl tracking-tight">
-                ShopEase
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-8">
+              <img
+                src={STORE_LOGO_URL}
+                alt="AllInOne"
+                className="h-9 w-auto object-contain"
+              />
+              <span className="text-lg font-bold tracking-tight text-black dark:text-slate-100">
+                AllIn<span className="text-[#2b64f6] dark:text-indigo-400">One</span>
               </span>
             </Link>
 
             <h1 className="text-3xl md:text-[2.6rem] font-bold text-[#10245A] dark:text-slate-100 mb-3 leading-[1.15] tracking-tight">
-
               {t("auth.brandTitle1")}
               <br />
               {t("auth.brandTitle2")}
@@ -263,7 +252,9 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full py-4 px-6 bg-[#2b64f6] dark:bg-indigo-600 hover:bg-blue-700 dark:hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 dark:shadow-indigo-600/30 active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2.5 text-base mt-2 disabled:opacity-50 cursor-pointer"
               >
-                <span>{loading ? t("auth.signingIn") : t("auth.loginButton")}</span>
+                <span>
+                  {loading ? t("auth.signingIn") : t("auth.loginButton")}
+                </span>
                 <svg
                   className="w-5 h-5 rtl:rotate-180"
                   fill="none"
