@@ -32,13 +32,20 @@ export function WishlistProvider({ children }) {
     setError(null);
     try {
       const { data } = await getMyWishlist();
-      // الـ API ممكن يرجع البيانات بأشكال مختلفة
-      const list = data.items || data.wishlist || data.products || data || [];
+      // API may return data in different shapes
+      const list =
+        data.items ||
+        data.wishlist ||
+        data.products ||
+        data.data?.items ||
+        data.data ||
+        data ||
+        [];
       setItems(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error(err);
-      setError("تعذر تحميل المفضلة");
-      toast.error("تعذر تحميل المفضلة");
+      setError("Failed to load wishlist");
+      toast.error("Failed to load wishlist");
     } finally {
       setLoading(false);
     }
@@ -48,10 +55,12 @@ export function WishlistProvider({ children }) {
     fetchWishlist();
   }, [fetchWishlist]);
 
-  // مجموعة IDs للمنتجات الموجودة في المفضلة، عشان نعرف نعرض قلب ممتلئ ولا لأ بسرعة
+  // Set of product IDs in wishlist (for fast lookup)
   const wishlistIds = useMemo(() => {
     return new Set(
-      items.map((item) => item.product?._id || item.productId || item._id)
+      items.map(
+        (item) => item.product?._id || item.productId || item._id
+      )
     );
   }, [items]);
 
@@ -62,17 +71,19 @@ export function WishlistProvider({ children }) {
 
   const addItem = async (productId) => {
     if (!user) {
-      toast.info("سجّل الدخول الأول عشان تضيف للمفضلة");
+      toast.info("Please log in first to add to wishlist");
       return false;
     }
     try {
       await addToWishlist(productId);
       await fetchWishlist();
-      toast.success("تمت الإضافة للمفضلة");
+      toast.success("Added to wishlist");
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("تعذر إضافة المنتج للمفضلة");
+      toast.error(
+        err.response?.data?.message || "Failed to add to wishlist"
+      );
       return false;
     }
   };
@@ -81,28 +92,34 @@ export function WishlistProvider({ children }) {
     try {
       await removeFromWishlist(productId);
       await fetchWishlist();
-      toast.success("تم الحذف من المفضلة");
+      toast.success("Removed from wishlist");
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("تعذر حذف المنتج من المفضلة");
+      toast.error(
+        err.response?.data?.message || "Failed to remove from wishlist"
+      );
       return false;
     }
   };
 
   const toggleItem = (productId) => {
-    return isInWishlist(productId) ? removeItem(productId) : addItem(productId);
+    return isInWishlist(productId)
+      ? removeItem(productId)
+      : addItem(productId);
   };
 
   const clearAllWishlist = async () => {
     try {
       await clearWishlist();
       setItems([]);
-      toast.success("تم إفراغ المفضلة");
+      toast.success("Wishlist cleared");
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("تعذر إفراغ المفضلة");
+      toast.error(
+        err.response?.data?.message || "Failed to clear wishlist"
+      );
       return false;
     }
   };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 import { getProducts } from "../../api/products.api";
 import ProductCard from "../products/ProductCard";
@@ -15,6 +16,7 @@ function extractProducts(response) {
 }
 
 export default function FeaturedProducts() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,7 +49,7 @@ export default function FeaturedProducts() {
           const list = extractProducts(fallback).slice(0, 4);
           if (isMounted) setProducts(list);
         } catch (e) {
-          if (isMounted) setError("فشل تحميل المنتجات، حاول مرة أخرى");
+          if (isMounted) setError(t("featured.error"));
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -59,22 +61,22 @@ export default function FeaturedProducts() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [t]);
 
   return (
-    <section className="w-full bg-white py-14 md:py-16">
+    <section className="w-full bg-white dark:bg-slate-900 py-14 md:py-16 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
         {/* ===================== Header ===================== */}
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary-500">
-              Featured
+              {t("featured.tag")}
             </p>
-            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-              Featured Products
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+              {t("featured.title")}
             </h2>
-            <p className="mt-2 text-sm text-gray-500">
-              Discover our most popular products
+            <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
+              {t("featured.subtitle")}
             </p>
           </div>
 
@@ -82,8 +84,8 @@ export default function FeaturedProducts() {
             to="/shop"
             className="hidden items-center gap-2 text-sm font-semibold text-primary-500 transition-all hover:gap-3 sm:flex"
           >
-            View All
-            <ArrowRight size={16} />
+            {t("common.viewAll")}
+            <ArrowRight size={16} className="rtl:rotate-180" />
           </Link>
         </div>
 
@@ -93,12 +95,12 @@ export default function FeaturedProducts() {
             <Spinner size={36} />
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-red-100 bg-red-50 py-12 text-center text-sm text-red-600">
+          <div className="rounded-2xl border border-red-100 dark:border-red-950/40 bg-red-50 dark:bg-red-950/20 py-12 text-center text-sm text-red-600 dark:text-red-400">
             {error}
           </div>
         ) : products.length === 0 ? (
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 py-12 text-center text-sm text-gray-500">
-            لا توجد منتجات مميزة حالياً
+          <div className="rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 py-12 text-center text-sm text-gray-500 dark:text-slate-400">
+            {t("featured.empty")}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-4">
@@ -117,8 +119,8 @@ export default function FeaturedProducts() {
             to="/shop"
             className="flex items-center gap-2 text-sm font-semibold text-primary-500"
           >
-            View All
-            <ArrowRight size={16} />
+            {t("common.viewAll")}
+            <ArrowRight size={16} className="rtl:rotate-180" />
           </Link>
         </div>
       </div>

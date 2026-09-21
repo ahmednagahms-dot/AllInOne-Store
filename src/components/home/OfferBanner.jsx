@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { ArrowRight } from "lucide-react";
 
 /* =========================================================
    Constants
@@ -50,6 +51,8 @@ function TimeBox({ value, label }) {
    Main component
 ========================================================= */
 export default function OfferBanner() {
+  const { t } = useTranslation();
+
   // Compute end time only once (persisted in localStorage)
   const endTime = useMemo(() => {
     if (typeof window === "undefined") return Date.now() + OFFER_DURATION_MS;
@@ -88,33 +91,30 @@ export default function OfferBanner() {
   const isFinished = timeLeft.finished;
 
   return (
-    <section className="w-full bg-white py-10 sm:py-14">
+    <section className="w-full bg-white dark:bg-slate-950 py-10 sm:py-14 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-        <div className="relative overflow-hidden rounded-3xl bg-primary-600">
+        <div className="relative overflow-hidden rounded-3xl bg-primary-600 dark:bg-slate-900">
           <div className="grid grid-cols-1 items-center gap-6 p-6 sm:p-10 lg:grid-cols-2 lg:gap-4 lg:p-12">
             {/* Left: Text + Countdown */}
             <div className="relative z-10">
               <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-100 sm:text-xs">
-                Limited Time Offer
+                {t("offer.badge")}
               </span>
 
               <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-[42px]">
-                Up to 50% Off
-                <br />
-                Top Brands
+                {t("offer.title")}
               </h2>
 
               <p className="mt-3 max-w-md text-sm leading-6 text-primary-100 sm:text-[15px]">
-                Don't miss out on our biggest sale of the season. Premium
-                electronics at record low prices.
+                {t("offer.description")}
               </p>
 
               {/* Countdown */}
               <div className="mt-6 flex items-center gap-2 sm:gap-3">
-                <TimeBox value={timeLeft.days} label="Days" />
-                <TimeBox value={timeLeft.hours} label="Hours" />
-                <TimeBox value={timeLeft.minutes} label="Minutes" />
-                <TimeBox value={timeLeft.seconds} label="Seconds" />
+                <TimeBox value={timeLeft.days} label={t("offer.days")} />
+                <TimeBox value={timeLeft.hours} label={t("offer.hours")} />
+                <TimeBox value={timeLeft.minutes} label={t("offer.minutes")} />
+                <TimeBox value={timeLeft.seconds} label={t("offer.seconds")} />
               </div>
 
               {/* CTA */}
@@ -124,15 +124,15 @@ export default function OfferBanner() {
                   disabled
                   className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/60 px-6 py-3 text-sm font-bold text-primary-700 cursor-not-allowed"
                 >
-                  Offer Ended
+                  {t("offer.offerEnded")}
                 </button>
               ) : (
                 <Link
                   to="/shop"
                   className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-primary-600 transition hover:bg-primary-50"
                 >
-                  Shop the Sale
-                  <ArrowRight size={16} />
+                  {t("offer.shopSale")}
+                  <ArrowRight size={16} className="rtl:rotate-180" />
                 </Link>
               )}
             </div>

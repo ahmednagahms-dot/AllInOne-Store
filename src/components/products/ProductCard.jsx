@@ -1,9 +1,21 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, Star, ShoppingCart, Eye } from "lucide-react";
 
 export default function ProductCard({ product, viewMode = "grid" }) {
   const navigate = useNavigate();
+
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Heart, ShoppingCart, Star, ImageOff } from "lucide-react";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
+import { toast } from "react-toastify";
+
+function resolveFirstImage(product) {
+
   if (!product) return null;
 
   const isList = viewMode === "list";
@@ -53,6 +65,7 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     stockTextColor = "text-red-500";
   }
 
+
   const rating = product.averageRating || 0;
   const reviewsCount = product.numReviews || 0;
 
@@ -89,6 +102,111 @@ export default function ProductCard({ product, viewMode = "grid" }) {
         <button 
           onClick={(e) => e.stopPropagation()} // 👈 عشان لو داس على القلب الكارت مايفتحش
           className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition z-10"
+=======
+  return { price: finalPrice, oldPrice: finalOldPrice, discount };
+}
+
+export default function ProductCard({ product }) {
+  const { t } = useTranslation();
+  const [imageError, setImageError] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
+
+  const { addItem: addToCart } = useCart();
+  const {
+    isInWishlist,
+    addItem: addToWishlist,
+    removeItem: removeFromWishlist,
+  } = useWishlist();
+
+  const productId = product._id || product.id;
+  const name = product.name || product.title || "Unnamed Product";
+  const rating = Number(product.rating || product.averageRating) || 0;
+  const reviewsCount =
+    product.reviewsCount ?? product.numReviews ?? product.reviews?.length ?? 0;
+  const stock = product.stock ?? 1;
+
+  const imageUrl = resolveFirstImage(product);
+  const showImage = imageUrl && !imageError;
+  const { price, oldPrice, discount } = getPricing(product);
+
+  const liked = isInWishlist?.(productId) ?? false;
+
+  const handleWishlist = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!productId) return;
+
+    try {
+      if (liked) {
+        await removeFromWishlist(productId);
+        toast.success(t("productCard.removedFromWishlist"));
+      } else {
+        await addToWishlist(productId);
+        toast.success(t("productCard.addedToWishlist"));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err.response?.data?.message || t("productCard.loginRequired")
+      );
+    }
+  };
+
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!productId || stock === 0) return;
+
+    try {
+      setCartLoading(true);
+      await addToCart(productId, 1);
+      toast.success(t("productCard.addedToCart"));
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err.response?.data?.message || t("productCard.loginRequired")
+      );
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition duration-300 hover:-translate-y-1 hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:shadow-xl dark:hover:shadow-indigo-950/20">
+      {/* Image */}
+      <div className="relative flex h-[220px] items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800/50 p-4">
+        <Link
+          to={productId ? `/products/${productId}` : "#"}
+          className="h-full w-full"
+        >
+          {showImage ? (
+            <img
+              src={imageUrl}
+              alt={name}
+              loading="lazy"
+              onError={() => setImageError(true)}
+              className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-300 dark:text-slate-600">
+              <ImageOff size={32} />
+              <span className="text-xs text-slate-400 dark:text-slate-500">{t("productCard.noImage")}</span>
+            </div>
+          )}
+        </Link>
+
+        {/* Wishlist */}
+        <button
+          type="button"
+          onClick={handleWishlist}
+          aria-label="Add to wishlist"
+          className={`absolute right-3 rtl:right-auto rtl:left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition cursor-pointer ${
+            liked
+              ? "bg-red-500 text-white"
+              : "bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-[#5046E5] dark:hover:bg-[#5046E5] hover:text-white"
+          }`}
+
         >
           <Heart size={16} />
         </button>
@@ -98,6 +216,7 @@ export default function ProductCard({ product, viewMode = "grid" }) {
           className="object-cover mix-blend-multiply group-hover:scale-110 transition-transform duration-500 w-full h-full"
         />
       </div>
+
 
       <div
         className={`flex-grow flex flex-col ${isList ? "w-full py-2 justify-center" : ""}`}
@@ -117,8 +236,15 @@ export default function ProductCard({ product, viewMode = "grid" }) {
           <span className="text-xs font-bold text-gray-700">{rating}</span>
           <span className="text-xs text-gray-400">
             ({reviewsCount} reviews)
+
+        {/* Discount */}
+        {discount > 0 && (
+          <span className="absolute left-3 rtl:left-auto rtl:right-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-semibold text-white shadow-sm dir-ltr">
+            -{discount}%
+
           </span>
         </div>
+
 
         <div className="flex items-center gap-2 mb-3">
           <span className="text-lg font-bold text-gray-900">
@@ -132,9 +258,44 @@ export default function ProductCard({ product, viewMode = "grid" }) {
           {discountString && (
             <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">
               {discountString}
+
+        {/* Out of stock */}
+        {stock === 0 && (
+          <span className="absolute bottom-3 left-3 rtl:left-auto rtl:right-3 rounded-full bg-slate-800/90 dark:bg-slate-900/90 px-2.5 py-1 text-[11px] font-semibold text-white border border-slate-700/50">
+            {t("productCard.outOfStock")}
+          </span>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-1 flex-col p-4">
+        {/* Rating */}
+        <div className="mb-2 flex items-center gap-1.5">
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star
+                key={i}
+                size={13}
+                className={
+                  i <= Math.round(rating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700"
+                }
+              />
+            ))}
+          </div>
+          {reviewsCount > 0 ? (
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              ({reviewsCount})
+            </span>
+          ) : (
+            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+              {rating || t("productCard.new")}
+
             </span>
           )}
         </div>
+
 
         <div className={`mb-4 ${isList ? "" : "mt-auto"}`}>
           <div
@@ -143,6 +304,25 @@ export default function ProductCard({ product, viewMode = "grid" }) {
             <span className={`w-2 h-2 rounded-full ${stockDotColor}`}></span>
             {stockStatus}
           </div>
+
+        {/* Name */}
+        <Link to={productId ? `/products/${productId}` : "#"}>
+          <h3 className="line-clamp-2 min-h-[40px] text-sm font-semibold text-[#0F172A] dark:text-slate-100 hover:text-[#5046E5] dark:hover:text-indigo-400 transition text-start">
+            {name}
+          </h3>
+        </Link>
+
+        {/* Price */}
+        <div className="mt-3 flex items-center gap-2">
+          <span className="text-lg font-bold text-[#5046E5] dark:text-indigo-400">
+            {formatPrice(price)}
+          </span>
+          {oldPrice > 0 && oldPrice > price && (
+            <span className="text-sm text-slate-400 dark:text-slate-500 line-through">
+              {formatPrice(oldPrice)}
+            </span>
+          )}
+
         </div>
       </div>
 
@@ -150,6 +330,7 @@ export default function ProductCard({ product, viewMode = "grid" }) {
         className={`flex gap-2 flex-shrink-0 ${isList ? "w-full sm:w-auto sm:min-w-[160px]" : ""}`}
       >
         <button
+
           onClick={(e) => e.stopPropagation()}
           disabled={stock <= 0}
           className={`group flex-grow flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-medium text-sm transition-all duration-300 shadow-sm whitespace-nowrap
@@ -164,6 +345,19 @@ export default function ProductCard({ product, viewMode = "grid" }) {
             className={`${stock > 0 ? "transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" : ""}`}
           />
           <span>{stock <= 0 ? "Out of Stock" : "Add to Cart"}</span>
+
+          type="button"
+          onClick={handleAddToCart}
+          disabled={stock === 0 || cartLoading}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4338CA] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 cursor-pointer shadow-sm"
+        >
+          <ShoppingCart size={17} />
+          {stock === 0
+            ? t("productCard.outOfStock")
+            : cartLoading
+            ? t("productCard.adding")
+            : t("productCard.addToCart")}
+
         </button>
 
         <div

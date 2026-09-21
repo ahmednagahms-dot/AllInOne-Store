@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { useAuth } from "./AuthContext";
 import {
   getCart,
@@ -31,14 +37,14 @@ export function CartProvider({ children }) {
       setCart(res.data);
     } catch (err) {
       console.error(err);
-      setError("تعذر تحميل السلة");
-      toast.error("تعذر تحميل السلة");
+      setError("Failed to load cart");
+      toast.error("Failed to load cart");
     } finally {
       setLoading(false);
     }
   }, [user]);
 
-  // عدد العناصر في السلة (الـ API ممكن يرجع البيانات بأشكال مختلفة)
+  // Cart items count (API may return data in different shapes)
   const cartItems = cart?.items || cart?.products || [];
   const cartItemsCount = cartItems.reduce(
     (sum, item) => sum + (item.quantity || 1),
@@ -51,17 +57,19 @@ export function CartProvider({ children }) {
 
   const addItem = async (productId, quantity = 1) => {
     if (!user) {
-      toast.info("سجّل الدخول الأول عشان تضيف للسلة");
+      toast.info("Please log in first to add items to cart");
       return false;
     }
     try {
       const res = await addCartItem({ productId, quantity });
       setCart(res.data);
-      toast.success("تمت الإضافة للسلة");
+      toast.success("Added to cart");
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("تعذر إضافة المنتج للسلة");
+      toast.error(
+        err.response?.data?.message || "Failed to add item to cart"
+      );
       return false;
     }
   };
@@ -73,7 +81,9 @@ export function CartProvider({ children }) {
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("تعذر تحديث الكمية");
+      toast.error(
+        err.response?.data?.message || "Failed to update quantity"
+      );
       return false;
     }
   };
@@ -82,11 +92,13 @@ export function CartProvider({ children }) {
     try {
       const res = await removeCartItem(productId);
       setCart(res.data);
-      toast.success("تم الحذف من السلة");
+      toast.success("Removed from cart");
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("تعذر حذف المنتج");
+      toast.error(
+        err.response?.data?.message || "Failed to remove item"
+      );
       return false;
     }
   };
@@ -95,11 +107,13 @@ export function CartProvider({ children }) {
     try {
       const res = await applyCoupon({ code });
       setCart(res.data);
-      toast.success("تم تطبيق الكوبون");
+      toast.success("Coupon applied");
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("كوبون غير صالح");
+      toast.error(
+        err.response?.data?.message || "Invalid coupon"
+      );
       return false;
     }
   };
@@ -111,7 +125,9 @@ export function CartProvider({ children }) {
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("تعذر إزالة الكوبون");
+      toast.error(
+        err.response?.data?.message || "Failed to remove coupon"
+      );
       return false;
     }
   };
@@ -119,12 +135,14 @@ export function CartProvider({ children }) {
   const clearAllCart = async () => {
     try {
       await clearCart();
-      setCart(null);
-      toast.success("تم إفراغ السلة");
+      setCart({ items: [] });
+      toast.success("Cart cleared");
       return true;
     } catch (err) {
       console.error(err);
-      toast.error("تعذر إفراغ السلة");
+      toast.error(
+        err.response?.data?.message || "Failed to clear cart"
+      );
       return false;
     }
   };
