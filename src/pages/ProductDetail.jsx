@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import {
   getProductById,
   getProductReviews,
@@ -176,10 +176,12 @@ function ShippingInfo() {
 ========================================================= */
 export default function ProductDetails() {
   const { id } = useParams();
+  const location = useLocation();
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
   const { isAuthenticated } = useAuth();
 
+  const passedProduct = location.state?.product; 
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -194,8 +196,16 @@ export default function ProductDetails() {
   const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
     const fetchData = async () => {
-      setLoading(true);
+      if (location.state?.product) {
+        setProduct(location.state.product);
+        setLoading(false); 
+      } else {
+        setLoading(true);
+      }
+
       try {
         const [productRes, reviewsRes] = await Promise.all([
           getProductById(id),
@@ -208,7 +218,6 @@ export default function ProductDetails() {
         const reviewsData = reviewsRes.data.reviews || reviewsRes.data || [];
         setReviews(Array.isArray(reviewsData) ? reviewsData : []);
 
-        // Related products (same category, excluding current product)
         if (fetchedProduct?.category) {
           try {
             const relatedRes = await getProducts({ limit: 20 });
@@ -238,12 +247,11 @@ export default function ProductDetails() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, location.state]);
 
   const handleAddToCart = async () => {
     const success = await addItem(product._id, quantity);
     if (success) {
-      // optional: navigate to cart
     }
   };
 

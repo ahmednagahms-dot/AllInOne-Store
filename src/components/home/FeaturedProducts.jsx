@@ -30,13 +30,13 @@ export default function FeaturedProducts() {
 
       try {
         // محاولة أولى: منتجات مميزة
-        const res = await getProducts({ limit: 5, featured: true });
-        let list = extractProducts(res).slice(0, 5);
+        const res = await getProducts({ limit: 4, featured: true });
+        let list = extractProducts(res).slice(0, 4);
 
-        // لو مفيش نتائج، نجيب أول 5 منتجات عادية
+        // لو مفيش نتائج، نجيب أول 4 منتجات عادية
         if (list.length === 0) {
-          const fallback = await getProducts({ limit: 5 });
-          list = extractProducts(fallback).slice(0, 5);
+          const fallback = await getProducts({ limit: 4 });
+          list = extractProducts(fallback).slice(0, 4);
         }
 
         if (isMounted) setProducts(list);
@@ -45,8 +45,8 @@ export default function FeaturedProducts() {
 
         // محاولة ثانية عند الفشل
         try {
-          const fallback = await getProducts({ limit: 5 });
-          const list = extractProducts(fallback).slice(0, 5);
+          const fallback = await getProducts({ limit: 4 });
+          const list = extractProducts(fallback).slice(0, 4);
           if (isMounted) setProducts(list);
         } catch (e) {
           if (isMounted) setError(t("featured.error"));
@@ -103,7 +103,7 @@ export default function FeaturedProducts() {
             {t("featured.empty")}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-4">
             {products.map((product) => (
               <ProductCard
                 key={product._id || product.id}

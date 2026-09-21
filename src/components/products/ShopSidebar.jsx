@@ -165,6 +165,23 @@ export default function ShopSidebar({
     ),
   ];
 
+
+  // 1. فلترة المنتجات عشان نعرض Subcategories القسم المتحدد بس!
+  const relevantProducts = selectedCategories.length > 0 
+    ? products.filter(p => {
+        const pCat = typeof p.category === 'object' ? p.category?.name : p.category;
+        return selectedCategories.includes(pCat?.toLowerCase());
+      })
+    : products;
+
+  // 2. استخراج الـ Subcategories من المنتجات المتعلقة بالقسم ده بس
+  const allSubcategories = [...new Set(relevantProducts.map(p => typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory).filter(Boolean))];
+
+  let dynamicSubcategories = allSubcategories.map(subName => ({
+    name: subName,
+    count: relevantProducts.filter(p => {
+      const pSub = typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory;
+
   let dynamicSubcategories = allSubcategories.map((subName) => ({
     name: subName,
     count: products.filter((p) => {
@@ -172,13 +189,19 @@ export default function ShopSidebar({
         typeof p.subcategory === "object"
           ? p.subcategory?.name
           : p.subcategory;
+
       return pSub?.toLowerCase() === subName.toLowerCase();
     }).length,
   }));
 
+
+  const othersCount = relevantProducts.filter(p => {
+    const pSub = typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory;
+
   const othersCount = products.filter((p) => {
     const pSub =
       typeof p.subcategory === "object" ? p.subcategory?.name : p.subcategory;
+
     return !pSub;
   }).length;
 
