@@ -7,11 +7,14 @@ import ShopSidebar from "../components/products/ShopSidebar";
 import ShopFeatures from "../components/products/ShopFeatures";
 import { Search } from "lucide-react";
 import { ChevronRight } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const ShopImage =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1789752545/swhfkjpwjhblaonheeo5.png";
 
 export default function Shop() {
+  const location = useLocation();
+
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,6 +31,23 @@ export default function Shop() {
   const [selectedRating, setSelectedRating] = useState(0);
   const [availability, setAvailability] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(0);
+
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    
+    // لو الرابط فيه category
+    const categoryParam = params.get("category");
+    if (categoryParam) {
+      setSelectedCategories([categoryParam.toLowerCase()]);
+    }
+
+    // لو الرابط فيه subcategory (وده اللي هيشتغل معاك دلوقتي)
+    const subcategoryParam = params.get("subcategory");
+    if (subcategoryParam) {
+      setSelectedSubcategories([subcategoryParam.toLowerCase()]);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const fetchAllProducts = async () => {

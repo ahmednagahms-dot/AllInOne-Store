@@ -16,8 +16,8 @@ export default function BestSellers() {
       
         const { data } = await getProducts({ limit: 10 });
         const list = data.products || data.data || data || [];
-        const sliced = Array.isArray(list) ? list.slice(3, 8) : [];
-        setProducts(sliced.length > 0 ? sliced : list.slice(0, 5));
+        const sliced = Array.isArray(list) ? list.slice(3, 7) : [];
+        setProducts(sliced.length > 0 ? sliced : list.slice(0, 4));
       } catch (err) {
         console.error(err);
         setError("فشل تحميل المنتجات");
@@ -67,7 +67,7 @@ export default function BestSellers() {
             لا توجد منتجات حالياً
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {products.map((product) => (
               <ProductCard key={product._id || product.id} product={product} />
             ))}

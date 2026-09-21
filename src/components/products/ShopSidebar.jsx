@@ -109,17 +109,26 @@ export default function ShopSidebar({
   }
 
 
-  const allSubcategories = [...new Set(products.map(p => typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory).filter(Boolean))];
+  // 1. فلترة المنتجات عشان نعرض Subcategories القسم المتحدد بس!
+  const relevantProducts = selectedCategories.length > 0 
+    ? products.filter(p => {
+        const pCat = typeof p.category === 'object' ? p.category?.name : p.category;
+        return selectedCategories.includes(pCat?.toLowerCase());
+      })
+    : products;
+
+  // 2. استخراج الـ Subcategories من المنتجات المتعلقة بالقسم ده بس
+  const allSubcategories = [...new Set(relevantProducts.map(p => typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory).filter(Boolean))];
 
   let dynamicSubcategories = allSubcategories.map(subName => ({
     name: subName,
-    count: products.filter(p => {
+    count: relevantProducts.filter(p => {
       const pSub = typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory;
       return pSub?.toLowerCase() === subName.toLowerCase();
     }).length
   }));
 
-  const othersCount = products.filter(p => {
+  const othersCount = relevantProducts.filter(p => {
     const pSub = typeof p.subcategory === 'object' ? p.subcategory?.name : p.subcategory;
     return !pSub;
   }).length;

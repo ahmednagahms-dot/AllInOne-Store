@@ -1,40 +1,46 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, Package } from "lucide-react";
-import {
-  Smartphone,
-  Laptop,
-  Headphones,
-  Watch,
-  Camera,
-  Gamepad2,
-  Home as HomeIcon,
-  Sparkles,
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { 
+  ArrowRight, 
+  Package, 
+  Smartphone, 
+  Laptop, 
+  Headphones, 
+  Watch, 
+  Gamepad2, 
+  Tablet 
 } from "lucide-react";
 
-const CATEGORIES = [
-  { name: "Electronics", slug: "electronics", icon: Headphones },
-  { name: "Fashion", slug: "fashion", icon: Package },
-  { name: "Home & Living", slug: "home", icon: HomeIcon },
-  { name: "Beauty & Care", slug: "beauty", icon: Sparkles },
-  { name: "Mobiles", slug: "mobiles", icon: Smartphone },
+const SUBCATEGORIES = [
+  { name: "Audio", slug: "audio", icon: Headphones },
+  { name: "Smartphones", slug: "smartphones", icon: Smartphone },
   { name: "Laptops", slug: "laptops", icon: Laptop },
+  { name: "Tablets", slug: "tablets", icon: Tablet },
   { name: "Watches", slug: "watches", icon: Watch },
-  { name: "Gaming", slug: "gaming", icon: Gamepad2 },
+  { name: "Macbook", slug: "macbook", icon: Laptop },
+  { name: "Accessories", slug: "accessories", icon: Package },
 ];
 
-function CategoryCard({ category }) {
-  const Icon = category.icon || Package;
+function CategoryCard({ item }) {
+  const Icon = item.icon || Package;
+  const navigate = useNavigate();
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    navigate(`/shop?subcategory=${encodeURIComponent(item.slug)}`);
+  };
 
   return (
-    <Link
-      to={`/shop?category=${encodeURIComponent(category.slug)}`}
-      className="group flex min-h-[140px] flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-4 text-center transition duration-300 hover:-translate-y-1 hover:border-primary-500 hover:shadow-lg"
+    <a
+      href={`/shop?subcategory=${encodeURIComponent(item.slug)}`}
+      onClick={handleClick}
+      className="group flex min-h-[140px] flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-4 text-center transition duration-300 hover:-translate-y-1 hover:border-primary-500 hover:shadow-lg cursor-pointer"
     >
       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-500 transition group-hover:bg-primary-500 group-hover:text-white">
         <Icon size={22} strokeWidth={1.8} />
       </div>
-      <h3 className="text-sm font-semibold text-gray-900">{category.name}</h3>
-    </Link>
+      <h3 className="text-sm font-semibold text-gray-900">{item.name}</h3>
+    </a>
   );
 }
 
@@ -61,9 +67,10 @@ export default function Categories() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8">
-          {CATEGORIES.map((category) => (
-            <CategoryCard key={category.slug} category={category} />
+        {/* خليناها lg:grid-cols-7 عشان هما 7 أقسام فرعية فيتوزعوا بشكل متناسق */}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+          {SUBCATEGORIES.map((sub) => (
+            <CategoryCard key={sub.slug} item={sub} />
           ))}
         </div>
 
