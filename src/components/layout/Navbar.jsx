@@ -14,6 +14,7 @@ import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../ui/LanguageSwitcher";
+import ThemeToggle from "../ui/ThemeToggle";
 
 const STORE_LOGO_URL =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
@@ -67,19 +68,22 @@ export default function Navbar() {
 
   const navLinkClass = ({ isActive }) =>
     `font-medium transition ${
-      isActive ? "text-primary-500" : "text-gray-600 hover:text-primary-500"
+      isActive
+        ? "text-primary-500 dark:text-primary-400"
+        : "text-gray-600 dark:text-slate-300 hover:text-primary-500 dark:hover:text-primary-400"
     }`;
    const STORE_LOGO_URL =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+    <header className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200">
       {/* Top Bar */}
       <div className="bg-primary-500 text-white text-sm py-2 hidden sm:block">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <p>{t("nav.freeShippingNotice")}</p>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <span className="cursor-pointer hover:underline">{t("nav.trackOrder")}</span>
             <span className="cursor-pointer hover:underline">{t("nav.help")}</span>
+            
             <LanguageSwitcher className="bg-white/95 text-gray-800" />
           </div>
         </div>
@@ -89,6 +93,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-18 gap-3">
           {/* Logo */}
+
           <Link to="/" className="inline-flex items-center gap-2.5">
                         <img
                           src={STORE_LOGO_URL}
@@ -99,6 +104,18 @@ export default function Navbar() {
                           AllIn<span className="text-primary-500">One</span>
                         </span>
                       </Link>
+
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <img
+              src={STORE_LOGO_URL}
+              alt="ShopEase"
+              className="h-9 w-auto object-contain"
+            />
+            <span className="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">
+              ShopEase
+            </span>
+          </Link>
+
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-7">
@@ -125,12 +142,12 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t("nav.searchPlaceholder")}
-                className="w-full pl-4 pr-11 py-2.5 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full pl-4 pr-11 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
               <button
                 type="submit"
                 aria-label={t("common.search")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-500 rtl:right-auto rtl:left-3"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-400 rtl:right-auto rtl:left-3"
               >
                 <Search size={18} />
               </button>
@@ -139,11 +156,12 @@ export default function Navbar() {
 
           {/* Icons */}
           <div className="flex items-center gap-1 sm:gap-2">
+            <ThemeToggle className="bg-white/95 text-gray-800" />
             {/* Wishlist */}
             <Link
               to="/wishlist"
               aria-label="Wishlist"
-              className="relative p-2 text-gray-600 hover:text-primary-500 transition"
+              className="relative p-2 text-gray-600 dark:text-slate-300 hover:text-primary-500 dark:hover:text-primary-400 transition"
             >
               <Heart size={22} />
               {wishlistCount > 0 && (
@@ -157,7 +175,7 @@ export default function Navbar() {
             <Link
               to="/cart"
               aria-label="Cart"
-              className="relative p-2 text-gray-600 hover:text-primary-500 transition"
+              className="relative p-2 text-gray-600 dark:text-slate-300 hover:text-primary-500 dark:hover:text-primary-400 transition"
             >
               <ShoppingCart size={22} />
               {cartItemsCount > 0 && (
@@ -174,58 +192,58 @@ export default function Navbar() {
                   onClick={() => setIsUserMenuOpen((v) => !v)}
                   aria-haspopup="true"
                   aria-expanded={isUserMenuOpen}
-                  className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-gray-50 transition-colors text-right"
+                  className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-right"
                 >
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                     alt={user?.username || "User"}
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100"
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 dark:ring-slate-700"
                   />
                   <div className="hidden xl:block text-xs">
-                    <span className="text-gray-400 block font-normal">
+                    <span className="text-gray-400 dark:text-slate-400 block font-normal">
                       {t("nav.welcome")}
                     </span>
-                    <span className="font-bold text-gray-800 block">
+                    <span className="font-bold text-gray-800 dark:text-slate-100 block">
                       {t("nav.hi")}{" "}
                       {user?.username?.split(" ")[0] ||
                         user?.name?.split(" ")[0] ||
                         t("nav.user")}
                     </span>
                   </div>
-                  <ChevronDown className="w-4 h-4 text-gray-400 hidden xl:block" />
+                  <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-400 hidden xl:block" />
                 </button>
 
                 {/* Dropdown */}
                 {isUserMenuOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-lg py-2 z-50"
+                    className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-lg py-2 z-50"
                   >
                     <Link
                       to="/profile"
                       onClick={() => setIsUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-start"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 text-start"
                     >
                       {t("nav.profile")}
                     </Link>
                     <Link
                       to="/orders"
                       onClick={() => setIsUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-start"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 text-start"
                     >
                       {t("nav.orders")}
                     </Link>
                     <Link
                       to="/wishlist"
                       onClick={() => setIsUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-start"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 text-start"
                     >
                       {t("nav.wishlist")}
                     </Link>
-                    <hr className="my-1 border-gray-100" />
+                    <hr className="my-1 border-gray-100 dark:border-slate-800" />
                     <button
                       onClick={handleLogout}
-                      className="w-full text-start px-4 py-2.5 text-sm text-danger hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                      className="w-full text-start px-4 py-2.5 text-sm text-danger hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
                     >
                       <LogOut size={16} />
                       {t("nav.logout")}
@@ -237,7 +255,7 @@ export default function Navbar() {
               <div className="hidden sm:flex items-center gap-2">
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-500"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 hover:text-primary-500 dark:hover:text-primary-400"
                 >
                   {t("nav.login")}
                 </Link>
@@ -252,7 +270,7 @@ export default function Navbar() {
 
             {/* Mobile Menu Button */}
             <button
-              className="lg:hidden p-2 text-gray-600"
+              className="lg:hidden p-2 text-gray-600 dark:text-slate-300"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
@@ -265,12 +283,15 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-gray-100 bg-white">
+        <div className="lg:hidden border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="container mx-auto px-4 py-4 space-y-1">
-            {/* Mobile Language Switcher */}
-            <div className="pb-3 flex justify-between items-center border-b border-gray-100">
-              <span className="text-xs text-gray-500">{t("nav.freeShippingNotice")}</span>
-              <LanguageSwitcher />
+            {/* Mobile Controls */}
+            <div className="pb-3 flex justify-between items-center border-b border-gray-100 dark:border-slate-800">
+              <span className="text-xs text-gray-500 dark:text-slate-400">{t("nav.freeShippingNotice")}</span>
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <LanguageSwitcher />
+              </div>
             </div>
 
             {/* Mobile Search */}
@@ -281,12 +302,12 @@ export default function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("nav.searchMobilePlaceholder")}
-                  className="w-full pl-4 pr-10 rtl:pr-4 rtl:pl-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full pl-4 pr-10 rtl:pr-4 rtl:pl-10 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <button
                   type="submit"
                   aria-label={t("common.search")}
-                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400"
                 >
                   <Search size={18} />
                 </button>
@@ -299,7 +320,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 `block py-2.5 font-medium ${
-                  isActive ? "text-primary-500" : "text-gray-700"
+                  isActive ? "text-primary-500 dark:text-primary-400" : "text-gray-700 dark:text-slate-200"
                 }`
               }
             >
@@ -310,7 +331,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 `block py-2.5 font-medium ${
-                  isActive ? "text-primary-500" : "text-gray-700"
+                  isActive ? "text-primary-500 dark:text-primary-400" : "text-gray-700 dark:text-slate-200"
                 }`
               }
             >
@@ -321,7 +342,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 `block py-2.5 font-medium ${
-                  isActive ? "text-primary-500" : "text-gray-700"
+                  isActive ? "text-primary-500 dark:text-primary-400" : "text-gray-700 dark:text-slate-200"
                 }`
               }
             >
@@ -332,7 +353,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 `block py-2.5 font-medium ${
-                  isActive ? "text-primary-500" : "text-gray-700"
+                  isActive ? "text-primary-500 dark:text-primary-400" : "text-gray-700 dark:text-slate-200"
                 }`
               }
             >
@@ -343,11 +364,11 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 `block py-2.5 font-medium ${
-                  isActive ? "text-primary-500" : "text-gray-700"
+                  isActive ? "text-primary-500 dark:text-primary-400" : "text-gray-700 dark:text-slate-200"
                 }`
               }
             >
-              {t("nav.orders")}
+              {t("cart.title") || "Cart"}
             </NavLink>
 
             {!isAuthenticated ? (

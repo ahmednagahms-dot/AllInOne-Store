@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { checkoutSchema } from "../schema/checkoutSchema";
+import { useTranslation } from "react-i18next";
+import { getCheckoutSchema } from "../schema/checkoutSchema";
 import { getCart, applyCoupon } from "../api/cart.api";
 import { createOrder } from "../api/orders.api";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 
 export default function Checkout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [cartItems, setCartItems] = useState([]);
@@ -25,7 +27,7 @@ export default function Checkout() {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(checkoutSchema),
+    resolver: yupResolver(getCheckoutSchema(t)),
     defaultValues: {
       deliveryMethod: "standard",
       paymentMethod: "cash",
@@ -52,7 +54,7 @@ export default function Checkout() {
           [];
 
         if (!Array.isArray(items) || items.length === 0) {
-          toast.info("Your cart is empty");
+          toast.info(t("checkout.cartEmpty"));
           navigate("/cart");
           return;
         }
@@ -61,7 +63,7 @@ export default function Checkout() {
       } catch (err) {
         console.error("Failed to load cart:", err);
         toast.error(
-          err.response?.data?.message || "Failed to load cart"
+          err.response?.data?.message || t("checkout.loadCartError")
         );
         navigate("/cart");
       } finally {
@@ -70,7 +72,7 @@ export default function Checkout() {
     };
 
     loadCart();
-  }, [navigate]);
+  }, [navigate, t]);
 
   // =========================
   // Calculations
@@ -99,8 +101,6 @@ export default function Checkout() {
     try {
       setLoading(true);
 
-      // ✅ الـ Backend بياخد الـ items من cart المستخدم
-      // بنبعت بس shippingAddress + paymentMethod
       const orderData = {
         shippingAddress: {
           fullName: data.fullName,
@@ -118,7 +118,7 @@ export default function Checkout() {
       const res = await createOrder(orderData);
       console.log("Order Response:", res?.data);
 
-      toast.success("Order placed successfully!");
+      toast.success(t("checkout.orderSuccess"));
 
       const orderId = res?.data?.order?._id;
       if (orderId) {
@@ -133,7 +133,7 @@ export default function Checkout() {
       const errorMsg =
         error.response?.data?.errors?.join(", ") ||
         error.response?.data?.message ||
-        "Failed to place order";
+        t("checkout.orderError");
 
       toast.error(errorMsg);
     } finally {
@@ -146,7 +146,7 @@ export default function Checkout() {
   // =========================
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
-      toast.error("Please enter a coupon code");
+      toast.error(t("checkout.enterCoupon"));
       return;
     }
 
@@ -163,17 +163,17 @@ export default function Checkout() {
         0;
 
       if (discountValue <= 0) {
-        toast.error("Coupon applied but no discount value");
+        toast.error(t("checkout.couponNoDiscount"));
         return;
       }
 
       setDiscount(discountValue);
       setCouponApplied(true);
-      toast.success("Coupon applied successfully!");
+      toast.success(t("checkout.couponSuccess"));
     } catch (err) {
       console.error("Coupon error:", err);
       toast.error(
-        err.response?.data?.message || "Invalid coupon code"
+        err.response?.data?.message || t("checkout.couponInvalid")
       );
     } finally {
       setCouponLoading(false);
@@ -184,7 +184,7 @@ export default function Checkout() {
     setCouponApplied(false);
     setDiscount(0);
     setCouponCode("");
-    toast.info("Coupon removed");
+    toast.info(t("checkout.couponRemoved"));
   };
 
   // =========================
@@ -203,28 +203,28 @@ export default function Checkout() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-500 text-lg">Your cart is empty</p>
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 flex flex-col items-center justify-center gap-4 transition-colors duration-200">
+        <p className="text-gray-500 dark:text-slate-400 text-lg">{t("checkout.cartEmptyMessage")}</p>
         <button
           onClick={() => navigate("/shop")}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition"
+          className="px-6 py-2.5 bg-[#5046E5] text-white rounded-xl font-medium hover:bg-[#4338CA] transition cursor-pointer"
         >
-          Continue Shopping
+          {t("checkout.continueShopping")}
         </button>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen py-10 text-gray-700 font-normal">
+    <div className="bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-10 text-gray-700 dark:text-slate-200 font-normal transition-colors duration-200">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            Checkout
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-slate-100">
+            {t("checkout.title")}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Complete your order details below
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+            {t("checkout.subtitle")}
           </p>
         </div>
 
@@ -234,9 +234,9 @@ export default function Checkout() {
         >
           <div className="lg:col-span-2 space-y-6">
             {/* 1. Shipping Information */}
-            <div className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800">
               <div className="flex items-center gap-3.5 mb-6">
-                <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                <div className="bg-indigo-50 dark:bg-indigo-950/50 p-3 rounded-2xl text-[#5046E5] dark:text-indigo-400">
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -252,25 +252,25 @@ export default function Checkout() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="font-semibold text-base text-gray-900 tracking-tight">
-                    Shipping Information
+                  <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
+                    {t("checkout.shippingInfo")}
                   </h2>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Please enter your shipping details
+                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                    {t("checkout.shippingInfoDesc")}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Full Name *
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
+                    {t("checkout.fullName")}
                   </label>
                   <input
                     type="text"
                     {...register("fullName")}
-                    placeholder="Enter your full name"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    placeholder={t("checkout.fullNamePlaceholder")}
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.fullName && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -279,14 +279,14 @@ export default function Checkout() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Email Address *
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
+                    {t("checkout.email")}
                   </label>
                   <input
                     type="email"
                     {...register("email")}
-                    placeholder="Enter your email address"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    placeholder={t("checkout.emailPlaceholder")}
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.email && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -295,14 +295,14 @@ export default function Checkout() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Phone Number *
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
+                    {t("checkout.phone")}
                   </label>
                   <input
                     type="text"
                     {...register("phone")}
-                    placeholder="Enter your phone number"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    placeholder={t("checkout.phonePlaceholder")}
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.phone && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -311,34 +311,34 @@ export default function Checkout() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Country *
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
+                    {t("checkout.country")}
                   </label>
                   <select
                     {...register("country")}
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100"
                   >
-                    <option value="Egypt">Egypt</option>
-                    <option value="Saudi Arabia">Saudi Arabia</option>
-                    <option value="United Arab Emirates">
-                      United Arab Emirates
+                    <option value="Egypt" className="dark:bg-slate-900">{t("checkout.countries.egypt")}</option>
+                    <option value="Saudi Arabia" className="dark:bg-slate-900">{t("checkout.countries.saudiArabia")}</option>
+                    <option value="United Arab Emirates" className="dark:bg-slate-900">
+                      {t("checkout.countries.uae")}
                     </option>
-                    <option value="Jordan">Jordan</option>
-                    <option value="Kuwait">Kuwait</option>
-                    <option value="Qatar">Qatar</option>
-                    <option value="United States">United States</option>
-                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Jordan" className="dark:bg-slate-900">{t("checkout.countries.jordan")}</option>
+                    <option value="Kuwait" className="dark:bg-slate-900">{t("checkout.countries.kuwait")}</option>
+                    <option value="Qatar" className="dark:bg-slate-900">{t("checkout.countries.qatar")}</option>
+                    <option value="United States" className="dark:bg-slate-900">{t("checkout.countries.us")}</option>
+                    <option value="United Kingdom" className="dark:bg-slate-900">{t("checkout.countries.uk")}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    City *
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
+                    {t("checkout.city")}
                   </label>
                   <input
                     type="text"
                     {...register("city")}
-                    placeholder="Enter your city"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    placeholder={t("checkout.cityPlaceholder")}
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.city && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -347,14 +347,14 @@ export default function Checkout() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Postal Code *
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
+                    {t("checkout.postalCode")}
                   </label>
                   <input
                     type="text"
                     {...register("postalCode")}
-                    placeholder="Enter your postal code"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    placeholder={t("checkout.postalCodePlaceholder")}
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.postalCode && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -363,14 +363,14 @@ export default function Checkout() {
                   )}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Address *
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
+                    {t("checkout.address")}
                   </label>
                   <input
                     type="text"
                     {...register("address")}
-                    placeholder="Enter your street address"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    placeholder={t("checkout.addressPlaceholder")}
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.address && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -379,23 +379,23 @@ export default function Checkout() {
                   )}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Apartment, Suite, etc. (Optional)
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
+                    {t("checkout.apartment")}
                   </label>
                   <input
                     type="text"
                     {...register("apartment")}
-                    placeholder="Enter apartment or suite details"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    placeholder={t("checkout.apartmentPlaceholder")}
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                 </div>
               </div>
             </div>
 
             {/* 2. Delivery Options */}
-            <div className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800 space-y-4">
               <div className="flex items-center gap-3.5">
-                <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                <div className="bg-indigo-50 dark:bg-indigo-950/50 p-3 rounded-2xl text-[#5046E5] dark:text-indigo-400">
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -411,11 +411,11 @@ export default function Checkout() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="font-semibold text-base text-gray-900 tracking-tight">
-                    Delivery
+                  <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
+                    {t("checkout.delivery")}
                   </h2>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Choose your preferred delivery option
+                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                    {t("checkout.deliveryDesc")}
                   </p>
                 </div>
               </div>
@@ -424,8 +424,8 @@ export default function Checkout() {
                 <label
                   className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-all ${
                     selectedDelivery === "standard"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/20 shadow-sm"
+                      : "border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
@@ -433,17 +433,17 @@ export default function Checkout() {
                       type="radio"
                       value="standard"
                       {...register("deliveryMethod")}
-                      className="w-4 h-4 text-blue-600 accent-blue-600"
+                      className="w-4 h-4 text-indigo-600 accent-indigo-600"
                     />
                     <div>
-                      <p className="font-medium text-xs text-gray-900">
-                        Standard Delivery{" "}
-                        <span className="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full ml-2 font-medium">
-                          Free
+                      <p className="font-medium text-xs text-gray-900 dark:text-slate-100">
+                        {t("checkout.standardDelivery")}{" "}
+                        <span className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10px] px-2 py-0.5 rounded-full mx-2 font-medium">
+                          {t("checkout.free")}
                         </span>
                       </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">
-                        3 - 5 business days
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
+                        {t("checkout.standardDuration")}
                       </p>
                     </div>
                   </div>
@@ -452,8 +452,8 @@ export default function Checkout() {
                 <label
                   className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-all ${
                     selectedDelivery === "express"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/20 shadow-sm"
+                      : "border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
@@ -461,17 +461,17 @@ export default function Checkout() {
                       type="radio"
                       value="express"
                       {...register("deliveryMethod")}
-                      className="w-4 h-4 text-blue-600 accent-blue-600"
+                      className="w-4 h-4 text-indigo-600 accent-indigo-600"
                     />
                     <div>
-                      <p className="font-medium text-xs text-gray-900">
-                        Express Delivery{" "}
-                        <span className="text-gray-800 font-medium ml-1">
+                      <p className="font-medium text-xs text-gray-900 dark:text-slate-100">
+                        {t("checkout.expressDelivery")}{" "}
+                        <span className="text-gray-800 dark:text-slate-200 font-medium mx-1">
                           $6.99
                         </span>
                       </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">
-                        1 - 2 business days
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
+                        {t("checkout.expressDuration")}
                       </p>
                     </div>
                   </div>
@@ -480,10 +480,10 @@ export default function Checkout() {
             </div>
 
             {/* 3. Payment Method */}
-            <div className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800 space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                  <div className="bg-blue-50 dark:bg-indigo-950/60 p-3 rounded-2xl text-blue-600 dark:text-indigo-400">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -499,11 +499,11 @@ export default function Checkout() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="font-semibold text-base text-gray-900 tracking-tight">
-                      Payment
+                    <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
+                      {t("checkout.payment")}
                     </h2>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      Select your payment method
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                      {t("checkout.paymentDesc")}
                     </p>
                   </div>
                 </div>
@@ -513,8 +513,8 @@ export default function Checkout() {
                 <label
                   className={`p-4 border rounded-2xl text-center cursor-pointer transition-all ${
                     selectedPaymentMethod === "card"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50/10 shadow-sm dark:border-indigo-500 dark:bg-indigo-950/30"
+                      : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 bg-transparent"
                   }`}
                 >
                   <input
@@ -523,18 +523,18 @@ export default function Checkout() {
                     {...register("paymentMethod")}
                     className="hidden"
                   />
-                  <p className="font-medium text-xs text-gray-900">
-                    Credit Card
+                  <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
+                    {t("checkout.creditCard")}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
-                    Visa, Mastercard
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
+                    {t("checkout.creditCardDesc")}
                   </p>
                 </label>
                 <label
                   className={`p-4 border rounded-2xl text-center cursor-pointer transition-all ${
                     selectedPaymentMethod === "wallet"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50/10 shadow-sm dark:border-indigo-500 dark:bg-indigo-950/30"
+                      : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 bg-transparent"
                   }`}
                 >
                   <input
@@ -543,18 +543,18 @@ export default function Checkout() {
                     {...register("paymentMethod")}
                     className="hidden"
                   />
-                  <p className="font-medium text-xs text-gray-900">
-                    Digital Wallet
+                  <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
+                    {t("checkout.digitalWallet")}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
-                    Apple / Google Pay
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
+                    {t("checkout.digitalWalletDesc")}
                   </p>
                 </label>
                 <label
                   className={`p-4 border rounded-2xl text-center cursor-pointer transition-all ${
                     selectedPaymentMethod === "cash"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50/10 shadow-sm dark:border-indigo-500 dark:bg-indigo-950/30"
+                      : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 bg-transparent"
                   }`}
                 >
                   <input
@@ -563,29 +563,29 @@ export default function Checkout() {
                     {...register("paymentMethod")}
                     className="hidden"
                   />
-                  <p className="font-medium text-xs text-gray-900">
-                    Cash on Delivery
+                  <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
+                    {t("checkout.cashOnDelivery")}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
-                    Pay upon delivery
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
+                    {t("checkout.cashOnDeliveryDesc")}
                   </p>
                 </label>
               </div>
 
               {selectedPaymentMethod === "card" && (
                 <div className="space-y-4 pt-2">
-                  <h3 className="text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Card Information
+                  <h3 className="text-xs font-medium text-gray-700 dark:text-slate-300 uppercase tracking-wider">
+                    {t("checkout.cardInfo")}
                   </h3>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                      Cardholder Name *
+                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                      {t("checkout.cardHolder")}
                     </label>
                     <input
                       type="text"
                       {...register("cardHolder")}
-                      placeholder="Enter cardholder name"
-                      className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                      placeholder={t("checkout.cardHolderPlaceholder")}
+                      className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
                     {errors.cardHolder && (
                       <p className="text-red-500 text-[11px] mt-1">
@@ -594,14 +594,14 @@ export default function Checkout() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                      Card Number *
+                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                      {t("checkout.cardNumber")}
                     </label>
                     <input
                       type="text"
                       {...register("cardNumber")}
-                      placeholder="Enter card number"
-                      className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                      placeholder={t("checkout.cardNumberPlaceholder")}
+                      className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
                     {errors.cardNumber && (
                       <p className="text-red-500 text-[11px] mt-1">
@@ -611,14 +611,14 @@ export default function Checkout() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                        Expiry Date *
+                      <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                        {t("checkout.expiryDate")}
                       </label>
                       <input
                         type="text"
                         {...register("expiryDate")}
-                        placeholder="MM/YY"
-                        className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                        placeholder={t("checkout.expiryDatePlaceholder")}
+                        className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                       {errors.expiryDate && (
                         <p className="text-red-500 text-[11px] mt-1">
@@ -627,14 +627,14 @@ export default function Checkout() {
                       )}
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                        CVV *
+                      <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                        {t("checkout.cvv")}
                       </label>
                       <input
                         type="password"
                         {...register("cvv")}
-                        placeholder="CVV"
-                        className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                        placeholder={t("checkout.cvvPlaceholder")}
+                        className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                       {errors.cvv && (
                         <p className="text-red-500 text-[11px] mt-1">
@@ -648,21 +648,21 @@ export default function Checkout() {
 
               {selectedPaymentMethod === "wallet" && (
                 <div className="space-y-4 pt-2">
-                  <h3 className="text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Digital Wallet Information
+                  <h3 className="text-xs font-medium text-gray-700 dark:text-slate-300 uppercase tracking-wider">
+                    {t("checkout.walletInfo")}
                   </h3>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                      Wallet Phone Number / Account ID *
+                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                      {t("checkout.walletNumber")}
                     </label>
                     <input
                       type="text"
                       {...register("walletNumber")}
-                      placeholder="Enter wallet phone number"
-                      className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                      placeholder={t("checkout.walletNumberPlaceholder")}
+                      className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
-                    <p className="text-[11px] text-gray-400 mt-1">
-                      Enter the mobile number registered with your wallet
+                    <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-1">
+                      {t("checkout.walletHint")}
                     </p>
                   </div>
                 </div>
@@ -672,35 +672,35 @@ export default function Checkout() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-4 rounded-2xl font-medium text-sm hover:bg-blue-700 transition shadow-lg shadow-blue-600/20 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 dark:bg-indigo-600 text-white py-4 rounded-2xl font-medium text-sm hover:bg-blue-700 dark:hover:bg-indigo-500 transition shadow-lg shadow-blue-600/20 dark:shadow-indigo-600/30 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               {loading
-                ? "Processing..."
-                : `Pay Now – $${total.toFixed(2)}`}
+                ? t("checkout.processing")
+                : t("checkout.payNow", { amount: total.toFixed(2) })}
             </button>
           </div>
 
           {/* Order Summary */}
-          <div className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 h-fit space-y-6">
-            <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-              <h2 className="font-semibold text-base text-gray-900 tracking-tight">
-                Order Summary
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800 h-fit space-y-6">
+            <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-800 pb-4">
+              <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
+                {t("checkout.orderSummary")}
               </h2>
               <button
                 type="button"
                 onClick={() => navigate("/cart")}
-                className="text-xs text-blue-600 cursor-pointer font-medium hover:underline"
+                className="text-xs text-blue-600 dark:text-indigo-400 cursor-pointer font-medium hover:underline"
               >
-                Edit Cart
+                {t("checkout.editCart")}
               </button>
             </div>
 
-            <p className="text-xs text-gray-400">
-              {cartItems.length} items in your cart
+            <p className="text-xs text-gray-400 dark:text-slate-500">
+              {t("checkout.itemsInCart", { count: cartItems.length })}
             </p>
 
-            <div className="space-y-4 divide-y divide-gray-100">
+            <div className="space-y-4 divide-y divide-gray-100 dark:divide-slate-800">
               {cartItems.map((item, index) => {
                 const product = item.product || {};
                 const image =
@@ -716,7 +716,7 @@ export default function Checkout() {
                     key={item._id || index}
                     className="pt-4 first:pt-0 flex items-center gap-3.5 group"
                   >
-                    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/40 p-1 shrink-0">
+                    <div className="overflow-hidden rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50/40 dark:bg-slate-800/40 p-1 shrink-0">
                       <img
                         src={image}
                         alt={name}
@@ -724,19 +724,19 @@ export default function Checkout() {
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-xs text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                      <h4 className="font-medium text-xs text-gray-900 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
                         {name}
                       </h4>
                       {item.variant && (
-                        <p className="text-[11px] text-gray-400 mt-0.5">
+                        <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
                           {item.variant}
                         </p>
                       )}
-                      <p className="text-[11px] text-gray-400">
-                        Qty: {item.quantity || 1}
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500">
+                        {t("checkout.qty")} {item.quantity || 1}
                       </p>
                     </div>
-                    <span className="font-medium text-xs text-gray-900">
+                    <span className="font-medium text-xs text-gray-900 dark:text-slate-200">
                       ${(price * (item.quantity || 1)).toFixed(2)}
                     </span>
                   </div>
@@ -744,47 +744,47 @@ export default function Checkout() {
               })}
             </div>
 
-            <div className="border-t border-gray-100 pt-4 space-y-2.5 text-xs">
-              <div className="flex justify-between text-gray-500">
-                <span>Subtotal</span>
-                <span className="font-medium text-gray-800">
+            <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-2.5 text-xs">
+              <div className="flex justify-between text-gray-500 dark:text-slate-400">
+                <span>{t("checkout.subtotal")}</span>
+                <span className="font-medium text-gray-800 dark:text-slate-200">
                   ${subtotal.toFixed(2)}
                 </span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-emerald-600 font-medium">
-                  <span>Discount</span>
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span>{t("checkout.discount")}</span>
                   <span>-${discount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-gray-500">
-                <span>Shipping</span>
-                <span className="font-medium text-gray-800">
-                  {shippingCost === 0 ? "Free" : `$${shippingCost}`}
+              <div className="flex justify-between text-gray-500 dark:text-slate-400">
+                <span>{t("checkout.shipping")}</span>
+                <span className="font-medium text-gray-800 dark:text-slate-200">
+                  {shippingCost === 0 ? t("checkout.free") : `$${shippingCost}`}
                 </span>
               </div>
-              <div className="flex justify-between text-gray-500">
-                <span>Estimated Tax (14%)</span>
-                <span className="font-medium text-gray-800">
+              <div className="flex justify-between text-gray-500 dark:text-slate-400">
+                <span>{t("checkout.tax")}</span>
+                <span className="font-medium text-gray-800 dark:text-slate-200">
                   ${tax.toFixed(2)}
                 </span>
               </div>
             </div>
 
-            <div className="border-t border-gray-100 pt-4 flex justify-between items-center">
-              <span className="font-semibold text-sm text-gray-900">
-                Total
+            <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-between items-center">
+              <span className="font-semibold text-sm text-gray-900 dark:text-slate-100">
+                {t("checkout.total")}
               </span>
-              <span className="font-semibold text-base text-gray-900">
+              <span className="font-semibold text-base text-gray-900 dark:text-slate-100">
                 ${total.toFixed(2)}
               </span>
             </div>
 
             {/* Coupon Section */}
-            <div className="border-t border-gray-100 pt-4 space-y-3">
-              <label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
+            <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-3">
+              <label className="text-xs font-medium text-gray-700 dark:text-slate-300 flex items-center gap-1.5">
                 <svg
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-blue-600 dark:text-indigo-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -796,42 +796,42 @@ export default function Checkout() {
                     d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                   />
                 </svg>
-                Have a coupon code?
+                {t("checkout.haveCoupon")}
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
-                  placeholder="Enter coupon code"
+                  placeholder={t("checkout.couponPlaceholder")}
                   disabled={couponApplied}
-                  className="flex-1 p-3 text-xs border border-gray-200 rounded-2xl outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50/20 text-gray-800 placeholder:text-gray-400 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  className="flex-1 p-3 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-indigo-500 bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 disabled:bg-slate-100 dark:disabled:bg-slate-800/50 disabled:cursor-not-allowed"
                 />
                 {couponApplied ? (
                   <button
                     type="button"
                     onClick={handleRemoveCoupon}
-                    className="bg-red-100 text-red-600 px-4 py-3 rounded-2xl text-xs font-medium hover:bg-red-200 transition"
+                    className="bg-red-100 dark:bg-rose-950/60 text-red-600 dark:text-rose-400 px-4 py-3 rounded-2xl text-xs font-medium hover:bg-red-200 dark:hover:bg-rose-900/60 transition cursor-pointer"
                   >
-                    Remove
+                    {t("checkout.remove")}
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleApplyCoupon}
                     disabled={couponLoading}
-                    className="bg-blue-600 text-white px-4 py-3 rounded-2xl text-xs font-medium hover:bg-blue-700 transition disabled:opacity-60 flex items-center gap-1"
+                    className="bg-blue-600 dark:bg-indigo-600 text-white px-4 py-3 rounded-2xl text-xs font-medium hover:bg-blue-700 dark:hover:bg-indigo-500 transition disabled:opacity-60 flex items-center gap-1 cursor-pointer"
                   >
                     {couponLoading && (
                       <Loader2 size={12} className="animate-spin" />
                     )}
-                    Apply
+                    {t("checkout.apply")}
                   </button>
                 )}
               </div>
 
               {couponApplied && discount > 0 && (
-                <div className="bg-emerald-50/70 border border-emerald-100 p-3.5 rounded-2xl flex items-start gap-3">
+                <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 p-3.5 rounded-2xl flex items-start gap-3">
                   <div className="bg-emerald-500 text-white p-1 rounded-full mt-0.5">
                     <svg
                       className="w-3.5 h-3.5"
@@ -848,11 +848,11 @@ export default function Checkout() {
                     </svg>
                   </div>
                   <div>
-                    <h5 className="font-medium text-xs text-emerald-900">
-                      Coupon applied successfully!
+                    <h5 className="font-medium text-xs text-emerald-900 dark:text-emerald-300">
+                      {t("checkout.couponAppliedSuccess")}
                     </h5>
-                    <p className="text-[11px] text-emerald-700">
-                      You saved ${discount.toFixed(2)}
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                      {t("checkout.youSaved", { amount: discount.toFixed(2) })}
                     </p>
                   </div>
                 </div>

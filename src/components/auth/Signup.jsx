@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { sendRegisterOtp } from "../../api/auth.api";
 import LanguageSwitcher from "../ui/LanguageSwitcher";
+import ThemeToggle from "../ui/ThemeToggle";
 
 export default function Signup() {
   const { t } = useTranslation();
@@ -83,18 +84,20 @@ export default function Signup() {
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
 
   return (
-    <div className="min-h-screen w-full bg-[#f3f5fc] flex flex-col items-center justify-center p-4 md:p-6 font-sans relative">
+    <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex flex-col items-center justify-center p-4 md:p-6 font-sans relative">
       {/* Top Bar with Language Switcher */}
-      <div className="w-full max-w-[1220px] flex justify-end pb-3">
-        <LanguageSwitcher />
+      <div className="w-full max-w-[1220px] flex justify-end pb-3 gap-2">
+        <ThemeToggle />
+        <LanguageSwitcher className="ml-2" />
       </div>
 
       {/* ================= Container ================= */}
-      <div className="w-full max-w-[1220px] bg-[#dbe5ff] rounded-[32px] grid grid-cols-1 lg:grid-cols-12 overflow-hidden shadow-2xl relative">
+      <div className="w-full max-w-[1220px] bg-[#dbe5ff] dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-[32px] grid grid-cols-1 lg:grid-cols-12 overflow-hidden shadow-2xl relative">
         {/* ================= Left Side ================= */}
-        <div className="lg:col-span-6 p-8 md:p-11 flex flex-col justify-between relative bg-[#dde6fe]">
+        <div className="lg:col-span-6 p-8 md:p-11 flex flex-col justify-between relative bg-[#dde6fe] dark:bg-slate-900/80 border-b lg:border-b-0 lg:border-r rtl:lg:border-r-0 rtl:lg:border-l dark:border-slate-800">
           <div>
             {/* Logo */}
+
              <Link to="/" className="inline-flex items-center gap-2.5">
                                       <img
                                         src={STORE_LOGO_URL}
@@ -106,13 +109,23 @@ export default function Signup() {
                                       </span>
                                     </Link>
 
-            <h1 className="text-3xl md:text-[2.5rem] font-bold text-[#10245A] mb-3 leading-[1.15] tracking-tight">
+            <Link to="/" className="inline-flex items-center gap-2.5 text-[#2b64f6] dark:text-indigo-400 font-bold text-lg mb-6">
+              <span className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm text-base">
+                🛍️
+              </span>
+              <span className="text-[#0038DC] dark:text-indigo-400 font-bold text-xl tracking-tight">
+                ShopEase
+              </span>
+            </Link>
+
+
+            <h1 className="text-3xl md:text-[2.5rem] font-bold text-[#10245A] dark:text-slate-100 mb-3 leading-[1.15] tracking-tight">
               {t("auth.brandTitle1")}
               <br />
               {t("auth.brandTitle2")}
             </h1>
 
-            <p className="text-[#6b7280] text-xs md:text-sm leading-relaxed max-w-sm font-medium">
+            <p className="text-[#6b7280] dark:text-slate-400 text-xs md:text-sm leading-relaxed max-w-sm font-medium">
               {t("auth.brandSubtitle")}
             </p>
           </div>
@@ -120,9 +133,9 @@ export default function Signup() {
           {/* Image Section */}
           <div className="relative flex justify-center items-center my-5">
             {/* YOUR MUSIC */}
-            <div className="absolute left-0 rtl:left-auto rtl:right-0 top-0 z-20 bg-white/95 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-white flex items-center gap-1.5">
+            <div className="absolute left-0 rtl:left-auto rtl:right-0 top-0 z-20 bg-white/95 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-white dark:border-slate-700 flex items-center gap-1.5">
               <span className="text-xs">🎧</span>
-              <span className="text-[11px] font-bold tracking-wider text-[#0038DC]">
+              <span className="text-[11px] font-bold tracking-wider text-[#0038DC] dark:text-indigo-400">
                 {t("auth.badgeMusic")}
               </span>
             </div>
@@ -135,8 +148,8 @@ export default function Signup() {
             />
 
             {/* OUR WAY */}
-            <div className="absolute right-0 rtl:right-auto rtl:left-0 top-1/2 -translate-y-1/2 z-20 bg-white/95 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-white">
-              <span className="text-[11px] font-bold tracking-wider text-[#0038DC]">
+            <div className="absolute right-0 rtl:right-auto rtl:left-0 top-1/2 -translate-y-1/2 z-20 bg-white/95 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-white dark:border-slate-700">
+              <span className="text-[11px] font-bold tracking-wider text-[#0038DC] dark:text-indigo-400">
                 {t("auth.badgeWay")}
               </span>
             </div>
@@ -144,22 +157,22 @@ export default function Signup() {
 
           {/* Bottom Badges */}
           <div className="flex items-center justify-between w-full pt-2">
-            <div className="bg-white/95 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-white">
+            <div className="bg-white/95 dark:bg-slate-800/90 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-white dark:border-slate-700">
               <svg
-                className="w-3.5 h-3.5 text-[#2b64f6]"
+                className="w-3.5 h-3.5 text-[#2b64f6] dark:text-indigo-400"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
               </svg>
-              <span className="text-[11px] font-bold text-[#0038DC]">
+              <span className="text-[11px] font-bold text-[#0038DC] dark:text-indigo-400">
                 {t("auth.badgeAudio")}
               </span>
             </div>
 
-            <div className="bg-[#e6f4ea] px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-emerald-100">
-              <span className="w-2 h-2 rounded-full bg-[#1e8e3e]"></span>
-              <span className="text-[11px] font-bold text-[#1e8e3e]">
+            <div className="bg-[#e6f4ea] dark:bg-emerald-950/50 px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-emerald-100 dark:border-emerald-800/60">
+              <span className="w-2 h-2 rounded-full bg-[#1e8e3e] dark:bg-emerald-400"></span>
+              <span className="text-[11px] font-bold text-[#1e8e3e] dark:text-emerald-400">
                 {t("auth.badgeInStock")}
               </span>
             </div>
@@ -167,21 +180,21 @@ export default function Signup() {
         </div>
 
         {/* ================= Right Side ================= */}
-        <div className="lg:col-span-6 py-9 px-8 md:px-12 flex flex-col justify-center bg-white rounded-t-[32px] lg:rounded-t-none lg:rounded-l-[32px] rtl:lg:rounded-l-none rtl:lg:rounded-r-[32px] shadow-2xl relative z-30">
+        <div className="lg:col-span-6 py-9 px-8 md:px-12 flex flex-col justify-center bg-white dark:bg-slate-900 rounded-t-[32px] lg:rounded-t-none lg:rounded-l-[32px] rtl:lg:rounded-l-none rtl:lg:rounded-r-[32px] shadow-2xl relative z-30">
           <div className="max-w-[450px] w-full mx-auto">
             {/* Header */}
             <div className="mb-4">
-              <h2 className="text-2xl md:text-[2.1rem] font-bold text-[#10245A] mb-1 tracking-tight">
+              <h2 className="text-2xl md:text-[2.1rem] font-bold text-[#10245A] dark:text-slate-100 mb-1 tracking-tight">
                 {t("auth.registerTitle")}
               </h2>
-              <p className="text-xs md:text-sm text-[#64748b] font-medium">
+              <p className="text-xs md:text-sm text-[#64748b] dark:text-slate-400 font-medium">
                 {t("auth.registerSubtitle")}
               </p>
             </div>
 
             {/* Error */}
             {error && (
-              <div className="mb-3 p-2.5 bg-red-50 text-red-600 text-xs rounded-xl border border-red-200 font-medium">
+              <div className="mb-3 p-2.5 bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400 text-xs rounded-xl border border-red-200 dark:border-rose-900/60 font-medium">
                 {error}
               </div>
             )}
@@ -191,7 +204,7 @@ export default function Signup() {
               {/* First + Last Name */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] md:text-xs font-bold text-[#334155] mb-1">
+                  <label className="block text-[11px] md:text-xs font-bold text-[#334155] dark:text-slate-300 mb-1">
                     {t("auth.firstNameLabel")}
                   </label>
                   <input
@@ -201,12 +214,12 @@ export default function Signup() {
                     onChange={handleChange}
                     placeholder={t("auth.firstNamePlaceholder")}
                     required
-                    className="w-full px-4 py-3 rounded-xl bg-[#eff4ff] border border-[#dbe5ff] text-xs md:text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 focus:border-[#2b64f6] transition-all font-medium"
+                    className="w-full px-4 py-3 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] md:text-xs font-bold text-[#334155] mb-1">
+                  <label className="block text-[11px] md:text-xs font-bold text-[#334155] dark:text-slate-300 mb-1">
                     {t("auth.lastNameLabel")}
                   </label>
                   <input
@@ -216,14 +229,14 @@ export default function Signup() {
                     onChange={handleChange}
                     placeholder={t("auth.lastNamePlaceholder")}
                     required
-                    className="w-full px-4 py-3 rounded-xl bg-[#eff4ff] border border-[#dbe5ff] text-xs md:text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 focus:border-[#2b64f6] transition-all font-medium"
+                    className="w-full px-4 py-3 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
                   />
                 </div>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-[11px] md:text-xs font-bold text-[#334155] mb-1">
+                <label className="block text-[11px] md:text-xs font-bold text-[#334155] dark:text-slate-300 mb-1">
                   {t("auth.emailLabel")}
                 </label>
                 <input
@@ -233,17 +246,17 @@ export default function Signup() {
                   onChange={handleChange}
                   placeholder={t("auth.emailPlaceholder")}
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-[#eff4ff] border border-[#dbe5ff] text-xs md:text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 focus:border-[#2b64f6] transition-all font-medium"
+                  className="w-full px-4 py-3 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
                 />
               </div>
 
               {/* Phone */}
               <div>
-                <label className="block text-[11px] md:text-xs font-bold text-[#334155] mb-1">
+                <label className="block text-[11px] md:text-xs font-bold text-[#334155] dark:text-slate-300 mb-1">
                   {t("auth.phoneLabel")}
                 </label>
                 <div className="flex gap-2.5" dir="ltr">
-                  <select className="px-3 py-3 text-xs md:text-sm border border-[#dbe5ff] rounded-xl bg-[#eff4ff] text-[#334155] focus:outline-none font-semibold">
+                  <select className="px-3 py-3 text-xs md:text-sm border border-[#dbe5ff] dark:border-slate-700 rounded-xl bg-[#eff4ff] dark:bg-slate-800 text-[#334155] dark:text-slate-200 focus:outline-none font-semibold">
                     <option>EG +20</option>
                   </select>
                   <input
@@ -253,7 +266,7 @@ export default function Signup() {
                     onChange={handleChange}
                     placeholder={t("auth.phonePlaceholder")}
                     required
-                    className="w-full px-4 py-3 rounded-xl bg-[#eff4ff] border border-[#dbe5ff] text-xs md:text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 focus:border-[#2b64f6] transition-all font-medium"
+                    className="w-full px-4 py-3 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
                   />
                 </div>
               </div>
@@ -262,7 +275,7 @@ export default function Signup() {
               <div className="grid grid-cols-2 gap-3">
                 {/* Password */}
                 <div>
-                  <label className="block text-[11px] md:text-xs font-bold text-[#334155] mb-1">
+                  <label className="block text-[11px] md:text-xs font-bold text-[#334155] dark:text-slate-300 mb-1">
                     {t("auth.passwordLabel")}
                   </label>
                   <div className="relative">
@@ -273,12 +286,12 @@ export default function Signup() {
                       onChange={handleChange}
                       placeholder="••••••••"
                       required
-                      className="w-full px-4 py-3 pr-9 rtl:pr-4 rtl:pl-9 rounded-xl bg-[#eff4ff] border border-[#dbe5ff] text-xs md:text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 focus:border-[#2b64f6] transition-all font-medium"
+                      className="w-full px-4 py-3 pr-9 rtl:pr-4 rtl:pl-9 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#475569] transition-colors p-1 cursor-pointer"
+                      className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] dark:text-slate-400 hover:text-[#475569] dark:hover:text-slate-200 transition-colors p-1 cursor-pointer"
                       aria-label="Toggle password visibility"
                     >
                       <svg
@@ -306,7 +319,7 @@ export default function Signup() {
 
                 {/* Confirm Password */}
                 <div>
-                  <label className="block text-[11px] md:text-xs font-bold text-[#334155] mb-1">
+                  <label className="block text-[11px] md:text-xs font-bold text-[#334155] dark:text-slate-300 mb-1">
                     {t("auth.confirmPasswordLabel")}
                   </label>
                   <div className="relative">
@@ -317,14 +330,14 @@ export default function Signup() {
                       onChange={handleChange}
                       placeholder="••••••••"
                       required
-                      className="w-full px-4 py-3 pr-9 rtl:pr-4 rtl:pl-9 rounded-xl bg-[#eff4ff] border border-[#dbe5ff] text-xs md:text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 focus:border-[#2b64f6] transition-all font-medium"
+                      className="w-full px-4 py-3 pr-9 rtl:pr-4 rtl:pl-9 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
                     />
                     <button
                       type="button"
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#475569] transition-colors p-1 cursor-pointer"
+                      className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] dark:text-slate-400 hover:text-[#475569] dark:hover:text-slate-200 transition-colors p-1 cursor-pointer"
                       aria-label="Toggle confirm password visibility"
                     >
                       <svg
@@ -355,7 +368,7 @@ export default function Signup() {
               {formData.password && isStrongPassword && (
                 <div className="flex items-center justify-end gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span className="text-[11px] font-bold text-emerald-600">
+                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                     {t("auth.passwordStrength")}
                   </span>
                 </div>
@@ -367,18 +380,18 @@ export default function Signup() {
                   type="checkbox"
                   id="terms"
                   required
-                  className="w-4 h-4 rounded border-[#cbd5e1] text-[#2b64f6] focus:ring-[#2b64f6] cursor-pointer"
+                  className="w-4 h-4 rounded border-[#cbd5e1] dark:border-slate-700 bg-transparent text-[#2b64f6] dark:text-indigo-500 focus:ring-[#2b64f6] cursor-pointer"
                 />
                 <label
                   htmlFor="terms"
-                  className="text-xs text-[#64748b] font-semibold"
+                  className="text-xs text-[#64748b] dark:text-slate-400 font-semibold"
                 >
                   {t("auth.agreeTerms")}{" "}
-                  <a href="#" className="text-[#2b64f6] hover:underline">
+                  <a href="#" className="text-[#2b64f6] dark:text-indigo-400 hover:underline">
                     {t("auth.terms")}
                   </a>{" "}
                   {t("auth.and")}{" "}
-                  <a href="#" className="text-[#2b64f6] hover:underline">
+                  <a href="#" className="text-[#2b64f6] dark:text-indigo-400 hover:underline">
                     {t("auth.privacyPolicy")}
                   </a>
                 </label>
@@ -388,7 +401,7 @@ export default function Signup() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-5 bg-[#2b64f6] hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2 text-xs md:text-sm mt-1 disabled:opacity-50 cursor-pointer"
+                className="w-full py-3.5 px-5 bg-[#2b64f6] dark:bg-indigo-600 hover:bg-blue-700 dark:hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 dark:shadow-indigo-600/30 active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2 text-xs md:text-sm mt-1 disabled:opacity-50 cursor-pointer"
               >
                 <span>
                   {loading ? t("auth.sendingOtp") : t("auth.registerButton")}
@@ -410,8 +423,8 @@ export default function Signup() {
 
               {/* Divider */}
               <div className="relative my-3 flex items-center justify-center">
-                <div className="border-t border-[#e2e8f0] w-full"></div>
-                <span className="bg-white px-3 text-[10px] text-[#94a3b8] absolute font-semibold uppercase tracking-wider">
+                <div className="border-t border-[#e2e8f0] dark:border-slate-800 w-full"></div>
+                <span className="bg-white dark:bg-slate-900 px-3 text-[10px] text-[#94a3b8] dark:text-slate-500 absolute font-semibold uppercase tracking-wider">
                   {t("auth.orContinueWith")}
                 </span>
               </div>
@@ -421,7 +434,7 @@ export default function Signup() {
                 {/* Google */}
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 py-3 px-3 border border-[#e2e8f0] rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all text-xs font-bold text-[#334155] active:scale-[0.98] cursor-pointer"
+                  className="flex items-center justify-center gap-2 py-3 px-3 border border-[#e2e8f0] dark:border-slate-700 dark:bg-slate-800/80 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-xs font-bold text-[#334155] dark:text-slate-200 active:scale-[0.98] cursor-pointer"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path
@@ -447,7 +460,7 @@ export default function Signup() {
                 {/* Apple */}
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 py-3 px-3 border border-[#e2e8f0] rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all text-xs font-bold text-[#334155] active:scale-[0.98] cursor-pointer"
+                  className="flex items-center justify-center gap-2 py-3 px-3 border border-[#e2e8f0] dark:border-slate-700 dark:bg-slate-800/80 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-xs font-bold text-[#334155] dark:text-slate-200 active:scale-[0.98] cursor-pointer"
                 >
                   <svg
                     className="w-4 h-4 fill-current"
@@ -460,11 +473,11 @@ export default function Signup() {
               </div>
 
               {/* Login Link */}
-              <p className="text-center text-xs text-[#64748b] pt-1.5 font-medium">
+              <p className="text-center text-xs text-[#64748b] dark:text-slate-400 pt-1.5 font-medium">
                 {t("auth.alreadyHaveAccount")}{" "}
                 <Link
                   to="/login"
-                  className="font-bold text-[#2b64f6] hover:underline"
+                  className="font-bold text-[#2b64f6] dark:text-indigo-400 hover:underline"
                 >
                   {t("auth.loginLink")}
                 </Link>

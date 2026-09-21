@@ -132,10 +132,10 @@ export default function VerifyOtp() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#f3f5fc] flex items-center justify-center p-4 md:p-6 font-sans">
-      <div className="w-full max-w-[480px] bg-white rounded-[28px] shadow-2xl overflow-hidden">
+    <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex items-center justify-center p-4 md:p-6 font-sans">
+      <div className="w-full max-w-[480px] bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 rounded-[28px] shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#2b64f6] to-[#1e40af] px-8 py-10 text-center text-white">
+        <div className="bg-gradient-to-br from-[#2b64f6] to-[#1e40af] dark:from-indigo-600 dark:to-indigo-900 px-8 py-10 text-center text-white">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/20 flex items-center justify-center">
             <Mail size={28} />
           </div>
@@ -150,7 +150,7 @@ export default function VerifyOtp() {
         <div className="px-8 py-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-[#334155] mb-2 text-center">
+              <label className="block text-xs font-bold text-[#334155] dark:text-slate-300 mb-2 text-center">
                 Enter Verification Code
               </label>
               <input
@@ -159,7 +159,7 @@ export default function VerifyOtp() {
                 autoComplete="one-time-code"
                 maxLength={6}
                 placeholder="• • • • • •"
-                className="w-full px-4 py-4 border-2 border-[#dbe5ff] rounded-2xl text-center text-2xl font-bold tracking-[0.4em] text-[#10245A] bg-[#eff4ff] focus:outline-none focus:ring-2 focus:ring-[#2b64f6] focus:border-[#2b64f6] transition"
+                className="w-full px-4 py-4 border-2 border-[#dbe5ff] dark:border-slate-700 rounded-2xl text-center text-2xl font-bold tracking-[0.4em] text-[#10245A] dark:text-slate-100 bg-[#eff4ff] dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2b64f6] dark:focus:ring-indigo-500 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition"
                 {...register("otp", {
                   required: "Verification code is required",
                   minLength: { value: 4, message: "Code is incomplete" },
@@ -179,7 +179,7 @@ export default function VerifyOtp() {
             <button
               type="submit"
               disabled={loading || otpValue.length < 4}
-              className="w-full py-3.5 bg-[#2b64f6] hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+              className="w-full py-3.5 bg-[#2b64f6] dark:bg-indigo-600 hover:bg-blue-700 dark:hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 dark:shadow-indigo-600/30 transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
             >
               {loading && <Loader2 size={18} className="animate-spin" />}
               {loading ? "Verifying..." : "Confirm Code"}
@@ -191,15 +191,15 @@ export default function VerifyOtp() {
               type="button"
               onClick={handleResend}
               disabled={resending}
-              className="text-sm text-[#2b64f6] font-semibold hover:underline disabled:opacity-50"
+              className="text-sm text-[#2b64f6] dark:text-indigo-400 font-semibold hover:underline disabled:opacity-50"
             >
               {resending ? "Sending..." : "Resend Code"}
             </button>
 
-            <p className="text-xs text-[#64748b]">
+            <p className="text-xs text-[#64748b] dark:text-slate-400">
               <Link
                 to="/signup"
-                className="font-semibold text-[#2b64f6] hover:underline"
+                className="font-semibold text-[#2b64f6] dark:text-indigo-400 hover:underline"
               >
                 Back to Sign Up
               </Link>

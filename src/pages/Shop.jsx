@@ -175,27 +175,27 @@ export default function Shop() {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-12">
+    <div className="min-h-screen bg-white dark:bg-slate-950 pb-12 transition-colors duration-200">
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-6 flex items-center gap-2 text-sm">
-        <Link to="/" className="text-gray-400 hover:text-blue-600 transition">
+        <Link to="/" className="text-gray-400 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
           {t("nav.home")}
         </Link>
-        <ChevronRight size={14} className="text-gray-300 rtl:rotate-180" />
-        <span className="text-gray-800 font-medium">{t("nav.shop")}</span>
+        <ChevronRight size={14} className="text-gray-300 dark:text-slate-600 rtl:rotate-180" />
+        <span className="text-gray-800 dark:text-slate-200 font-medium">{t("nav.shop")}</span>
       </div>
 
       <div className="container mx-auto px-4">
         {/* Banner */}
-        <div className="bg-[#f4f7fb] border border-blue-100 rounded-[2rem] p-6 sm:p-8 lg:p-12 mb-8 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden gap-8 lg:gap-0">
+        <div className="bg-[#f4f7fb] dark:bg-slate-900 border border-blue-100 dark:border-slate-800 rounded-[2rem] p-6 sm:p-8 lg:p-12 mb-8 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden gap-8 lg:gap-0">
           <div className="z-10 w-full lg:w-1/2 text-center lg:text-start">
-            <h1 className="text-4xl lg:text-5xl font-extrabold text-[#111827] mb-3 lg:mb-4 tracking-tight">
+            <h1 className="text-4xl lg:text-5xl font-extrabold text-[#111827] dark:text-white mb-3 lg:mb-4 tracking-tight">
               {t("shop.title")}
             </h1>
-            <p className="text-gray-500 text-base lg:text-lg mb-1 max-w-xl mx-auto lg:mx-0">
+            <p className="text-gray-500 dark:text-slate-400 text-base lg:text-lg mb-1 max-w-xl mx-auto lg:mx-0">
               {t("shop.subtitle")}
             </p>
-            <p className="text-gray-500 text-base lg:text-lg">
+            <p className="text-gray-500 dark:text-slate-400 text-base lg:text-lg">
               {t("shop.productsFound", { count: filteredProducts.length })}
             </p>
           </div>
@@ -204,7 +204,7 @@ export default function Shop() {
             <div
               className={`flex flex-col transform ${
                 isArabic ? "rotate-6" : "-rotate-12"
-              } text-[#424750] opacity-90 text-2xl sm:text-3xl lg:text-[2.2rem] select-none`}
+              } text-[#424750] dark:text-slate-300 opacity-90 text-2xl sm:text-3xl lg:text-[2.2rem] select-none`}
               style={{
                 fontFamily: isArabic ? "'Cairo', sans-serif" : "'Caveat', cursive",
                 lineHeight: "1.2",
@@ -217,11 +217,11 @@ export default function Shop() {
             </div>
 
             <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-blue-200/50 rounded-2xl lg:rounded-3xl blur-lg lg:blur-xl transform translate-y-2 lg:translate-y-3 scale-95 group-hover:scale-100 transition-all duration-500"></div>
+              <div className="absolute inset-0 bg-blue-200/50 dark:bg-indigo-500/20 rounded-2xl lg:rounded-3xl blur-lg lg:blur-xl transform translate-y-2 lg:translate-y-3 scale-95 group-hover:scale-100 transition-all duration-500"></div>
               <img
                 src={ShopImage}
                 alt="Shop workspace"
-                className="relative z-10 w-56 sm:w-80 lg:w-96 h-36 sm:h-44 lg:h-52 object-cover rounded-[1rem] lg:rounded-[1.5rem] border-2 border-white/60 shadow-sm"
+                className="relative z-10 w-56 sm:w-80 lg:w-96 h-36 sm:h-44 lg:h-52 object-cover rounded-[1rem] lg:rounded-[1.5rem] border-2 border-white/60 dark:border-slate-700/60 shadow-sm"
               />
             </div>
           </div>
@@ -252,15 +252,15 @@ export default function Shop() {
           {mobileFilterOpen && (
             <div className="fixed inset-0 z-50 flex lg:hidden">
               <div
-                className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+                className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
                 onClick={() => setMobileFilterOpen(false)}
               />
-              <div className="relative ms-auto w-full max-w-xs h-full bg-white shadow-2xl flex flex-col z-10">
-                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-bold text-gray-900">{t("shop.filter")}</h3>
+              <div className="relative ms-auto w-full max-w-xs h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col z-10">
+                <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900 dark:text-slate-100">{t("shop.filter")}</h3>
                   <button
                     onClick={() => setMobileFilterOpen(false)}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 cursor-pointer"
+                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-pointer"
                   >
                     <X size={20} />
                   </button>
@@ -299,7 +299,7 @@ export default function Shop() {
             />
 
             {loading ? (
-              <div className="text-center py-20 text-gray-500 font-semibold animate-pulse">
+              <div className="text-center py-20 text-gray-500 dark:text-slate-400 font-semibold animate-pulse">
                 {t("shop.loadingProducts")}
               </div>
             ) : displayedProducts.length > 0 ? (
@@ -329,20 +329,20 @@ export default function Shop() {
                 />
               </>
             ) : (
-              <div className="text-center py-24 bg-white rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center h-[500px]">
-                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mb-5">
+              <div className="text-center py-24 bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center h-[500px]">
+                <div className="w-16 h-16 bg-blue-50 dark:bg-indigo-950/50 rounded-full flex items-center justify-center text-[#5046E5] dark:text-indigo-400 mb-5">
                   <Search size={28} strokeWidth={2} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100 mb-2">
                   {t("shop.noResultsTitle")}
                 </h3>
-                <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
+                <p className="text-gray-500 dark:text-slate-400 text-sm max-w-sm mx-auto mb-6">
                   {t("shop.noResultsSubtitle")}
                 </p>
                 <button
                   type="button"
                   onClick={handleClearFilters}
-                  className="px-6 py-2.5 bg-white border border-gray-200 text-blue-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition shadow-sm cursor-pointer"
+                  className="px-6 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-[#5046E5] dark:text-indigo-400 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700/50 transition shadow-sm cursor-pointer"
                 >
                   {t("shop.clearFilters")}
                 </button>

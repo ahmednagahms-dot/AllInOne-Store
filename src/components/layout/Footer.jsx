@@ -9,7 +9,7 @@ export default function Footer() {
   const { t } = useTranslation();
 
   return (
-    <footer className="w-full bg-slate-900 text-white">
+    <footer className="w-full bg-slate-900 dark:bg-slate-900 text-white border-t border-slate-800 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-5 py-12 sm:px-6 lg:py-14">
         {/* Main */}
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-12">
@@ -136,7 +136,7 @@ export default function Footer() {
               {["VISA", "MC", "AMEX"].map((method) => (
                 <span
                   key={method}
-                  className="flex h-8 min-w-[44px] items-center justify-center rounded-md bg-white px-2 text-[10px] font-bold text-slate-800"
+                  className="flex h-8 min-w-[44px] items-center justify-center rounded-md bg-white dark:bg-slate-800 px-2 text-[10px] font-bold text-slate-800 dark:text-slate-200 border border-transparent dark:border-slate-700"
                 >
                   {method}
                 </span>
