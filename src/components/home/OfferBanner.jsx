@@ -97,7 +97,7 @@ export default function OfferBanner() {
           <div className="grid grid-cols-1 items-center gap-6 p-6 sm:p-10 lg:grid-cols-2 lg:gap-4 lg:p-12">
             {/* Left: Text + Countdown */}
             <div className="relative z-10">
-              <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-100 sm:text-xs">
+              <span className="offer-badge-animate inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-100 sm:text-xs">
                 {t("offer.badge")}
               </span>
 

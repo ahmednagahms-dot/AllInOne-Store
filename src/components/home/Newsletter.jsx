@@ -14,7 +14,7 @@ function Newsletter() {
 
           <div className="relative z-10 mx-auto max-w-3xl text-center">
             {/* Icon */}
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#5046E5]">
+            <div className="newsletter-icon-animate mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#5046E5] shadow-lg shadow-[#8b86f0]/30">
               <Mail size={25} />
             </div>
 
@@ -47,10 +47,13 @@ function Newsletter() {
 
               <button
                 type="submit"
-                className="flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-[#403D88] transition dark:bg-white dark:text-[#403D88]  cursor-pointer"
+                className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-6 text-sm font-semibold text-white shadow-md shadow-[#5046E5]/30 transition hover:bg-[#4338ca] cursor-pointer"
               >
                 {t("newsletter.button")}
-                <ArrowRight size={17} className="rtl:rotate-180" />
+                <ArrowRight
+                  size={17}
+                  className="newsletter-arrow-animate rtl:rotate-180"
+                />
               </button>
             </form>
 

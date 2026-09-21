@@ -113,7 +113,7 @@ export default function Hero() {
           <div className="grid min-h-[420px] grid-cols-1 items-center lg:grid-cols-2">
             {/* Content Side */}
             <div className="relative z-10 px-6 py-10 sm:px-10 md:px-12 lg:px-14 lg:py-12">
-              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 shadow-sm border border-slate-200/40 dark:border-slate-700/50">
+              <div className="hero-badge-animate mb-4 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 shadow-sm border border-slate-200/40 dark:border-slate-700/50">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary-500">
                   {currentBadge}
@@ -137,7 +137,7 @@ export default function Hero() {
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary-500 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-600"
                 >
                   {t("hero.shopNow")}
-                  <ArrowRight size={16} className="rtl:rotate-180" />
+                  <ArrowRight size={16} className="hero-arrow-animate rtl:rotate-180" />
                 </Link>
                 <Link
                   to="/shop"
@@ -170,14 +170,15 @@ export default function Hero() {
             <div className="relative flex min-h-[300px] items-center justify-center px-8 pb-10 pt-4 lg:min-h-[420px] lg:pb-0">
               <div className="absolute right-[8%] rtl:right-auto rtl:left-[8%] top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full bg-white/60 dark:bg-slate-800/60 sm:h-[320px] sm:w-[320px] lg:h-[360px] lg:w-[360px]" />
 
-              <div className="relative z-10 h-[240px] w-[240px] sm:h-[280px] sm:w-[280px] lg:h-[310px] lg:w-[310px]">
-                <img
-                  key={slide.id}
-                  src={slide.image}
-                  alt={currentTitle}
-                  className="h-full w-full object-contain drop-shadow-xl transition duration-500"
-                />
-              </div>
+              {/* Image */}
+            <div className="relative z-10 h-[240px] w-[240px] sm:h-[280px] sm:w-[280px] lg:h-[310px] lg:w-[310px]">
+              <img
+                key={slide.id}
+                src={slide.image}
+                alt={currentTitle}
+                className="h-full w-full rounded-[25px] object-cover drop-shadow-xl transition duration-500"
+              />
+            </div>
 
               <div className="absolute right-[10%] rtl:right-auto rtl:left-[10%] top-[10%] z-20 flex h-16 w-16 rotate-6 rtl:-rotate-6 items-center justify-center rounded-full bg-primary-500 text-center text-white shadow-lg sm:h-[72px] sm:w-[72px]">
                 <div>
