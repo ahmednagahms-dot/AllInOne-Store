@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Heart, Star, ShoppingCart, Eye, Loader2 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 
 export default function ProductCard({ product, viewMode = "grid" }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { addItem } = useCart(); 
   
@@ -15,10 +17,13 @@ export default function ProductCard({ product, viewMode = "grid" }) {
   const productId = product._id || product.id; 
 
   const title = product.name || "Product Name";
-  const category =
+  const rawCat =
     typeof product.category === "object"
-      ? product.category.name
-      : product.category || "Uncategorized";
+      ? product.category?.name
+      : product.category;
+  const category = rawCat
+    ? t(`categories.items.${rawCat.toLowerCase()}`, { defaultValue: rawCat })
+    : t("shop.sidebar.others", "Uncategorized");
 
   const firstImage = product.images && product.images[0];
   const image =
@@ -45,15 +50,15 @@ export default function ProductCard({ product, viewMode = "grid" }) {
   let stockTextColor = "";
 
   if (stock > 10) {
-    stockStatus = "In stock";
+    stockStatus = t("shop.sidebar.inStock", "In stock");
     stockDotColor = "bg-green-500";
     stockTextColor = "text-green-600";
   } else if (stock > 0 && stock <= 10) {
-    stockStatus = "Low stock";
+    stockStatus = t("shop.sidebar.lowStock", "Low stock");
     stockDotColor = "bg-orange-400";
     stockTextColor = "text-orange-500";
   } else {
-    stockStatus = "Out of stock";
+    stockStatus = t("productCard.outOfStock", "Out of stock");
     stockDotColor = "bg-red-500";
     stockTextColor = "text-red-500";
   }
@@ -69,10 +74,10 @@ export default function ProductCard({ product, viewMode = "grid" }) {
   const isExplicitSale = product.tags?.includes("sale") || product.featured;
 
   if (isNew) {
-    badge = "New";
+    badge = t("productCard.new", "New");
     badgeColor = "bg-green-500";
   } else if (isExplicitSale) {
-    badge = "Sale";
+    badge = t("offer.badge", "Sale");
     badgeColor = "bg-blue-600";
   }
 
@@ -136,7 +141,7 @@ export default function ProductCard({ product, viewMode = "grid" }) {
           <Star size={14} className="fill-yellow-400 text-yellow-400" />
           <span className="text-xs font-bold text-gray-700 dark:text-slate-300">{rating}</span>
           <span className="text-xs text-gray-400 dark:text-slate-500">
-            ({reviewsCount} reviews)
+            ({reviewsCount})
           </span>
         </div>
 
@@ -190,13 +195,18 @@ export default function ProductCard({ product, viewMode = "grid" }) {
             />
           )}
           <span>
-            {stock <= 0 ? "Out of Stock" : isAdding ? "Adding..." : "Add to Cart"}
+            {stock <= 0
+              ? t("productCard.outOfStock")
+              : isAdding
+              ? t("productCard.adding")
+              : t("productCard.addToCart")}
           </span>
         </button>
 
         <div
+          onClick={() => navigate(`/product/${productId}`, { state: { product } })}
           className="w-11 h-11 flex-shrink-0 border border-gray-200 dark:border-slate-700 flex items-center justify-center rounded-xl text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-indigo-400 hover:border-blue-200 dark:hover:border-indigo-500/50 transition-all z-20 cursor-pointer"
-          title="View Details"
+          title={t("common.viewAll", "View Details")}
         >
           <Eye size={18} />
         </div>

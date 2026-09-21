@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { 
   ArrowRight, 
   Package, 
@@ -12,16 +13,17 @@ import {
 } from "lucide-react";
 
 const SUBCATEGORIES = [
-  { name: "Audio", slug: "audio", icon: Headphones },
-  { name: "Smartphones", slug: "smartphones", icon: Smartphone },
-  { name: "Laptops", slug: "laptops", icon: Laptop },
-  { name: "Tablets", slug: "tablets", icon: Tablet },
-  { name: "Watches", slug: "watches", icon: Watch },
-  { name: "Macbook", slug: "macbook", icon: Laptop },
-  { name: "Accessories", slug: "accessories", icon: Package },
+  { name: "Audio", slug: "audio", icon: Headphones, translationKey: "electronics" },
+  { name: "Smartphones", slug: "smartphones", icon: Smartphone, translationKey: "mobiles" },
+  { name: "Laptops", slug: "laptops", icon: Laptop, translationKey: "laptops" },
+  { name: "Tablets", slug: "tablets", icon: Tablet, translationKey: "mobiles" },
+  { name: "Watches", slug: "watches", icon: Watch, translationKey: "watches" },
+  { name: "Macbook", slug: "macbook", icon: Laptop, translationKey: "laptops" },
+  { name: "Accessories", slug: "accessories", icon: Package, translationKey: "accessories" },
 ];
 
 function CategoryCard({ item }) {
+  const { t } = useTranslation();
   const Icon = item.icon || Package;
   const navigate = useNavigate();
 
@@ -29,6 +31,10 @@ function CategoryCard({ item }) {
     e.preventDefault();
     navigate(`/shop?subcategory=${encodeURIComponent(item.slug)}`);
   };
+
+  const displayName = item.translationKey && t(`categories.items.${item.translationKey}`, { defaultValue: "" }) 
+    ? t(`categories.items.${item.translationKey}`) 
+    : item.name;
 
   return (
     <a
@@ -39,22 +45,24 @@ function CategoryCard({ item }) {
       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 dark:bg-indigo-950/50 text-primary-500 dark:text-indigo-400 transition group-hover:bg-primary-500 group-hover:text-white">
         <Icon size={22} strokeWidth={1.8} />
       </div>
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{item.name}</h3>
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{displayName}</h3>
     </a>
   );
 }
 
 export default function Categories() {
+  const { t } = useTranslation();
+
   return (
     <section className="w-full bg-gray-50 dark:bg-slate-950 py-14 md:py-16 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary-500">
-              Explore
+              {t("categories.tag")}
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              Shop by Category
+              {t("categories.title")}
             </h2>
           </div>
 
@@ -62,8 +70,8 @@ export default function Categories() {
             to="/shop"
             className="hidden items-center gap-2 text-sm font-semibold text-primary-500 transition hover:gap-3 sm:flex"
           >
-            View All
-            <ArrowRight size={16} />
+            {t("common.viewAll")}
+            <ArrowRight size={16} className="rtl:rotate-180" />
           </Link>
         </div>
 
@@ -78,8 +86,8 @@ export default function Categories() {
             to="/shop"
             className="flex items-center gap-2 text-sm font-semibold text-primary-500"
           >
-            View All
-            <ArrowRight size={16} />
+            {t("common.viewAll")}
+            <ArrowRight size={16} className="rtl:rotate-180" />
           </Link>
         </div>
       </div>

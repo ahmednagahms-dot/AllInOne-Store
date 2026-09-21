@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import api from "../api/axios";
 import ProductCard from "../components/products/ProductCard";
 import Pagination from "../components/ui/Pagination";
@@ -6,12 +7,13 @@ import ProductToolbar from "../components/products/ProductToolbar";
 import ShopSidebar from "../components/products/ShopSidebar";
 import ShopFeatures from "../components/products/ShopFeatures";
 import { Search, ChevronRight } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 const ShopImage =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1789752545/swhfkjpwjhblaonheeo5.png";
 
 export default function Shop() {
+  const { t } = useTranslation();
   const location = useLocation();
 
   const [allProducts, setAllProducts] = useState([]);
@@ -182,28 +184,24 @@ export default function Shop() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 pb-12 transition-colors duration-200">
       <div className="container mx-auto px-4 py-6 flex items-center gap-2 text-sm">
-        <a href="/" className="text-gray-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-indigo-400 transition">
-          Home
-        </a>
-        <ChevronRight size={14} className="text-gray-300 dark:text-slate-600" />
-        <span className="text-gray-800 dark:text-slate-200 font-medium">Shop</span>
+        <Link to="/" className="text-gray-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-indigo-400 transition">
+          {t("nav.home")}
+        </Link>
+        <ChevronRight size={14} className="text-gray-300 dark:text-slate-600 rtl:rotate-180" />
+        <span className="text-gray-800 dark:text-slate-200 font-medium">{t("shop.title")}</span>
       </div>
 
       <div className="container mx-auto px-4">
         <div className="bg-[#f4f7fb] dark:bg-slate-900/80 border border-1 border-blue-100 dark:border-slate-800 rounded-[2rem] p-6 sm:p-8 lg:p-12 mb-8 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden gap-8 lg:gap-0">
-          <div className="z-10 w-full lg:w-1/2 text-center lg:text-left">
+          <div className="z-10 w-full lg:w-1/2 text-center lg:text-left rtl:lg:text-right">
             <h1 className="text-4xl lg:text-5xl font-extrabold text-[#111827] dark:text-white mb-3 lg:mb-4 tracking-tight">
-              Shop
+              {t("shop.title")}
             </h1>
             <p className="text-gray-500 dark:text-slate-400 text-base lg:text-lg mb-1 max-w-xl mx-auto lg:mx-0">
-              Discover amazing products, great deals and the latest trends.
+              {t("shop.subtitle")}
             </p>
             <p className="text-gray-500 dark:text-slate-400 text-base lg:text-lg">
-              We found{" "}
-              <span className="font-bold text-gray-800 dark:text-slate-200">
-                {filteredProducts.length}
-              </span>{" "}
-              products for you.
+              {t("shop.productsFound", { count: filteredProducts.length })}
             </p>
           </div>
 
@@ -212,10 +210,10 @@ export default function Shop() {
               className="flex flex-col transform -rotate-12 text-[#424750] dark:text-indigo-200/60 opacity-90 text-3xl sm:text-4xl lg:text-[2.5rem]"
               style={{ fontFamily: "'Caveat', cursive", lineHeight: "1.1" }}
             >
-              <span className="ml-2 lg:ml-4">Better</span>
-              <span className="ml-5 lg:ml-8">Choices</span>
-              <span className="-ml-1 lg:-ml-2">Brighter</span>
-              <span className="ml-4 lg:ml-6">Days</span>
+              <span className="ms-2 lg:ms-4">{t("shop.floatingText.line1")}</span>
+              <span className="ms-5 lg:ms-8">{t("shop.floatingText.line2")}</span>
+              <span className="-ms-1 lg:-ms-2">{t("shop.floatingText.line3")}</span>
+              <span className="ms-4 lg:ms-6">{t("shop.floatingText.line4")}</span>
             </div>
 
             <div className="relative group flex-shrink-0">
@@ -260,7 +258,7 @@ export default function Shop() {
 
             {loading ? (
               <div className="text-center py-20 text-gray-500 dark:text-slate-400 font-semibold animate-pulse">
-                Loading products...
+                {t("shop.loadingProducts")}
               </div>
             ) : displayedProducts.length > 0 ? (
               <>
@@ -294,10 +292,10 @@ export default function Shop() {
                   <Search size={28} strokeWidth={2} />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100 mb-2">
-                  No results found
+                  {t("shop.noResultsTitle")}
                 </h3>
                 <p className="text-gray-500 dark:text-slate-400 text-sm max-w-sm mx-auto mb-6">
-                  Try adjusting your search or browse our categories.
+                  {t("shop.noResultsSubtitle")}
                 </p>
                 <button
                   onClick={() => {
@@ -311,7 +309,7 @@ export default function Shop() {
                   }}
                   className="px-6 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-blue-600 dark:text-indigo-400 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700/50 transition shadow-sm cursor-pointer"
                 >
-                  Browse Categories
+                  {t("shop.browseCategories")}
                 </button>
               </div>
             )}
