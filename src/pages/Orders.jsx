@@ -21,12 +21,12 @@ const STATUS_TABS = [
 ];
 
 const STATUS_STYLES = {
-  pending: "bg-amber-50 text-amber-600",
-  confirmed: "bg-blue-50 text-blue-600",
-  processing: "bg-yellow-50 text-yellow-600",
-  shipped: "bg-indigo-50 text-indigo-600",
-  delivered: "bg-emerald-50 text-emerald-600",
-  cancelled: "bg-red-50 text-red-600",
+  pending: "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400",
+  confirmed: "bg-blue-50 dark:bg-indigo-950/50 text-[#5046E5] dark:text-indigo-400",
+  processing: "bg-yellow-50 dark:bg-amber-950/50 text-yellow-600 dark:text-amber-400",
+  shipped: "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400",
+  delivered: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400",
+  cancelled: "bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400",
 };
 
 function getOrderItems(order) {
@@ -125,7 +125,7 @@ export default function Orders() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
+        <Loader2 className="animate-spin text-[#5046E5]" size={40} />
       </div>
     );
   }
@@ -134,19 +134,19 @@ export default function Orders() {
   if (error) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center px-4">
-        <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
           <AlertTriangle className="text-red-500" size={28} />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">
           {t("orders.errorTitle") || "Something went wrong"}
         </h2>
-        <p className="text-gray-500 max-w-sm">
+        <p className="text-gray-500 dark:text-slate-400 max-w-sm">
           {t("orders.errorSubtitle") ||
             "We couldn't load your orders."}
         </p>
         <button
           onClick={fetchOrders}
-          className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition cursor-pointer"
+          className="px-6 py-2.5 bg-[#5046E5] text-white font-medium rounded-lg hover:bg-[#4338CA] transition cursor-pointer"
         >
           {t("orders.tryAgain") || "Try Again"}
         </button>
@@ -157,10 +157,10 @@ export default function Orders() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-slate-100">
           {t("orders.title") || "My Orders"}
         </h1>
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-500 dark:text-slate-400 mt-1">
           {t("orders.orderCount", { count: orders.length }) ||
             `${orders.length} ${
               orders.length === 1 ? "order" : "orders"
@@ -176,8 +176,8 @@ export default function Orders() {
             onClick={() => setActiveTab(tab.key)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer ${
               activeTab === tab.key
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                ? "bg-[#5046E5] text-white shadow-sm"
+                : "bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
             }`}
           >
             {t(`orders.tabs.${tab.key}`, {
@@ -190,23 +190,23 @@ export default function Orders() {
       {/* ===== Empty State ===== */}
       {filteredOrders.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-          <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
-            <Package className="text-blue-600" size={32} />
+          <div className="w-20 h-20 rounded-full bg-blue-50 dark:bg-indigo-950/50 flex items-center justify-center">
+            <Package className="text-[#5046E5] dark:text-indigo-400" size={32} />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">
             {activeTab === "all"
               ? t("orders.emptyTitle") ||
                 "You haven't placed any orders yet"
               : t("orders.emptyFilterTitle") ||
                 "No orders with this status"}
           </h2>
-          <p className="text-gray-500 max-w-sm">
+          <p className="text-gray-500 dark:text-slate-400 max-w-sm">
             {t("orders.emptySubtitle") ||
               "Products you order will appear here."}
           </p>
           <Link
             to="/shop"
-            className="mt-2 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+            className="mt-2 px-6 py-2.5 bg-[#5046E5] text-white font-medium rounded-lg hover:bg-[#4338CA] transition"
           >
             {t("orders.exploreProducts") || "Explore Products"}
           </Link>
@@ -222,15 +222,15 @@ export default function Orders() {
             return (
               <div
                 key={order._id}
-                className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition"
+                className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-gray-900 dark:text-slate-100">
                       {t("orders.orderNumber") || "Order #"}
                       {order._id?.slice(-6).toUpperCase()}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
                       {order.createdAt
                         ? new Date(order.createdAt).toLocaleDateString(
                             isArabic ? "ar-EG" : "en-US",
@@ -251,7 +251,7 @@ export default function Orders() {
                   <span
                     className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${
                       STATUS_STYLES[status] ||
-                      "bg-gray-100 text-gray-600"
+                      "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300"
                     }`}
                   >
                     {t(`orders.tabs.${status}`, {
@@ -266,7 +266,7 @@ export default function Orders() {
                     {items.slice(0, 4).map((item, idx) => (
                       <div
                         key={item._id || idx}
-                        className="w-12 h-12 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0"
+                        className="w-12 h-12 rounded-lg overflow-hidden bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 shrink-0"
                       >
                         <img
                           src={getOrderImage(item)}
@@ -280,15 +280,15 @@ export default function Orders() {
                       </div>
                     ))}
                     {items.length > 4 && (
-                      <span className="text-xs text-gray-400 ml-1">
+                      <span className="text-xs text-gray-400 dark:text-slate-500 ml-1">
                         +{items.length - 4} more
                       </span>
                     )}
                   </div>
                 )}
 
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-100">
-                  <p className="font-bold text-gray-900">
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                  <p className="font-bold text-gray-900 dark:text-slate-100">
                     ${getOrderTotal(order).toFixed(2)}
                   </p>
                   <div className="flex items-center gap-3">
@@ -297,7 +297,7 @@ export default function Orders() {
                         type="button"
                         onClick={() => handleCancel(order._id)}
                         disabled={cancellingId === order._id}
-                        className="text-sm text-red-600 hover:underline disabled:opacity-50 font-medium cursor-pointer"
+                        className="text-sm text-red-600 dark:text-red-400 hover:underline disabled:opacity-50 font-medium cursor-pointer"
                       >
                         {cancellingId === order._id
                           ? t("orders.cancelling") || "Cancelling..."
@@ -306,7 +306,7 @@ export default function Orders() {
                     )}
                     <Link
                       to={`/orders/${order._id}`}
-                      className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:underline"
+                      className="flex items-center gap-1 text-sm text-[#5046E5] dark:text-indigo-400 font-medium hover:underline"
                     >
                       {t("orders.viewOrder") || "View Order"}
                       <ChevronRight

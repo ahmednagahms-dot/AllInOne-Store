@@ -37,7 +37,7 @@ function WhyShopWithUs() {
   const { t } = useTranslation();
 
   return (
-    <section className="w-full bg-white py-16">
+    <section className="w-full bg-white dark:bg-slate-900 py-16 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
         {/* Header */}
         <div className="mx-auto mb-10 max-w-2xl text-center">
@@ -45,11 +45,11 @@ function WhyShopWithUs() {
             {t("whyUs.tag")}
           </p>
 
-          <h2 className="text-3xl font-bold text-[#0F172A]">
+          <h2 className="text-3xl font-bold text-[#0F172A] dark:text-white">
             {t("whyUs.title")}
           </h2>
 
-          <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
+          <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400 sm:text-base">
             {t("whyUs.subtitle")}
           </p>
         </div>
@@ -62,20 +62,20 @@ function WhyShopWithUs() {
             return (
               <div
                 key={feature.id}
-                className="group rounded-2xl border border-slate-200 bg-[#F8FAFC] p-6 text-center transition duration-300 hover:-translate-y-1 hover:border-[#5046E5] hover:bg-white hover:shadow-lg"
+                className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50 p-6 text-center transition duration-300 hover:-translate-y-1 hover:border-[#5046E5] dark:hover:border-indigo-500/50 hover:bg-white dark:hover:bg-slate-800 hover:shadow-lg dark:hover:shadow-indigo-950/20"
               >
                 {/* Icon */}
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EEF2FF] text-[#5046E5] transition duration-300 group-hover:bg-[#5046E5] group-hover:text-white">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EEF2FF] dark:bg-indigo-950/60 text-[#5046E5] dark:text-indigo-400 transition duration-300 group-hover:bg-[#5046E5] group-hover:text-white">
                   <Icon size={25} strokeWidth={1.8} />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-base font-bold text-[#0F172A]">
+                <h3 className="text-base font-bold text-[#0F172A] dark:text-slate-100">
                   {t(feature.titleKey)}
                 </h3>
 
                 {/* Description */}
-                <p className="mt-2 text-sm leading-6 text-slate-500">
+                <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                   {t(feature.descKey)}
                 </p>
               </div>

@@ -51,12 +51,12 @@ const AUTOPLAY_MS = 5000;
 function Benefit({ icon: Icon, title, subtitle }) {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-primary-500 shadow-sm">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-[#5046E5] dark:text-indigo-400 shadow-sm">
         <Icon size={16} />
       </div>
       <div>
-        <p className="text-xs font-semibold text-gray-900">{title}</p>
-        <p className="text-[11px] text-gray-400">{subtitle}</p>
+        <p className="text-xs font-semibold text-gray-900 dark:text-slate-100">{title}</p>
+        <p className="text-[11px] text-gray-400 dark:text-slate-400">{subtitle}</p>
       </div>
     </div>
   );
@@ -103,31 +103,31 @@ export default function Hero() {
   }, [next, isPaused]);
 
   return (
-    <section className="w-full overflow-hidden bg-gray-50">
+    <section className="w-full overflow-hidden bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6 md:py-8 lg:py-10">
         <div
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-50 to-indigo-50"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-50 to-indigo-50 dark:from-slate-900 dark:to-indigo-950/40 border border-slate-200/50 dark:border-slate-800"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           <div className="grid min-h-[420px] grid-cols-1 items-center lg:grid-cols-2">
             {/* Content Side */}
             <div className="relative z-10 px-6 py-10 sm:px-10 md:px-12 lg:px-14 lg:py-12">
-              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 shadow-sm border border-slate-200/40 dark:border-slate-700/50">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary-500">
                   {currentBadge}
                 </span>
               </div>
 
-              <h1 className="max-w-[520px] text-3xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-4xl lg:text-[42px]">
+              <h1 className="max-w-[520px] text-3xl font-extrabold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-4xl lg:text-[42px]">
                 <HighlightedTitle
                   title={currentTitle}
                   highlight={currentHighlight}
                 />
               </h1>
 
-              <p className="mt-4 max-w-[460px] text-sm leading-relaxed text-gray-500 sm:text-[15px]">
+              <p className="mt-4 max-w-[460px] text-sm leading-relaxed text-gray-500 dark:text-slate-300 sm:text-[15px]">
                 {currentDescription}
               </p>
 
@@ -141,13 +141,13 @@ export default function Hero() {
                 </Link>
                 <Link
                   to="/shop"
-                  className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-500 bg-white px-6 text-sm font-semibold text-primary-500 transition hover:bg-primary-50"
+                  className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-500 bg-white dark:bg-slate-800 px-6 text-sm font-semibold text-primary-500 dark:text-indigo-400 transition hover:bg-primary-50 dark:hover:bg-slate-700"
                 >
                   {t("hero.exploreCollections")}
                 </Link>
               </div>
 
-              <div className="mt-8 grid max-w-[520px] grid-cols-1 gap-4 border-t border-primary-100 pt-6 sm:grid-cols-3">
+              <div className="mt-8 grid max-w-[520px] grid-cols-1 gap-4 border-t border-primary-100 dark:border-slate-800 pt-6 sm:grid-cols-3">
                 <Benefit
                   icon={ShieldCheck}
                   title={t("hero.benefits.qualityTitle")}
@@ -168,7 +168,7 @@ export default function Hero() {
 
             {/* Media Side */}
             <div className="relative flex min-h-[300px] items-center justify-center px-8 pb-10 pt-4 lg:min-h-[420px] lg:pb-0">
-              <div className="absolute right-[8%] rtl:right-auto rtl:left-[8%] top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full bg-white/60 sm:h-[320px] sm:w-[320px] lg:h-[360px] lg:w-[360px]" />
+              <div className="absolute right-[8%] rtl:right-auto rtl:left-[8%] top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full bg-white/60 dark:bg-slate-800/60 sm:h-[320px] sm:w-[320px] lg:h-[360px] lg:w-[360px]" />
 
               <div className="relative z-10 h-[240px] w-[240px] sm:h-[280px] sm:w-[280px] lg:h-[310px] lg:w-[310px]">
                 <img
@@ -198,7 +198,7 @@ export default function Hero() {
             type="button"
             onClick={isRTL ? next : prev}
             aria-label="Previous"
-            className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 z-30 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-800 shadow-md transition hover:bg-primary-500 hover:text-white sm:flex cursor-pointer"
+            className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 z-30 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 shadow-md transition hover:bg-primary-500 hover:text-white sm:flex cursor-pointer"
           >
             {isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
@@ -206,7 +206,7 @@ export default function Hero() {
             type="button"
             onClick={isRTL ? prev : next}
             aria-label="Next"
-            className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 z-30 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-gray-800 shadow-md transition hover:bg-primary-500 hover:text-white sm:flex cursor-pointer"
+            className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 z-30 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 shadow-md transition hover:bg-primary-500 hover:text-white sm:flex cursor-pointer"
           >
             {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
@@ -221,7 +221,7 @@ export default function Hero() {
                 className={`h-1.5 rounded-full transition-all cursor-pointer ${
                   i === index
                     ? "w-5 bg-primary-500"
-                    : "w-1.5 bg-slate-300 hover:bg-slate-400"
+                    : "w-1.5 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400"
                 }`}
               />
             ))}
