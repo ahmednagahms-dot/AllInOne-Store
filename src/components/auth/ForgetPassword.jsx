@@ -129,6 +129,8 @@ export default function ForgetPassword() {
     setConfirmPassword("");
     setStep("email");
   };
+  const STORE_LOGO_URL =
+  "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
 
   return (
     <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex items-center justify-center p-4 md:p-6 font-sans relative overflow-hidden">
@@ -138,12 +140,25 @@ export default function ForgetPassword() {
       <div className="w-full max-w-[500px] bg-white dark:bg-slate-900 rounded-[32px] p-8 md:p-12 shadow-2xl shadow-blue-900/5 border border-[#e2e8f0]/80 dark:border-slate-800 relative z-10">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-8">
+
+          <Link to="/" className="inline-flex items-center gap-2.5">
+                                    <img
+                                      src={STORE_LOGO_URL}
+                                      alt="AllInOne"
+                                      className="h-9 w-auto object-contain"
+                                    />
+                                    <span className="text-lg font-bold tracking-tight text-black">
+                                      AllIn<span className="text-primary-500">One</span>
+                                    </span>
+                                  </Link>
+
           <span className="p-2.5 bg-[#eff4ff] dark:bg-slate-800 rounded-2xl shadow-sm text-lg border border-[#dbe5ff] dark:border-slate-700">
             🛍️
           </span>
           <span className="text-[#0038DC] dark:text-indigo-400 font-extrabold text-2xl tracking-tight">
             ShopEase
           </span>
+
         </div>
 
         {/* Title */}

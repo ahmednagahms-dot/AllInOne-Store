@@ -80,6 +80,8 @@ export default function Signup() {
       setLoading(false);
     }
   };
+   const STORE_LOGO_URL =
+  "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
 
   return (
     <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex flex-col items-center justify-center p-4 md:p-6 font-sans relative">
@@ -95,6 +97,18 @@ export default function Signup() {
         <div className="lg:col-span-6 p-8 md:p-11 flex flex-col justify-between relative bg-[#dde6fe] dark:bg-slate-900/80 border-b lg:border-b-0 lg:border-r rtl:lg:border-r-0 rtl:lg:border-l dark:border-slate-800">
           <div>
             {/* Logo */}
+
+             <Link to="/" className="inline-flex items-center gap-2.5">
+                                      <img
+                                        src={STORE_LOGO_URL}
+                                        alt="AllInOne"
+                                        className="h-9 w-auto object-contain"
+                                      />
+                                      <span className="text-lg font-bold tracking-tight text-black">
+                                        AllIn<span className="text-primary-500">One</span>
+                                      </span>
+                                    </Link>
+
             <Link to="/" className="inline-flex items-center gap-2.5 text-[#2b64f6] dark:text-indigo-400 font-bold text-lg mb-6">
               <span className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm text-base">
                 🛍️
@@ -103,6 +117,7 @@ export default function Signup() {
                 ShopEase
               </span>
             </Link>
+
 
             <h1 className="text-3xl md:text-[2.5rem] font-bold text-[#10245A] dark:text-slate-100 mb-3 leading-[1.15] tracking-tight">
               {t("auth.brandTitle1")}
