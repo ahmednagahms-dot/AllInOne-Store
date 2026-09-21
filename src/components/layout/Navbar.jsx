@@ -114,9 +114,6 @@ export default function Navbar() {
             <NavLink to="/orders" className={navLinkClass}>
               {t("nav.orders")}
             </NavLink>
-            <NavLink to="/wishlist" className={navLinkClass}>
-              {t("nav.wishlist")}
-            </NavLink>
           </nav>
 
           {/* Search - Desktop */}

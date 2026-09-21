@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   getProductById,
   getProductReviews,
@@ -33,15 +34,6 @@ import ProductCard from "../components/products/ProductCard";
 /* =========================================================
    Constants
 ========================================================= */
-const PAYMENT_FEATURES = [
-  [Lock, "Secure Payment", "SSL Encrypted"],
-  [Truck, "Fast Shipping", "Orders over $50"],
-  [RotateCcw, "Easy Returns", "30 Days Hassle Free"],
-  [ShieldCheck, "Authentic Products", "100% Genuine"],
-];
-
-const SHIPPING_STEPS = ["Order Placed", "Processing", "Shipped", "Delivered"];
-
 const cx = (...c) => c.filter(Boolean).join(" ");
 
 /* =========================================================
@@ -61,7 +53,7 @@ function Stars({ rating, size = 13, className = "" }) {
   );
 }
 
-function SpecTable({ product, stock }) {
+function SpecTable({ product, stock, t }) {
   // دعم شكلين: product.specifications (object) أو حقول مباشرة
   const fromObject =
     product.specifications && typeof product.specifications === "object"
@@ -72,17 +64,17 @@ function SpecTable({ product, stock }) {
     fromObject.length > 0
       ? fromObject
       : [
-          ["Brand", product.brand],
-          ["Model", product.name],
-          ["Category", product.category],
-          ["SKU", product.sku],
-          ["Stock", stock],
+          [t("productDetail.specs.brand"), product.brand],
+          [t("productDetail.specs.model"), product.name],
+          [t("productDetail.specs.category"), product.category],
+          [t("productDetail.specs.sku"), product.sku],
+          [t("productDetail.specs.stock"), stock],
         ].filter(([, v]) => v !== undefined && v !== null && v !== "");
 
   if (rows.length === 0) {
     return (
       <div className="border border-dashed border-gray-200 dark:border-slate-800 rounded-xl p-6 text-center text-xs text-gray-400 dark:text-slate-500">
-        No specifications available
+        {t("productDetail.specs.noSpecs")}
       </div>
     );
   }
@@ -127,20 +119,29 @@ function SpecTable({ product, stock }) {
   );
 }
 
-function ShippingInfo() {
+function ShippingInfo({ t }) {
+  const shippingSteps = [
+    t("productDetail.shipping.steps.orderPlaced"),
+    t("productDetail.shipping.steps.processing"),
+    t("productDetail.shipping.steps.shipped"),
+    t("productDetail.shipping.steps.delivered"),
+  ];
+
   return (
     <div className="rounded-xl border border-[#dce6ff] dark:border-slate-800 bg-[#f8faff] dark:bg-slate-900/80 p-4 sm:p-5">
       <div className="flex items-center gap-2 text-[#2149b8] dark:text-indigo-400 font-bold text-base">
-        <Truck size={18} /> Shipping Information
+        <Truck size={18} /> {t("productDetail.shipping.title")}
       </div>
-      <p className="text-xs text-gray-500 dark:text-slate-400 mt-5">Estimated delivery</p>
+      <p className="text-xs text-gray-500 dark:text-slate-400 mt-5">
+        {t("productDetail.shipping.estimatedDelivery")}
+      </p>
       <p className="text-base font-bold text-[#263653] dark:text-white mt-1">
-        2 - 5 business days
+        {t("productDetail.shipping.duration")}
       </p>
 
       <div className="relative mt-7 grid grid-cols-4 gap-1 text-center">
         <div className="absolute left-[12.5%] right-[12.5%] top-4 h-0.5 bg-[#dce6ff] dark:bg-slate-700" />
-        {SHIPPING_STEPS.map((step, i) => (
+        {shippingSteps.map((step, i) => (
           <div key={step} className="relative z-10 min-w-0">
             <div
               className={cx(
@@ -160,12 +161,11 @@ function ShippingInfo() {
       </div>
 
       <p className="mt-6 inline-flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
-        <Truck size={14} className="text-[#2149b8] dark:text-indigo-400" /> Free shipping on orders
-        over $50
+        <Truck size={14} className="text-[#2149b8] dark:text-indigo-400" />{" "}
+        {t("productDetail.shipping.freeShippingOver")}
       </p>
       <p className="mt-3 text-xs text-gray-500 dark:text-slate-400 leading-5">
-        Your order will be carefully packed and delivered safely to your
-        address.
+        {t("productDetail.shipping.safetyPromise")}
       </p>
     </div>
   );
@@ -175,6 +175,8 @@ function ShippingInfo() {
    Main Component
 ========================================================= */
 export default function ProductDetails() {
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
   const { id } = useParams();
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
@@ -192,6 +194,13 @@ export default function ProductDetails() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  const paymentFeatures = [
+    [Lock, t("productDetail.features.securePayment"), t("productDetail.features.sslEncrypted")],
+    [Truck, t("productDetail.features.fastShipping"), t("productDetail.features.ordersOver")],
+    [RotateCcw, t("productDetail.features.easyReturns"), t("productDetail.features.returnsHassle")],
+    [ShieldCheck, t("productDetail.features.authentic"), t("productDetail.features.genuine")],
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -231,14 +240,14 @@ export default function ProductDetails() {
         }
       } catch (error) {
         console.error(error);
-        toast.error("Failed to load product");
+        toast.error(t("productDetail.loadError"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id]);
+  }, [id, t]);
 
   const handleAddToCart = async () => {
     const success = await addItem(product._id, quantity);
@@ -250,7 +259,7 @@ export default function ProductDetails() {
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (reviewRating === 0) {
-      toast.error("Please select a rating from 1 to 5 stars first");
+      toast.error(t("productDetail.reviews.ratingRequired"));
       return;
     }
     setSubmittingReview(true);
@@ -259,7 +268,7 @@ export default function ProductDetails() {
         rating: reviewRating,
         comment: reviewComment,
       });
-      toast.success("Your review has been added, thank you!");
+      toast.success(t("productDetail.reviews.success"));
       setReviewRating(0);
       setReviewComment("");
       const { data } = await getProductReviews(id);
@@ -267,7 +276,7 @@ export default function ProductDetails() {
       setReviews(Array.isArray(reviewsData) ? reviewsData : []);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to add review");
+      toast.error(t("productDetail.reviews.error"));
     } finally {
       setSubmittingReview(false);
     }
@@ -284,9 +293,9 @@ export default function ProductDetails() {
   if (!product) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-500 text-lg">Product not found</p>
+        <p className="text-gray-500 text-lg">{t("productDetail.notFound")}</p>
         <Link to="/shop" className="text-primary-500 hover:underline">
-          Back to Shop
+          {t("productDetail.backToShop")}
         </Link>
       </div>
     );
@@ -331,15 +340,15 @@ export default function ProductDetails() {
     <div className="min-h-screen bg-[#f7f8fa] dark:bg-slate-950 text-[#374151] dark:text-slate-200 px-1 sm:px-2 lg:px-3 py-4 transition-colors duration-200">
       <div className="max-w-[1400px] mx-auto">
         {/* Breadcrumb */}
-        <div className="text-[10px] text-gray-400 dark:text-slate-400 mb-4 px-1">
+        <div className="text-[10px] text-gray-400 dark:text-slate-400 mb-4 px-1 flex items-center gap-1.5 flex-wrap">
           <Link to="/" className="hover:text-primary-500">
-            Home
+            {t("productDetail.breadcrumb.home")}
           </Link>
-          <span className="mx-2">›</span>
+          <span className="text-gray-400">/</span>
           <Link to="/shop" className="hover:text-primary-500">
-            Shop
+            {t("productDetail.breadcrumb.shop")}
           </Link>
-          <span className="mx-2">›</span>
+          <span className="text-gray-400">/</span>
           <span className="text-[#263653] dark:text-slate-100 font-medium">{product.name}</span>
         </div>
 
@@ -413,7 +422,7 @@ export default function ProductDetails() {
             {/* Info */}
             <div className="pt-1 p-2 sm:p-3">
               <p className="text-[9px] uppercase font-semibold text-gray-400 dark:text-slate-400 tracking-wide">
-                {product.brand || product.category || "BRAND"}
+                {product.brand || product.category || t("productDetail.brandFallback")}
               </p>
               <h1 className="text-2xl sm:text-3xl font-bold mt-1 text-[#374151] dark:text-white">
                 {product.name}
@@ -421,7 +430,7 @@ export default function ProductDetails() {
 
               {product.sku && (
                 <p className="text-[9px] text-gray-400 dark:text-slate-500 mt-1">
-                  SKU: {product.sku}
+                  {t("productDetail.sku", { sku: product.sku })}
                 </p>
               )}
 
@@ -434,8 +443,8 @@ export default function ProductDetails() {
               <div className="flex items-center gap-2 mt-3">
                 <Stars rating={product.averageRating || 0} />
                 <span className="text-[9px] text-gray-500 dark:text-slate-400">
-                  {(product.averageRating || 0).toFixed(1)} ({reviewCount}{" "}
-                  reviews)
+                  {(product.averageRating || 0).toFixed(1)}{" "}
+                  {t("productDetail.reviewsCount", { count: reviewCount })}
                 </span>
                 <span className="text-gray-300 dark:text-slate-600">|</span>
                 <span
@@ -444,7 +453,7 @@ export default function ProductDetails() {
                     stock > 0 ? "text-[#d28c16] dark:text-amber-400" : "text-red-500"
                   )}
                 >
-                  ● {stock > 0 ? "In stock" : "Out of stock"}
+                  ● {stock > 0 ? t("productDetail.inStock") : t("productDetail.outOfStock")}
                 </span>
               </div>
 
@@ -458,8 +467,9 @@ export default function ProductDetails() {
                       ${Number(price).toFixed(2)}
                     </span>
                     <span className="text-[9px] text-green-500 font-semibold">
-                      -
-                      {Math.round(((price - discountPrice) / price) * 100)}% off
+                      {t("productDetail.discountOff", {
+                        percent: Math.round(((price - discountPrice) / price) * 100),
+                      })}
                     </span>
                   </>
                 ) : (
@@ -471,13 +481,15 @@ export default function ProductDetails() {
 
               {stock > 0 && (
                 <p className="text-[9px] mt-2 font-medium text-[#d28c16] dark:text-amber-400">
-                  ● In stock (Only {stock} left)
+                  {t("productDetail.onlyLeft", { count: stock })}
                 </p>
               )}
 
               {/* Quantity + Buttons */}
               <div className="border-t border-gray-100 dark:border-slate-800 mt-5 pt-5">
-                <p className="text-[10px] font-semibold mb-2 text-slate-800 dark:text-slate-200">Quantity:</p>
+                <p className="text-[10px] font-semibold mb-2 text-slate-800 dark:text-slate-200">
+                  {t("productDetail.quantity")}
+                </p>
                 <div className="flex items-center border border-gray-200 dark:border-slate-700 rounded-lg w-fit overflow-hidden bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -502,9 +514,9 @@ export default function ProductDetails() {
                   <button
                     onClick={handleAddToCart}
                     disabled={stock <= 0}
-                    className="flex-1 h-10 bg-[#5046E5] hover:bg-[#4338CA] text-white rounded-lg text-[10px] font-semibold hover:shadow-lg transition disabled:bg-gray-300 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 disabled:cursor-not-allowed cursor-pointer"
+                    className="flex-1 h-10 bg-[#5046E5] hover:bg-[#4338CA] text-white rounded-lg text-[10px] font-semibold hover:shadow-lg transition disabled:bg-gray-300 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    <Lock size={12} className="inline mr-1.5" /> Add to Cart
+                    <Lock size={12} /> {t("productDetail.addToCart")}
                   </button>
                   <button
                     onClick={() => toggleItem(product._id)}
@@ -528,7 +540,7 @@ export default function ProductDetails() {
 
         {/* ===== Payment Features ===== */}
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5 pt-1">
-          {PAYMENT_FEATURES.map(([Icon, title, text]) => (
+          {paymentFeatures.map(([Icon, title, text]) => (
             <div
               key={title}
               className="group flex items-center gap-3 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-colors duration-300 shadow-sm"
@@ -547,10 +559,10 @@ export default function ProductDetails() {
         {/* ===== Tabs Section ===== */}
         <section className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl mt-5 p-4 sm:p-5 lg:p-6 shadow-sm">
           <div className="flex items-center gap-5 sm:gap-7 border-b border-gray-100 dark:border-slate-800 pb-3 text-xs sm:text-sm whitespace-nowrap overflow-x-auto">
-            {tabBtn("description", "Description")}
-            {tabBtn("specifications", "Specifications")}
-            {tabBtn("shipping", "Shipping")}
-            {tabBtn("reviews", `Reviews (${reviewCount})`)}
+            {tabBtn("description", t("productDetail.tabs.description"))}
+            {tabBtn("specifications", t("productDetail.tabs.specifications"))}
+            {tabBtn("shipping", t("productDetail.tabs.shipping"))}
+            {tabBtn("reviews", t("productDetail.tabs.reviews", { count: reviewCount }))}
           </div>
 
           {activeTab === "description" && (
@@ -562,18 +574,18 @@ export default function ProductDetails() {
                 <p className="text-sm text-gray-500 dark:text-slate-300 leading-7 whitespace-pre-line">
                   {product.description ||
                     product.shortDescription ||
-                    "No description available."}
+                    t("productDetail.noDescription")}
                 </p>
               </div>
 
               <div className="space-y-5">
                 <div>
                   <h3 className="text-base font-bold text-[#263653] dark:text-slate-100 mb-4">
-                    Specifications
+                    {t("productDetail.specs.title")}
                   </h3>
-                  <SpecTable product={product} stock={stock} />
+                  <SpecTable product={product} stock={stock} t={t} />
                 </div>
-                <ShippingInfo />
+                <ShippingInfo t={t} />
               </div>
             </div>
           )}
@@ -581,15 +593,15 @@ export default function ProductDetails() {
           {activeTab === "specifications" && (
             <div className="mt-6 w-full rounded-xl bg-[#f3f4f6] dark:bg-slate-800/50 p-4">
               <h3 className="text-base font-bold text-[#263653] dark:text-slate-100 mb-4">
-                Specifications
+                {t("productDetail.specs.title")}
               </h3>
-              <SpecTable product={product} stock={stock} />
+              <SpecTable product={product} stock={stock} t={t} />
             </div>
           )}
 
           {activeTab === "shipping" && (
             <div className="mt-6 w-full">
-              <ShippingInfo />
+              <ShippingInfo t={t} />
             </div>
           )}
 
@@ -601,7 +613,7 @@ export default function ProductDetails() {
                   className="border border-gray-100 dark:border-slate-800 rounded-2xl p-5 space-y-4"
                 >
                   <p className="font-medium text-gray-900 dark:text-slate-100">
-                    Write your review
+                    {t("productDetail.reviews.writeReview")}
                   </p>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -625,7 +637,7 @@ export default function ProductDetails() {
                   <textarea
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
-                    placeholder="Share your opinion about the product..."
+                    placeholder={t("productDetail.reviews.placeholder")}
                     rows={3}
                     className="w-full px-4 py-3 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                   />
@@ -634,23 +646,27 @@ export default function ProductDetails() {
                     disabled={submittingReview}
                     className="px-6 py-2.5 bg-[#5046E5] hover:bg-[#4338CA] text-white font-medium rounded-lg transition disabled:opacity-50 cursor-pointer"
                   >
-                    {submittingReview ? "Submitting..." : "Submit Review"}
+                    {submittingReview
+                      ? t("productDetail.reviews.submitting")
+                      : t("productDetail.reviews.submit")}
                   </button>
                 </form>
               ) : (
-                <div className="border border-gray-100 dark:border-slate-800 rounded-2xl p-5 text-sm text-gray-500 dark:text-slate-400">
+                <div className="border border-gray-100 dark:border-slate-800 rounded-2xl p-5 text-sm text-gray-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Link
                     to="/login"
                     className="text-primary-500 hover:underline"
                   >
-                    Log in
-                  </Link>{" "}
-                  to write a review.
+                    {t("productDetail.reviews.login")}
+                  </Link>
+                  <span>{t("productDetail.reviews.loginPrompt")}</span>
                 </div>
               )}
 
               {reviews.length === 0 ? (
-                <p className="text-gray-500 dark:text-slate-400">No reviews yet.</p>
+                <p className="text-gray-500 dark:text-slate-400">
+                  {t("productDetail.reviews.noReviews")}
+                </p>
               ) : (
                 reviews.map((review) => (
                   <div
@@ -677,7 +693,7 @@ export default function ProductDetails() {
                       </div>
                       <span className="text-xs text-gray-400 dark:text-slate-500">
                         {new Date(review.createdAt).toLocaleDateString(
-                          "en-US"
+                          isRtl ? "ar-EG" : "en-US"
                         )}
                       </span>
                     </div>
@@ -693,7 +709,7 @@ export default function ProductDetails() {
         {relatedProducts.length > 0 && (
           <div className="mt-6 pb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-[#374151] dark:text-white mb-4">
-              Related Products
+              {t("productDetail.relatedProducts")}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
               {relatedProducts.map((p) => (

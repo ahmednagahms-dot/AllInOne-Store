@@ -539,5 +539,80 @@
       "cvvRequired": "رمز الأمان (CVV) مطلوب",
       "cvvMin": "يجب أن يتكون رمز الأمان من 3 أرقام على الأقل"
     }
+  },
+  "productDetail": {
+    "breadcrumb": {
+      "home": "الرئيسية",
+      "shop": "المتجر"
+    },
+    "loadError": "فشل في تحميل بيانات المنتج",
+    "notFound": "المنتج غير موجود",
+    "backToShop": "العودة إلى المتجر",
+    "brandFallback": "العلامة التجارية",
+    "sku": "رمز المنتج: {{sku}}",
+    "inStock": "متوفر في المخزون",
+    "outOfStock": "نفد من المخزون",
+    "onlyLeft": "● متوفر (متبقي {{count}} فقط)",
+    "reviewsCount_one": "(تقييم واحد)",
+    "reviewsCount_two": "(تقييمان)",
+    "reviewsCount_few": "({{count}} تقييمات)",
+    "reviewsCount_many": "({{count}} تقييماً)",
+    "reviewsCount_other": "({{count}} تقييم)",
+    "discountOff": "خصم {{percent}}%",
+    "quantity": "الكمية:",
+    "addToCart": "أضف إلى السلة",
+    "addingToCart": "جاري الإضافة...",
+    "features": {
+      "securePayment": "دفع آمن ومحمي",
+      "sslEncrypted": "تشفير SSL آمن",
+      "fastShipping": "شحن سريع وموثوق",
+      "ordersOver": "للطلبات أكثر من 50 دولار",
+      "easyReturns": "إرجاع سهل وميسر",
+      "returnsHassle": "خلال 30 يومًا بدون تعقيد",
+      "authentic": "منتجات أصلية",
+      "genuine": "100% مضمونة ومعتمدة"
+    },
+    "tabs": {
+      "description": "الوصف",
+      "specifications": "المواصفات",
+      "shipping": "الشحن والتوصيل",
+      "reviews": "التقييمات ({{count}})"
+    },
+    "noDescription": "لا يوجد وصف متوفر لهذا المنتج.",
+    "specs": {
+      "title": "المواصفات الفنية",
+      "brand": "العلامة التجارية",
+      "model": "الموديل",
+      "category": "الفئة / القسم",
+      "sku": "رمز المنتج SKU",
+      "stock": "الكمية المتوفرة",
+      "noSpecs": "لا توجد مواصفات متاحة"
+    },
+    "shipping": {
+      "title": "معلومات الشحن والتوصيل",
+      "estimatedDelivery": "موعد التوصيل المتوقع",
+      "duration": "2 - 5 أيام عمل",
+      "freeShippingOver": "شحن مجاني للطلبات فوق 50 دولار",
+      "safetyPromise": "سيتم تغليف طلبك بعناية فائقة وتوصيله بأمان إلى باب منزلك.",
+      "steps": {
+        "orderPlaced": "تم تقديم الطلب",
+        "processing": "قيد المعالجة",
+        "shipped": "تم الشحن",
+        "delivered": "تم التوصيل"
+      }
+    },
+    "reviews": {
+      "writeReview": "أضف تقييمك للمنتج",
+      "placeholder": "شارِكنا تجربتك ورأيك الصادق حول هذا المنتج...",
+      "submit": "إرسال التقييم",
+      "submitting": "جاري الإرسال...",
+      "ratingRequired": "يرجى اختيار تقييم من 1 إلى 5 نجوم أولاً",
+      "success": "تمت إضافة تقييمك بنجاح، شكراً لمشاركتك!",
+      "error": "فشل في إضافة التقييم، يرجى المحاولة لاحقاً",
+      "loginPrompt": "لكتابة تقييم.",
+      "login": "تسجيل الدخول",
+      "noReviews": "لا توجد تقييمات لهذا المنتج بعد. كن أول من يقيّمه!"
+    },
+    "relatedProducts": "منتجات ذات صلة"
   }
 }
