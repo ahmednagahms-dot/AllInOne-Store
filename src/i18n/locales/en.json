@@ -70,9 +70,16 @@
       "watches": "Watches",
       "gaming": "Gaming",
       "sports": "Sports & Outdoors",
-      "toys": "Toys & Games",
+      "toys": "Toys & Hobbies",
+      "toys & games": "Toys & Games",
       "books": "Books",
-      "accessories": "Accessories"
+      "accessories": "Accessories",
+      "audio": "Audio",
+      "smartphones": "Smartphones",
+      "tablets": "Tablets",
+      "macbook": "Macbook",
+      "beauty & care": "Beauty & Care",
+      "others": "Others"
     }
   },
   "featured": {
@@ -535,5 +542,77 @@
       "cvvRequired": "CVV is required",
       "cvvMin": "Must be 3 digits"
     }
+  },
+  "productDetail": {
+    "breadcrumb": {
+      "home": "Home",
+      "shop": "Shop"
+    },
+    "loadError": "Failed to load product",
+    "notFound": "Product not found",
+    "backToShop": "Back to Shop",
+    "brandFallback": "Brand",
+    "sku": "SKU: {{sku}}",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "onlyLeft": "● In stock (Only {{count}} left)",
+    "reviewsCount_one": "({{count}} review)",
+    "reviewsCount_other": "({{count}} reviews)",
+    "discountOff": "-{{percent}}% off",
+    "quantity": "Quantity:",
+    "addToCart": "Add to Cart",
+    "addingToCart": "Adding...",
+    "features": {
+      "securePayment": "Secure Payment",
+      "sslEncrypted": "SSL Encrypted",
+      "fastShipping": "Fast Shipping",
+      "ordersOver": "Orders over $50",
+      "easyReturns": "Easy Returns",
+      "returnsHassle": "30 Days Hassle Free",
+      "authentic": "Authentic Products",
+      "genuine": "100% Genuine"
+    },
+    "tabs": {
+      "description": "Description",
+      "specifications": "Specifications",
+      "shipping": "Shipping",
+      "reviews": "Reviews ({{count}})"
+    },
+    "noDescription": "No description available.",
+    "specs": {
+      "title": "Specifications",
+      "brand": "Brand",
+      "model": "Model",
+      "category": "Category",
+      "sku": "SKU",
+      "stock": "Stock",
+      "noSpecs": "No specifications available"
+    },
+    "shipping": {
+      "title": "Shipping Information",
+      "estimatedDelivery": "Estimated delivery",
+      "duration": "2 - 5 business days",
+      "freeShippingOver": "Free shipping on orders over $50",
+      "safetyPromise": "Your order will be carefully packed and delivered safely to your address.",
+      "steps": {
+        "orderPlaced": "Order Placed",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered"
+      }
+    },
+    "reviews": {
+      "writeReview": "Write your review",
+      "placeholder": "Share your opinion about the product...",
+      "submit": "Submit Review",
+      "submitting": "Submitting...",
+      "ratingRequired": "Please select a rating from 1 to 5 stars first",
+      "success": "Your review has been added, thank you!",
+      "error": "Failed to add review",
+      "loginPrompt": "to write a review.",
+      "login": "Log in",
+      "noReviews": "No reviews yet."
+    },
+    "relatedProducts": "Related Products"
   }
 }
