@@ -31,7 +31,6 @@ export default function Shop() {
   const [availability, setAvailability] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(0);
 
-  // --- 1. قراءة الأقسام الرئيسية أو الفرعية من الرابط (URL) ---
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     
@@ -46,7 +45,6 @@ export default function Shop() {
     }
   }, [location.search]);
 
-  // --- 2. جلب كل المنتجات من الـ API ---
   useEffect(() => {
     const fetchAllProducts = async () => {
       setLoading(true);
@@ -69,18 +67,15 @@ export default function Shop() {
     fetchAllProducts();
   }, []);
 
-  // --- 3. تطبيق الفلاتر والترتيب (مدمج فيها تعديلات السعر والخصم) ---
   const filteredProducts = useMemo(() => {
     let result = [...allProducts];
 
-    // فلتر البحث
     if (searchQuery) {
       result = result.filter((p) =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // فلتر الأقسام الفرعية
     if (selectedSubcategories.length > 0) {
       result = result.filter((p) => {
         const sub =
@@ -94,7 +89,6 @@ export default function Shop() {
       });
     }
 
-    // فلتر الأقسام الرئيسية
     if (selectedCategories.length > 0) {
       result = result.filter((p) => {
         const cat =
@@ -103,14 +97,12 @@ export default function Shop() {
       });
     }
 
-    // دالة مساعدة لحساب السعر الفعلي بأمان
     const getActualPrice = (p) => {
       const price = Number(p.price) || 0;
       const discountPrice = Number(p.discountPrice) || 0;
       return discountPrice > 0 && discountPrice < price ? discountPrice : price;
     };
 
-    // فلتر السعر
     if (priceRange.min !== "")
       result = result.filter(
         (p) => getActualPrice(p) >= Number(priceRange.min)
@@ -120,12 +112,10 @@ export default function Shop() {
         (p) => getActualPrice(p) <= Number(priceRange.max)
       );
 
-    // فلتر التقييم
     if (selectedRating > 0) {
       result = result.filter((p) => (Number(p.averageRating) || 0) >= selectedRating);
     }
 
-    // فلتر المخزون
     if (availability.length > 0) {
       result = result.filter((p) => {
         const st = Number(p.stock) || 0;
@@ -136,7 +126,6 @@ export default function Shop() {
       });
     }
 
-    // فلتر الخصومات
     if (selectedDiscount > 0) {
       result = result.filter((p) => {
         const price = Number(p.price) || 0;
@@ -147,7 +136,6 @@ export default function Shop() {
       });
     }
 
-    // ترتيب المنتجات
     if (sortOption === "price-asc") {
       result.sort((a, b) => getActualPrice(a) - getActualPrice(b));
     } else if (sortOption === "price-desc") {

@@ -11,7 +11,6 @@ import {
   Tablet 
 } from "lucide-react";
 
-// الأقسام الفرعية الحقيقية اللي موجودة في الداتابيز
 const SUBCATEGORIES = [
   { name: "Audio", slug: "audio", icon: Headphones },
   { name: "Smartphones", slug: "smartphones", icon: Smartphone },
@@ -28,7 +27,6 @@ function CategoryCard({ item }) {
 
   const handleClick = (e) => {
     e.preventDefault();
-    // بنبعت subcategory في الرابط عشان Shop.jsx يقرأها ويفلتر صح
     navigate(`/shop?subcategory=${encodeURIComponent(item.slug)}`);
   };
 
@@ -69,7 +67,6 @@ export default function Categories() {
           </Link>
         </div>
 
-        {/* اتظبطت على lg:grid-cols-7 عشان تتناسب مع عدد الأقسام الفرعية (7 أقسام) */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
           {SUBCATEGORIES.map((sub) => (
             <CategoryCard key={sub.slug} item={sub} />

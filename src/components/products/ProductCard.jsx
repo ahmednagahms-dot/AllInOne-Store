@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, Star, ShoppingCart, Eye } from "lucide-react";
+import { Heart, Star, ShoppingCart, Eye, Loader2 } from "lucide-react";
+import { useCart } from "../../context/CartContext";
 
 export default function ProductCard({ product, viewMode = "grid" }) {
   const navigate = useNavigate();
+  const { addItem } = useCart(); 
+  
+  const [isAdding, setIsAdding] = useState(false);
+
   if (!product) return null;
 
   const isList = viewMode === "list";
-  const productId = product._id || product.id; // المتغير اللي بيمنع الشاشة البيضا
+  const productId = product._id || product.id; 
 
   const title = product.name || "Product Name";
   const category =
@@ -23,7 +28,6 @@ export default function ProductCard({ product, viewMode = "grid" }) {
       ? firstImage
       : "https://placehold.co/500x500?text=No+Image");
 
-  // --- حساب الأسعار والخصومات من الـ API ---
   const price = Number(product.price) || 0;
   const discountPrice = Number(product.discountPrice) || 0;
   const hasDiscount = discountPrice > 0 && discountPrice < price;
@@ -35,7 +39,6 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     : 0;
   const discountString = hasDiscount ? `-${discountPercent}%` : null;
 
-  // --- حساب المخزون ---
   const stock = product.stock || 0;
   let stockStatus = "";
   let stockDotColor = "";
@@ -73,9 +76,23 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     badgeColor = "bg-blue-600";
   }
 
+  const handleAddToCart = async (e) => {
+    e.stopPropagation();
+    if (stock <= 0 || isAdding) return;
+    
+    setIsAdding(true);
+    try {
+      const success = await addItem(productId, 1);
+      if (success) {
+        navigate('/cart');
+      }
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <div
-      // الكارت كله بيشتغل كزرار وبينقل الداتا للصفحة الجديدة في لمح البصر
       onClick={() => navigate(`/product/${productId}`, { state: { product } })}
       className={`bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 group flex cursor-pointer ${isList ? "flex-col sm:flex-row gap-6 items-center" : "flex-col h-full"}`}
     >
@@ -90,7 +107,6 @@ export default function ProductCard({ product, viewMode = "grid" }) {
           </span>
         )}
         <button 
-          // منع الكارت يفتح لما تدوس على القلب
           onClick={(e) => e.stopPropagation()} 
           className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition z-10"
         >
@@ -154,21 +170,28 @@ export default function ProductCard({ product, viewMode = "grid" }) {
         className={`flex gap-2 flex-shrink-0 ${isList ? "w-full sm:w-auto sm:min-w-[160px]" : ""}`}
       >
         <button
-          // منع الكارت يفتح لما تدوس Add to Cart
-          onClick={(e) => e.stopPropagation()} 
-          disabled={stock <= 0}
+          onClick={handleAddToCart}
+          disabled={stock <= 0 || isAdding}
           className={`group flex-grow flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-medium text-sm transition-all duration-300 shadow-sm whitespace-nowrap
             ${
               stock <= 0
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                : isAdding
+                ? "bg-blue-400 cursor-wait text-white"
                 : "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
             }`}
         >
-          <ShoppingCart
-            size={18}
-            className={`${stock > 0 ? "transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" : ""}`}
-          />
-          <span>{stock <= 0 ? "Out of Stock" : "Add to Cart"}</span>
+          {isAdding ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : (
+            <ShoppingCart
+              size={18}
+              className={`${stock > 0 ? "transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" : ""}`}
+            />
+          )}
+          <span>
+            {stock <= 0 ? "Out of Stock" : isAdding ? "Adding..." : "Add to Cart"}
+          </span>
         </button>
 
         <div
