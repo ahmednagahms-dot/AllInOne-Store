@@ -75,7 +75,6 @@ export default function ShopSidebar({
     'accessories': Smartphone,
   };
 
-  // --- 1. بناء مصفوفة الأقسام الرئيسية ---
   const allCategories = [...new Set(products.map(p => {
     const cat = typeof p.category === 'object' ? p.category?.name : p.category;
     return cat ? cat.toLowerCase() : null;
@@ -106,7 +105,6 @@ export default function ShopSidebar({
     });
   }
 
-  // --- 2. بناء الأقسام الفرعية (Subcategories) بناءً على القسم الرئيسي المحدد ---
   const relevantProducts = selectedCategories.length > 0 
     ? products.filter(p => {
         const pCat = typeof p.category === 'object' ? p.category?.name : p.category;
@@ -136,14 +134,12 @@ export default function ShopSidebar({
     });
   }
 
-  // --- 3. متغيرات شريط السعر ---
   const minPrice = Number(priceRange.min) || 0;
   const maxPrice = Number(priceRange.max) || 5000;
   const maxLimit = 5000;
   const leftPercent = (minPrice / maxLimit) * 100;
   const rightPercent = 100 - (maxPrice / maxLimit) * 100;
 
-  // --- 4. دوال التحكم في الفلاتر ---
   const handleCategoryChange = (cat) => {
     setSelectedCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
@@ -184,7 +180,6 @@ export default function ShopSidebar({
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-4 shadow-sm w-full lg:w-72 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
       
-      {/* 1. Categories */}
       <div className="mb-6 border-b border-gray-100 pb-6">
         <SectionHeader title="Categories" section="categories" />
         {openSections.categories && (
@@ -211,7 +206,6 @@ export default function ShopSidebar({
         )}
       </div>
 
-      {/* 2. Subcategories */}
       <div className="mb-6 border-b border-gray-100 pb-6">
         <SectionHeader title="Subcategories" section="subcategories" />
         {openSections.subcategories && (
@@ -249,7 +243,6 @@ export default function ShopSidebar({
         )}
       </div>
 
-      {/* 3. Price Range */}
       <div className="mb-6 border-b border-gray-100 pb-6">
         <SectionHeader title="Price" section="price" />
         {openSections.price && (
@@ -337,7 +330,6 @@ export default function ShopSidebar({
         )}
       </div>
 
-      {/* 4. Rating */}
       <div className="mb-6 border-b border-gray-100 pb-6">
         <SectionHeader title="Rating" section="rating" />
         {openSections.rating && (
@@ -394,7 +386,6 @@ export default function ShopSidebar({
         )}
       </div>
 
-      {/* 5. Availability */}
       <div className="mb-6 border-b border-gray-100 pb-6">
         <SectionHeader title="Availability" section="availability" />
         {openSections.availability && (
@@ -435,7 +426,6 @@ export default function ShopSidebar({
         )}
       </div>
 
-      {/* 6. Discount */}
       <div className="mb-6">
         <SectionHeader title="Discount" section="discount" />
         {openSections.discount && (
@@ -461,7 +451,6 @@ export default function ShopSidebar({
         )}
       </div>
 
-      {/* 7. Clear Filters */}
       <button
         onClick={clearFilters}
         className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:border-gray-300 hover:bg-gray-50 transition shadow-sm text-sm"

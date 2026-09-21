@@ -7,7 +7,6 @@ export default function ProductCard({ product, viewMode = "grid" }) {
   const navigate = useNavigate();
   const { addItem } = useCart(); 
   
-  // 1. إضافة State لمراقبة حالة التحميل الخاصة بالزرار
   const [isAdding, setIsAdding] = useState(false);
 
   if (!product) return null;
@@ -77,19 +76,18 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     badgeColor = "bg-blue-600";
   }
 
-  // 2. تحديث الدالة لتشغيل اللودنج أثناء الإضافة
   const handleAddToCart = async (e) => {
     e.stopPropagation();
-    if (stock <= 0 || isAdding) return; // منع الضغط المتكرر
+    if (stock <= 0 || isAdding) return;
     
-    setIsAdding(true); // تشغيل اللودنج
+    setIsAdding(true);
     try {
       const success = await addItem(productId, 1);
       if (success) {
         navigate('/cart');
       }
     } finally {
-      setIsAdding(false); // إيقاف اللودنج (في حالة الفشل أو بعد الانتهاء)
+      setIsAdding(false);
     }
   };
 
@@ -171,7 +169,6 @@ export default function ProductCard({ product, viewMode = "grid" }) {
       <div
         className={`flex gap-2 flex-shrink-0 ${isList ? "w-full sm:w-auto sm:min-w-[160px]" : ""}`}
       >
-        {/* 3. تحديث تصميم الزرار لعرض اللودنج وتغيير الألوان */}
         <button
           onClick={handleAddToCart}
           disabled={stock <= 0 || isAdding}
@@ -180,7 +177,7 @@ export default function ProductCard({ product, viewMode = "grid" }) {
               stock <= 0
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                 : isAdding
-                ? "bg-blue-400 cursor-wait text-white" // شكل الزرار وقت التحميل
+                ? "bg-blue-400 cursor-wait text-white"
                 : "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
             }`}
         >
