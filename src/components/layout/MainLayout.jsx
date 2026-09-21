@@ -21,7 +21,7 @@ export default function MainLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex flex-col min-h-screen relative">
+    <div className="flex flex-col min-h-screen relative bg-gray-50/50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 antialiased transition-colors duration-200">
       <Navbar />
 
       {isPageLoading && <Spinner fullScreen={true} />}
