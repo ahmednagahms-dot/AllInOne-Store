@@ -129,9 +129,9 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition duration-300 hover:-translate-y-1 hover:border-indigo-200 dark:hover:border-indigo-500/40 hover:shadow-xl dark:hover:shadow-indigo-950/20">
       {/* Image */}
-      <div className="relative flex h-[220px] items-center justify-center overflow-hidden bg-slate-50 p-4">
+      <div className="relative flex h-[220px] items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800/50 p-4">
         <Link
           to={productId ? `/products/${productId}` : "#"}
           className="h-full w-full"
@@ -145,9 +145,9 @@ export default function ProductCard({ product }) {
               className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-300">
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-300 dark:text-slate-600">
               <ImageOff size={32} />
-              <span className="text-xs text-slate-400">{t("productCard.noImage")}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">{t("productCard.noImage")}</span>
             </div>
           )}
         </Link>
@@ -160,7 +160,7 @@ export default function ProductCard({ product }) {
           className={`absolute right-3 rtl:right-auto rtl:left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition cursor-pointer ${
             liked
               ? "bg-red-500 text-white"
-              : "bg-white text-slate-500 hover:bg-[#5046E5] hover:text-white"
+              : "bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-[#5046E5] dark:hover:bg-[#5046E5] hover:text-white"
           }`}
         >
           <Heart size={17} className={liked ? "fill-current" : ""} />
@@ -175,7 +175,7 @@ export default function ProductCard({ product }) {
 
         {/* Out of stock */}
         {stock === 0 && (
-          <span className="absolute bottom-3 left-3 rtl:left-auto rtl:right-3 rounded-full bg-slate-800/90 px-2.5 py-1 text-[11px] font-semibold text-white">
+          <span className="absolute bottom-3 left-3 rtl:left-auto rtl:right-3 rounded-full bg-slate-800/90 dark:bg-slate-900/90 px-2.5 py-1 text-[11px] font-semibold text-white border border-slate-700/50">
             {t("productCard.outOfStock")}
           </span>
         )}
@@ -193,17 +193,17 @@ export default function ProductCard({ product }) {
                 className={
                   i <= Math.round(rating)
                     ? "fill-yellow-400 text-yellow-400"
-                    : "fill-slate-200 text-slate-200"
+                    : "fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700"
                 }
               />
             ))}
           </div>
           {reviewsCount > 0 ? (
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
               ({reviewsCount})
             </span>
           ) : (
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
               {rating || t("productCard.new")}
             </span>
           )}
@@ -211,18 +211,18 @@ export default function ProductCard({ product }) {
 
         {/* Name */}
         <Link to={productId ? `/products/${productId}` : "#"}>
-          <h3 className="line-clamp-2 min-h-[40px] text-sm font-semibold text-[#0F172A] hover:text-[#5046E5] transition text-start">
+          <h3 className="line-clamp-2 min-h-[40px] text-sm font-semibold text-[#0F172A] dark:text-slate-100 hover:text-[#5046E5] dark:hover:text-indigo-400 transition text-start">
             {name}
           </h3>
         </Link>
 
         {/* Price */}
         <div className="mt-3 flex items-center gap-2">
-          <span className="text-lg font-bold text-[#5046E5]">
+          <span className="text-lg font-bold text-[#5046E5] dark:text-indigo-400">
             {formatPrice(price)}
           </span>
           {oldPrice > 0 && oldPrice > price && (
-            <span className="text-sm text-slate-400 line-through">
+            <span className="text-sm text-slate-400 dark:text-slate-500 line-through">
               {formatPrice(oldPrice)}
             </span>
           )}
@@ -233,7 +233,7 @@ export default function ProductCard({ product }) {
           type="button"
           onClick={handleAddToCart}
           disabled={stock === 0 || cartLoading}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4338CA] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 cursor-pointer"
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4338CA] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 cursor-pointer shadow-sm"
         >
           <ShoppingCart size={17} />
           {stock === 0

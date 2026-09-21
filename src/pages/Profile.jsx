@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import Cookies from "js-cookie";
 import {
   getMe,
@@ -24,6 +25,7 @@ export default function Profile() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { logoutUser, updateUser } = useAuth();
+  const { theme: currentTheme, setTheme: setGlobalTheme } = useTheme();
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ export default function Profile() {
   const [preferences, setPreferences] = useState({
     language: i18n.language?.startsWith("ar") ? "العربية" : "English",
     currency: "USD ($)",
-    theme: "light",
+    theme: currentTheme || "light",
   });
 
   const [passwordStep, setPasswordStep] = useState("idle");
@@ -166,6 +168,16 @@ export default function Profile() {
       language: i18n.language?.startsWith("ar") ? "العربية" : "English",
     }));
   }, [i18n.language]);
+
+  // Keep preferences theme synchronized with global theme
+  useEffect(() => {
+    if (currentTheme) {
+      setPreferences((prev) => ({
+        ...prev,
+        theme: currentTheme,
+      }));
+    }
+  }, [currentTheme]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -367,15 +379,15 @@ export default function Profile() {
       : user.username || user.name || "User";
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 px-4 sm:px-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-6 px-4 sm:px-6 transition-colors duration-200">
       <div className="max-w-[1000px] mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-xl font-bold text-slate-800">
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
               {t("profile.title") || "Account Settings"}
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               {t("profile.subtitle") ||
                 "Manage your account information and preferences"}
             </p>
@@ -385,7 +397,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"
             >
               <Pencil size={14} />
               {t("profile.editProfile") || "Edit Profile"}
@@ -394,15 +406,15 @@ export default function Profile() {
         </div>
 
         {/* Profile Information */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-          <h2 className="text-base font-bold text-slate-800 mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 mb-6">
+          <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-6">
             {t("profile.profileInfo") || "Profile Information"}
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
             {/* Avatar — read-only */}
             <div className="flex flex-col items-center">
-              <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+              <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white dark:ring-slate-800 shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
                 {user?.avatar ? (
                   <img
                     src={user.avatar}
@@ -424,7 +436,7 @@ export default function Profile() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
                     {t("profile.firstName") || "First name"}
                   </label>
                   <input
@@ -433,12 +445,12 @@ export default function Profile() {
                     value={form.firstName}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 disabled:text-slate-500 bg-white"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
                     {t("profile.lastName") || "Last name"}
                   </label>
                   <input
@@ -447,14 +459,14 @@ export default function Profile() {
                     value={form.lastName}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 disabled:text-slate-500 bg-white"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
                     {t("profile.email") || "Email"}
                   </label>
                   <input
@@ -462,19 +474,19 @@ export default function Profile() {
                     name="email"
                     value={form.email}
                     disabled
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none bg-slate-50 text-slate-500 cursor-not-allowed"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 cursor-not-allowed"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                  <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
                     {t("profile.phone") || "Phone"}
                   </label>
                   <div className="flex gap-2">
                     <div className="relative">
                       <select
                         disabled={!isEditing}
-                        className="appearance-none px-3 py-2.5 pr-8 rtl:pr-3 rtl:pl-8 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white disabled:bg-slate-50 disabled:text-slate-500"
+                        className="appearance-none px-3 py-2.5 pr-8 rtl:pr-3 rtl:pl-8 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
                       >
                         <option>+20</option>
                         <option>+1</option>
@@ -493,14 +505,14 @@ export default function Profile() {
                       onChange={handleChange}
                       disabled={!isEditing}
                       dir="ltr"
-                      className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 disabled:text-slate-500 bg-white"
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
                   {t("profile.dateOfBirth") || "Date of birth"}
                 </label>
                 <input
@@ -509,7 +521,7 @@ export default function Profile() {
                   value={form.dateOfBirth}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 disabled:text-slate-500 bg-white"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -517,12 +529,12 @@ export default function Profile() {
         </div>
 
         {/* Preferences */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 mb-6">
           <div className="mb-6">
-            <h2 className="text-base font-bold text-slate-800">
+            <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">
               {t("profile.preferences") || "Preferences"}
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {t("profile.preferencesDesc") ||
                 "Set your preferred language, currency and theme"}
             </p>
@@ -530,7 +542,7 @@ export default function Profile() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
                 {t("profile.language") || "Language"}
               </label>
               <div className="relative">
@@ -551,7 +563,7 @@ export default function Profile() {
                     }
                   }}
                   disabled={!isEditing}
-                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white disabled:bg-slate-50 disabled:text-slate-500"
+                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
                 >
                   <option value="English">
                     {t("profile.languageEnglish") || "English"}
@@ -565,13 +577,13 @@ export default function Profile() {
                 </select>
                 <ChevronDown
                   size={14}
-                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
                 {t("profile.currency") || "Currency"}
               </label>
               <div className="relative">
@@ -584,7 +596,7 @@ export default function Profile() {
                     })
                   }
                   disabled={!isEditing}
-                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white disabled:bg-slate-50 disabled:text-slate-500"
+                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
                 >
                   <option>USD ($)</option>
                   <option>EGP (E£)</option>
@@ -593,16 +605,16 @@ export default function Profile() {
                 </select>
                 <ChevronDown
                   size={14}
-                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
                 {t("profile.theme") || "Theme"}
               </label>
-              <div className="flex items-center bg-slate-100 rounded-xl p-1">
+              <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 border border-transparent dark:border-slate-700">
                 {["light", "dark", "auto"].map((themeKey) => {
                   const labelMap = {
                     light: t("profile.themeLight") || "Light",
@@ -613,19 +625,18 @@ export default function Profile() {
                     <button
                       key={themeKey}
                       type="button"
-                      onClick={() =>
-                        isEditing &&
-                        setPreferences({
-                          ...preferences,
+                      onClick={() => {
+                        setPreferences((prev) => ({
+                          ...prev,
                           theme: themeKey,
-                        })
-                      }
-                      disabled={!isEditing}
-                      className={`flex-1 py-1.5 text-xs font-medium rounded-lg capitalize transition ${
+                        }));
+                        setGlobalTheme(themeKey);
+                      }}
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-lg capitalize transition cursor-pointer ${
                         preferences.theme === themeKey
                           ? "bg-indigo-600 text-white shadow-sm"
-                          : "text-slate-600 hover:text-slate-900"
-                      } ${!isEditing ? "cursor-not-allowed opacity-70" : ""}`}
+                          : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                      }`}
                     >
                       {labelMap[themeKey] || themeKey}
                     </button>
@@ -637,10 +648,10 @@ export default function Profile() {
         </div>
 
         {/* Change Password */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <Lock size={16} className="text-indigo-600" />
-            <h2 className="text-base font-bold text-slate-800">
+            <Lock size={16} className="text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">
               {t("profile.changePassword") || "Change Password"}
             </h2>
           </div>
@@ -649,7 +660,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={handleStartChangePassword}
-              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 text-sm font-medium hover:bg-indigo-50 transition"
+              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"
             >
               {t("profile.changePassword") || "Change Password"}
             </button>
@@ -657,7 +668,7 @@ export default function Profile() {
 
           {passwordStep === "email" && (
             <>
-              <p className="text-xs text-slate-500 mb-4">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
                 {t("profile.otpInstruction") ||
                   "We'll send an OTP to your email to verify your identity."}
               </p>
@@ -666,7 +677,7 @@ export default function Profile() {
                 placeholder={t("profile.email") || "Email"}
                 value={passwordEmail}
                 onChange={(e) => setPasswordEmail(e.target.value)}
-                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white"
+                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               <div className="flex gap-3">
                 <button
@@ -683,7 +694,7 @@ export default function Profile() {
                 <button
                   type="button"
                   onClick={handleCancelChangePassword}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition"
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium transition"
                 >
                   {t("profile.cancel") || "Cancel"}
                 </button>
@@ -699,7 +710,7 @@ export default function Profile() {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 maxLength={6}
-                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white"
+                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
 
               <div className="relative mb-4">
@@ -708,12 +719,12 @@ export default function Profile() {
                   placeholder={t("profile.newPassword") || "New password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 pr-10 rtl:pr-3 rtl:pl-10 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
+                  className="w-full px-3 py-2.5 pr-10 rtl:pr-3 rtl:pl-10 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -734,7 +745,7 @@ export default function Profile() {
                 <button
                   type="button"
                   onClick={handleCancelChangePassword}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition"
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium transition"
                 >
                   {t("profile.cancel") || "Cancel"}
                 </button>
@@ -749,7 +760,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-5 py-2.5 rounded-xl border border-gray-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition"
+              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition"
             >
               {t("profile.cancel") || "Cancel"}
             </button>
@@ -774,7 +785,7 @@ export default function Profile() {
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 transition"
+          className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 py-3 rounded-xl font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 transition"
         >
           <LogOut size={16} />
           {t("profile.logout") || "Logout"}

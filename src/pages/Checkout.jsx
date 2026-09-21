@@ -203,11 +203,11 @@ export default function Checkout() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-500 text-lg">Your cart is empty</p>
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 flex flex-col items-center justify-center gap-4 transition-colors duration-200">
+        <p className="text-gray-500 dark:text-slate-400 text-lg">Your cart is empty</p>
         <button
           onClick={() => navigate("/shop")}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition"
+          className="px-6 py-2.5 bg-[#5046E5] text-white rounded-xl font-medium hover:bg-[#4338CA] transition cursor-pointer"
         >
           Continue Shopping
         </button>
@@ -216,14 +216,14 @@ export default function Checkout() {
   }
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen py-10 text-gray-700 font-normal">
+    <div className="bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-10 text-gray-700 dark:text-slate-200 font-normal transition-colors duration-200">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-slate-100">
             Checkout
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
             Complete your order details below
           </p>
         </div>
@@ -234,9 +234,9 @@ export default function Checkout() {
         >
           <div className="lg:col-span-2 space-y-6">
             {/* 1. Shipping Information */}
-            <div className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800">
               <div className="flex items-center gap-3.5 mb-6">
-                <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                <div className="bg-indigo-50 dark:bg-indigo-950/50 p-3 rounded-2xl text-[#5046E5] dark:text-indigo-400">
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -252,10 +252,10 @@ export default function Checkout() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="font-semibold text-base text-gray-900 tracking-tight">
+                  <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
                     Shipping Information
                   </h2>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
                     Please enter your shipping details
                   </p>
                 </div>
@@ -263,14 +263,14 @@ export default function Checkout() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
                     Full Name *
                   </label>
                   <input
                     type="text"
                     {...register("fullName")}
                     placeholder="Enter your full name"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.fullName && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -279,14 +279,14 @@ export default function Checkout() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
                     Email Address *
                   </label>
                   <input
                     type="email"
                     {...register("email")}
                     placeholder="Enter your email address"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.email && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -295,14 +295,14 @@ export default function Checkout() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
                     Phone Number *
                   </label>
                   <input
                     type="text"
                     {...register("phone")}
                     placeholder="Enter your phone number"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.phone && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -311,34 +311,34 @@ export default function Checkout() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
                     Country *
                   </label>
                   <select
                     {...register("country")}
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100"
                   >
-                    <option value="Egypt">Egypt</option>
-                    <option value="Saudi Arabia">Saudi Arabia</option>
-                    <option value="United Arab Emirates">
+                    <option value="Egypt" className="dark:bg-slate-900">Egypt</option>
+                    <option value="Saudi Arabia" className="dark:bg-slate-900">Saudi Arabia</option>
+                    <option value="United Arab Emirates" className="dark:bg-slate-900">
                       United Arab Emirates
                     </option>
-                    <option value="Jordan">Jordan</option>
-                    <option value="Kuwait">Kuwait</option>
-                    <option value="Qatar">Qatar</option>
-                    <option value="United States">United States</option>
-                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Jordan" className="dark:bg-slate-900">Jordan</option>
+                    <option value="Kuwait" className="dark:bg-slate-900">Kuwait</option>
+                    <option value="Qatar" className="dark:bg-slate-900">Qatar</option>
+                    <option value="United States" className="dark:bg-slate-900">United States</option>
+                    <option value="United Kingdom" className="dark:bg-slate-900">United Kingdom</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
                     City *
                   </label>
                   <input
                     type="text"
                     {...register("city")}
                     placeholder="Enter your city"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.city && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -347,14 +347,14 @@ export default function Checkout() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
                     Postal Code *
                   </label>
                   <input
                     type="text"
                     {...register("postalCode")}
                     placeholder="Enter your postal code"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.postalCode && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -363,14 +363,14 @@ export default function Checkout() {
                   )}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
                     Address *
                   </label>
                   <input
                     type="text"
                     {...register("address")}
                     placeholder="Enter your street address"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   {errors.address && (
                     <p className="text-red-500 text-[11px] mt-1">
@@ -379,23 +379,23 @@ export default function Checkout() {
                   )}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-1.5">
                     Apartment, Suite, etc. (Optional)
                   </label>
                   <input
                     type="text"
                     {...register("apartment")}
                     placeholder="Enter apartment or suite details"
-                    className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                    className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                 </div>
               </div>
             </div>
 
             {/* 2. Delivery Options */}
-            <div className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800 space-y-4">
               <div className="flex items-center gap-3.5">
-                <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                <div className="bg-indigo-50 dark:bg-indigo-950/50 p-3 rounded-2xl text-[#5046E5] dark:text-indigo-400">
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -411,10 +411,10 @@ export default function Checkout() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="font-semibold text-base text-gray-900 tracking-tight">
+                  <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
                     Delivery
                   </h2>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
                     Choose your preferred delivery option
                   </p>
                 </div>
@@ -424,8 +424,8 @@ export default function Checkout() {
                 <label
                   className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-all ${
                     selectedDelivery === "standard"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/20 shadow-sm"
+                      : "border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
@@ -433,16 +433,16 @@ export default function Checkout() {
                       type="radio"
                       value="standard"
                       {...register("deliveryMethod")}
-                      className="w-4 h-4 text-blue-600 accent-blue-600"
+                      className="w-4 h-4 text-indigo-600 accent-indigo-600"
                     />
                     <div>
-                      <p className="font-medium text-xs text-gray-900">
+                      <p className="font-medium text-xs text-gray-900 dark:text-slate-100">
                         Standard Delivery{" "}
-                        <span className="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full ml-2 font-medium">
+                        <span className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[10px] px-2 py-0.5 rounded-full ml-2 font-medium">
                           Free
                         </span>
                       </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
                         3 - 5 business days
                       </p>
                     </div>
@@ -452,8 +452,8 @@ export default function Checkout() {
                 <label
                   className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-all ${
                     selectedDelivery === "express"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/20 shadow-sm"
+                      : "border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
@@ -461,16 +461,16 @@ export default function Checkout() {
                       type="radio"
                       value="express"
                       {...register("deliveryMethod")}
-                      className="w-4 h-4 text-blue-600 accent-blue-600"
+                      className="w-4 h-4 text-indigo-600 accent-indigo-600"
                     />
                     <div>
-                      <p className="font-medium text-xs text-gray-900">
+                      <p className="font-medium text-xs text-gray-900 dark:text-slate-100">
                         Express Delivery{" "}
-                        <span className="text-gray-800 font-medium ml-1">
+                        <span className="text-gray-800 dark:text-slate-200 font-medium ml-1">
                           $6.99
                         </span>
                       </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
                         1 - 2 business days
                       </p>
                     </div>
@@ -480,10 +480,10 @@ export default function Checkout() {
             </div>
 
             {/* 3. Payment Method */}
-            <div className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800 space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                  <div className="bg-blue-50 dark:bg-indigo-950/60 p-3 rounded-2xl text-blue-600 dark:text-indigo-400">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -499,10 +499,10 @@ export default function Checkout() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="font-semibold text-base text-gray-900 tracking-tight">
+                    <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
                       Payment
                     </h2>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
                       Select your payment method
                     </p>
                   </div>
@@ -513,8 +513,8 @@ export default function Checkout() {
                 <label
                   className={`p-4 border rounded-2xl text-center cursor-pointer transition-all ${
                     selectedPaymentMethod === "card"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50/10 shadow-sm dark:border-indigo-500 dark:bg-indigo-950/30"
+                      : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 bg-transparent"
                   }`}
                 >
                   <input
@@ -523,18 +523,18 @@ export default function Checkout() {
                     {...register("paymentMethod")}
                     className="hidden"
                   />
-                  <p className="font-medium text-xs text-gray-900">
+                  <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
                     Credit Card
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
                     Visa, Mastercard
                   </p>
                 </label>
                 <label
                   className={`p-4 border rounded-2xl text-center cursor-pointer transition-all ${
                     selectedPaymentMethod === "wallet"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50/10 shadow-sm dark:border-indigo-500 dark:bg-indigo-950/30"
+                      : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 bg-transparent"
                   }`}
                 >
                   <input
@@ -543,18 +543,18 @@ export default function Checkout() {
                     {...register("paymentMethod")}
                     className="hidden"
                   />
-                  <p className="font-medium text-xs text-gray-900">
+                  <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
                     Digital Wallet
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
                     Apple / Google Pay
                   </p>
                 </label>
                 <label
                   className={`p-4 border rounded-2xl text-center cursor-pointer transition-all ${
                     selectedPaymentMethod === "cash"
-                      ? "border-blue-500 bg-blue-50/10 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50/10 shadow-sm dark:border-indigo-500 dark:bg-indigo-950/30"
+                      : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 bg-transparent"
                   }`}
                 >
                   <input
@@ -563,10 +563,10 @@ export default function Checkout() {
                     {...register("paymentMethod")}
                     className="hidden"
                   />
-                  <p className="font-medium text-xs text-gray-900">
+                  <p className="font-medium text-xs text-gray-900 dark:text-slate-200">
                     Cash on Delivery
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">
                     Pay upon delivery
                   </p>
                 </label>
@@ -574,18 +574,18 @@ export default function Checkout() {
 
               {selectedPaymentMethod === "card" && (
                 <div className="space-y-4 pt-2">
-                  <h3 className="text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  <h3 className="text-xs font-medium text-gray-700 dark:text-slate-300 uppercase tracking-wider">
                     Card Information
                   </h3>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
                       Cardholder Name *
                     </label>
                     <input
                       type="text"
                       {...register("cardHolder")}
                       placeholder="Enter cardholder name"
-                      className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                      className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
                     {errors.cardHolder && (
                       <p className="text-red-500 text-[11px] mt-1">
@@ -594,14 +594,14 @@ export default function Checkout() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
                       Card Number *
                     </label>
                     <input
                       type="text"
                       {...register("cardNumber")}
                       placeholder="Enter card number"
-                      className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                      className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
                     {errors.cardNumber && (
                       <p className="text-red-500 text-[11px] mt-1">
@@ -611,14 +611,14 @@ export default function Checkout() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                      <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
                         Expiry Date *
                       </label>
                       <input
                         type="text"
                         {...register("expiryDate")}
                         placeholder="MM/YY"
-                        className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                        className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                       {errors.expiryDate && (
                         <p className="text-red-500 text-[11px] mt-1">
@@ -627,14 +627,14 @@ export default function Checkout() {
                       )}
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                      <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
                         CVV *
                       </label>
                       <input
                         type="password"
                         {...register("cvv")}
                         placeholder="CVV"
-                        className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                        className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                       {errors.cvv && (
                         <p className="text-red-500 text-[11px] mt-1">
@@ -648,20 +648,20 @@ export default function Checkout() {
 
               {selectedPaymentMethod === "wallet" && (
                 <div className="space-y-4 pt-2">
-                  <h3 className="text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  <h3 className="text-xs font-medium text-gray-700 dark:text-slate-300 uppercase tracking-wider">
                     Digital Wallet Information
                   </h3>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
                       Wallet Phone Number / Account ID *
                     </label>
                     <input
                       type="text"
                       {...register("walletNumber")}
                       placeholder="Enter wallet phone number"
-                      className="w-full p-3.5 text-xs border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition bg-gray-50/20 text-gray-800 placeholder:text-gray-400"
+                      className="w-full p-3.5 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
-                    <p className="text-[11px] text-gray-400 mt-1">
+                    <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-1">
                       Enter the mobile number registered with your wallet
                     </p>
                   </div>
@@ -672,7 +672,7 @@ export default function Checkout() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-4 rounded-2xl font-medium text-sm hover:bg-blue-700 transition shadow-lg shadow-blue-600/20 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 dark:bg-indigo-600 text-white py-4 rounded-2xl font-medium text-sm hover:bg-blue-700 dark:hover:bg-indigo-500 transition shadow-lg shadow-blue-600/20 dark:shadow-indigo-600/30 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               {loading
@@ -682,25 +682,25 @@ export default function Checkout() {
           </div>
 
           {/* Order Summary */}
-          <div className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 h-fit space-y-6">
-            <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-              <h2 className="font-semibold text-base text-gray-900 tracking-tight">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-gray-100 dark:border-slate-800 h-fit space-y-6">
+            <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-800 pb-4">
+              <h2 className="font-semibold text-base text-gray-900 dark:text-slate-100 tracking-tight">
                 Order Summary
               </h2>
               <button
                 type="button"
                 onClick={() => navigate("/cart")}
-                className="text-xs text-blue-600 cursor-pointer font-medium hover:underline"
+                className="text-xs text-blue-600 dark:text-indigo-400 cursor-pointer font-medium hover:underline"
               >
                 Edit Cart
               </button>
             </div>
 
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-400 dark:text-slate-500">
               {cartItems.length} items in your cart
             </p>
 
-            <div className="space-y-4 divide-y divide-gray-100">
+            <div className="space-y-4 divide-y divide-gray-100 dark:divide-slate-800">
               {cartItems.map((item, index) => {
                 const product = item.product || {};
                 const image =
@@ -716,7 +716,7 @@ export default function Checkout() {
                     key={item._id || index}
                     className="pt-4 first:pt-0 flex items-center gap-3.5 group"
                   >
-                    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/40 p-1 shrink-0">
+                    <div className="overflow-hidden rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50/40 dark:bg-slate-800/40 p-1 shrink-0">
                       <img
                         src={image}
                         alt={name}
@@ -724,19 +724,19 @@ export default function Checkout() {
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-xs text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                      <h4 className="font-medium text-xs text-gray-900 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
                         {name}
                       </h4>
                       {item.variant && (
-                        <p className="text-[11px] text-gray-400 mt-0.5">
+                        <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
                           {item.variant}
                         </p>
                       )}
-                      <p className="text-[11px] text-gray-400">
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500">
                         Qty: {item.quantity || 1}
                       </p>
                     </div>
-                    <span className="font-medium text-xs text-gray-900">
+                    <span className="font-medium text-xs text-gray-900 dark:text-slate-200">
                       ${(price * (item.quantity || 1)).toFixed(2)}
                     </span>
                   </div>
@@ -744,47 +744,47 @@ export default function Checkout() {
               })}
             </div>
 
-            <div className="border-t border-gray-100 pt-4 space-y-2.5 text-xs">
-              <div className="flex justify-between text-gray-500">
+            <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-2.5 text-xs">
+              <div className="flex justify-between text-gray-500 dark:text-slate-400">
                 <span>Subtotal</span>
-                <span className="font-medium text-gray-800">
+                <span className="font-medium text-gray-800 dark:text-slate-200">
                   ${subtotal.toFixed(2)}
                 </span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-emerald-600 font-medium">
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
                   <span>Discount</span>
                   <span>-${discount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-gray-500 dark:text-slate-400">
                 <span>Shipping</span>
-                <span className="font-medium text-gray-800">
+                <span className="font-medium text-gray-800 dark:text-slate-200">
                   {shippingCost === 0 ? "Free" : `$${shippingCost}`}
                 </span>
               </div>
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-gray-500 dark:text-slate-400">
                 <span>Estimated Tax (14%)</span>
-                <span className="font-medium text-gray-800">
+                <span className="font-medium text-gray-800 dark:text-slate-200">
                   ${tax.toFixed(2)}
                 </span>
               </div>
             </div>
 
-            <div className="border-t border-gray-100 pt-4 flex justify-between items-center">
-              <span className="font-semibold text-sm text-gray-900">
+            <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-between items-center">
+              <span className="font-semibold text-sm text-gray-900 dark:text-slate-100">
                 Total
               </span>
-              <span className="font-semibold text-base text-gray-900">
+              <span className="font-semibold text-base text-gray-900 dark:text-slate-100">
                 ${total.toFixed(2)}
               </span>
             </div>
 
             {/* Coupon Section */}
-            <div className="border-t border-gray-100 pt-4 space-y-3">
-              <label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
+            <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-3">
+              <label className="text-xs font-medium text-gray-700 dark:text-slate-300 flex items-center gap-1.5">
                 <svg
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-blue-600 dark:text-indigo-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -805,13 +805,13 @@ export default function Checkout() {
                   onChange={(e) => setCouponCode(e.target.value)}
                   placeholder="Enter coupon code"
                   disabled={couponApplied}
-                  className="flex-1 p-3 text-xs border border-gray-200 rounded-2xl outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50/20 text-gray-800 placeholder:text-gray-400 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  className="flex-1 p-3 text-xs border border-gray-200 dark:border-slate-700 rounded-2xl outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-indigo-500 bg-gray-50/20 dark:bg-slate-800 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 disabled:bg-slate-100 dark:disabled:bg-slate-800/50 disabled:cursor-not-allowed"
                 />
                 {couponApplied ? (
                   <button
                     type="button"
                     onClick={handleRemoveCoupon}
-                    className="bg-red-100 text-red-600 px-4 py-3 rounded-2xl text-xs font-medium hover:bg-red-200 transition"
+                    className="bg-red-100 dark:bg-rose-950/60 text-red-600 dark:text-rose-400 px-4 py-3 rounded-2xl text-xs font-medium hover:bg-red-200 dark:hover:bg-rose-900/60 transition"
                   >
                     Remove
                   </button>
@@ -820,7 +820,7 @@ export default function Checkout() {
                     type="button"
                     onClick={handleApplyCoupon}
                     disabled={couponLoading}
-                    className="bg-blue-600 text-white px-4 py-3 rounded-2xl text-xs font-medium hover:bg-blue-700 transition disabled:opacity-60 flex items-center gap-1"
+                    className="bg-blue-600 dark:bg-indigo-600 text-white px-4 py-3 rounded-2xl text-xs font-medium hover:bg-blue-700 dark:hover:bg-indigo-500 transition disabled:opacity-60 flex items-center gap-1"
                   >
                     {couponLoading && (
                       <Loader2 size={12} className="animate-spin" />
@@ -831,7 +831,7 @@ export default function Checkout() {
               </div>
 
               {couponApplied && discount > 0 && (
-                <div className="bg-emerald-50/70 border border-emerald-100 p-3.5 rounded-2xl flex items-start gap-3">
+                <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 p-3.5 rounded-2xl flex items-start gap-3">
                   <div className="bg-emerald-500 text-white p-1 rounded-full mt-0.5">
                     <svg
                       className="w-3.5 h-3.5"
@@ -848,10 +848,10 @@ export default function Checkout() {
                     </svg>
                   </div>
                   <div>
-                    <h5 className="font-medium text-xs text-emerald-900">
+                    <h5 className="font-medium text-xs text-emerald-900 dark:text-emerald-300">
                       Coupon applied successfully!
                     </h5>
-                    <p className="text-[11px] text-emerald-700">
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
                       You saved ${discount.toFixed(2)}
                     </p>
                   </div>

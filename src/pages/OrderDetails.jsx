@@ -16,14 +16,14 @@ import { useAuth } from "../context/AuthContext";
 const CANCELLABLE_STATUSES = ["pending", "confirmed"];
 
 const STATUS_STYLES = {
-  pending: "bg-amber-50 text-amber-600",
-  confirmed: "bg-blue-50 text-blue-600",
-  processing: "bg-yellow-50 text-yellow-600",
-  shipped: "bg-indigo-50 text-indigo-600",
-  delivered: "bg-emerald-50 text-emerald-600",
-  cancelled: "bg-red-50 text-red-600",
-  paid: "bg-emerald-50 text-emerald-600",
-  unpaid: "bg-amber-50 text-amber-600",
+  pending: "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400",
+  confirmed: "bg-blue-50 dark:bg-indigo-950/50 text-[#5046E5] dark:text-indigo-400",
+  processing: "bg-yellow-50 dark:bg-amber-950/50 text-yellow-600 dark:text-amber-400",
+  shipped: "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400",
+  delivered: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400",
+  cancelled: "bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400",
+  paid: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400",
+  unpaid: "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400",
 };
 
 function getItemImage(item) {
@@ -209,7 +209,7 @@ export default function OrderDetails() {
       {/* Back Link */}
       <Link
         to="/orders"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 mb-6 transition"
       >
         <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
         <span>
@@ -220,7 +220,7 @@ export default function OrderDetails() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {t("orderDetails.orderTitle", {
               number: orderNumber?.slice?.(-6)?.toUpperCase() || orderNumber,
             }) ||
@@ -228,19 +228,19 @@ export default function OrderDetails() {
                 orderNumber?.slice?.(-6)?.toUpperCase() || orderNumber
               }`}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">{formattedDate}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{formattedDate}</p>
         </div>
         <div className="flex items-center gap-2">
           <span
             className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${
-              STATUS_STYLES[paymentStatus] || "bg-gray-100 text-gray-600"
+              STATUS_STYLES[paymentStatus] || "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300"
             }`}
           >
             {paymentStatus}
           </span>
           <span
             className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${
-              STATUS_STYLES[orderStatus] || "bg-gray-100 text-gray-600"
+              STATUS_STYLES[orderStatus] || "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300"
             }`}
           >
             {orderStatus}
@@ -249,12 +249,12 @@ export default function OrderDetails() {
       </div>
 
       {/* Items */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-6">
-        <h2 className="font-semibold text-slate-900 mb-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 mb-6">
+        <h2 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">
           {t("orderDetails.itemsTitle", { count: items.length }) ||
             `Items (${items.length})`}
         </h2>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {items.map((item, idx) => {
             const product = item.product || item;
             const lineTotal =
@@ -269,21 +269,21 @@ export default function OrderDetails() {
                 <img
                   src={getItemImage(item)}
                   alt={product.name || "product"}
-                  className="w-16 h-16 rounded-lg object-cover bg-slate-50 border border-slate-100 shrink-0"
+                  className="w-16 h-16 rounded-lg object-cover bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shrink-0"
                   onError={(e) => {
                     e.currentTarget.src = "/Background+Border.svg";
                   }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-900 truncate">
+                  <p className="font-medium text-slate-900 dark:text-slate-100 truncate">
                     {product.name || "Product"}
                   </p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     {t("orderDetails.quantity") || "Qty"}:{" "}
                     {item.quantity || 1}
                   </p>
                 </div>
-                <p className="font-semibold text-slate-900 shrink-0">
+                <p className="font-semibold text-slate-900 dark:text-slate-100 shrink-0">
                   ${lineTotal.toFixed(2)}
                 </p>
               </div>
@@ -295,14 +295,14 @@ export default function OrderDetails() {
       {/* Shipping & Payment Grid */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         {/* Shipping Address */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h2 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-blue-600" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5">
+          <h2 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-[#5046E5] dark:text-indigo-400" />
             <span>
               {t("orderDetails.shippingAddress") || "Shipping Address"}
             </span>
           </h2>
-          <p className="text-sm text-slate-600 leading-relaxed">
+          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
             {shippingAddress.fullName || shippingAddress.name || "-"}
             <br />
             {shippingAddress.address || shippingAddress.street || ""}
@@ -318,36 +318,36 @@ export default function OrderDetails() {
         </div>
 
         {/* Payment */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h2 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-blue-600" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5">
+          <h2 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-[#5046E5] dark:text-indigo-400" />
             <span>{t("orderDetails.payment") || "Payment"}</span>
           </h2>
-          <p className="text-sm text-slate-600 capitalize mb-4">
+          <p className="text-sm text-slate-600 dark:text-slate-300 capitalize mb-4">
             {paymentMethod === "cash"
               ? t("orderDetails.cashOnDelivery") || "Cash on Delivery"
               : paymentMethod}
           </p>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between text-slate-500">
+            <div className="flex justify-between text-slate-500 dark:text-slate-400">
               <span>{t("orderDetails.subtotal") || "Subtotal"}</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span className="text-slate-800 dark:text-slate-200">${subtotal.toFixed(2)}</span>
             </div>
             {discount > 0 && (
-              <div className="flex justify-between text-emerald-600">
+              <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                 <span>{t("orderDetails.discount") || "Discount"}</span>
                 <span>-${discount.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between text-slate-500">
+            <div className="flex justify-between text-slate-500 dark:text-slate-400">
               <span>{t("orderDetails.shipping") || "Shipping"}</span>
-              <span>
+              <span className="text-slate-800 dark:text-slate-200">
                 {shippingFee > 0
                   ? `$${shippingFee.toFixed(2)}`
                   : t("orderDetails.freeShipping") || "Free"}
               </span>
             </div>
-            <div className="flex justify-between font-semibold text-slate-900 pt-2 border-t border-slate-100">
+            <div className="flex justify-between font-semibold text-slate-900 dark:text-slate-100 pt-2 border-t border-slate-100 dark:border-slate-800">
               <span>{t("orderDetails.total") || "Total"}</span>
               <span>${total.toFixed(2)}</span>
             </div>
@@ -362,7 +362,7 @@ export default function OrderDetails() {
             type="button"
             onClick={handleCancelOrder}
             disabled={cancelling}
-            className="px-4 py-2.5 rounded-lg border border-red-500 text-red-600 text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition cursor-pointer"
+            className="px-4 py-2.5 rounded-lg border border-red-500 text-red-600 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-rose-950/20 disabled:opacity-50 transition cursor-pointer"
           >
             {cancelling
               ? t("orderDetails.cancelling") || "Cancelling..."
@@ -373,7 +373,7 @@ export default function OrderDetails() {
           type="button"
           onClick={handleBuyAgain}
           disabled={buyingAgain || items.length === 0}
-          className="px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition cursor-pointer"
+          className="px-4 py-2.5 rounded-lg bg-[#5046E5] hover:bg-[#4338CA] text-white text-sm font-medium disabled:opacity-50 transition cursor-pointer"
         >
           {buyingAgain
             ? t("orderDetails.adding") || "Adding..."

@@ -29,18 +29,18 @@ export default function ShopFeatures() {
   ];
 
   return (
-    <div className="bg-white rounded-[2rem] p-6 lg:p-10 mt-12 mb-4 border border-gray-100 shadow-xl w-full">
+    <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 lg:p-10 mt-12 mb-4 border border-gray-100 dark:border-slate-800 shadow-xl w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {features.map((feature, index) => (
           <div key={index} className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 flex-shrink-0 transition-transform hover:scale-110 duration-300">
+            <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/50 rounded-2xl flex items-center justify-center text-[#5046E5] dark:text-indigo-400 flex-shrink-0 transition-transform hover:scale-110 duration-300">
               <feature.icon size={24} strokeWidth={1.5} />
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 text-[15px]">
+              <h4 className="font-bold text-gray-900 dark:text-slate-100 text-[15px]">
                 {feature.title}
               </h4>
-              <p className="text-gray-400 text-sm mt-0.5">{feature.subtitle}</p>
+              <p className="text-gray-400 dark:text-slate-400 text-sm mt-0.5">{feature.subtitle}</p>
             </div>
           </div>
         ))}

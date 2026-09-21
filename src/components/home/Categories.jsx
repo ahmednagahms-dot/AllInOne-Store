@@ -29,12 +29,12 @@ function CategoryCard({ category, title }) {
   return (
     <Link
       to={`/shop?category=${encodeURIComponent(category.slug)}`}
-      className="group flex min-h-[140px] flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-4 text-center transition duration-300 hover:-translate-y-1 hover:border-primary-500 hover:shadow-lg"
+      className="group flex min-h-[140px] flex-col items-center justify-center rounded-2xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-center transition duration-300 hover:-translate-y-1 hover:border-primary-500 dark:hover:border-indigo-500/50 hover:shadow-lg dark:hover:shadow-indigo-950/20"
     >
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-500 transition group-hover:bg-primary-500 group-hover:text-white">
+      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 dark:bg-indigo-950/50 text-primary-500 dark:text-indigo-400 transition group-hover:bg-primary-500 group-hover:text-white">
         <Icon size={22} strokeWidth={1.8} />
       </div>
-      <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{title}</h3>
     </Link>
   );
 }
@@ -43,14 +43,14 @@ export default function Categories() {
   const { t } = useTranslation();
 
   return (
-    <section className="w-full bg-gray-50 py-14 md:py-16">
+    <section className="w-full bg-gray-50 dark:bg-slate-950 py-14 md:py-16 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary-500">
               {t("categories.tag")}
             </p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               {t("categories.title")}
             </h2>
           </div>

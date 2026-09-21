@@ -16,7 +16,7 @@ export default function LanguageSwitcher({ className = "" }) {
     <button
       type="button"
       onClick={toggleLanguage}
-      className={`inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-primary-500 hover:text-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500/20 active:scale-95 cursor-pointer ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-slate-200 shadow-sm transition hover:border-primary-500 hover:text-primary-600 dark:hover:border-primary-400 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 active:scale-95 cursor-pointer ${className}`}
       aria-label={isArabic ? "Switch to English" : "التبديل إلى العربية"}
       title={isArabic ? "Switch to English" : "التبديل إلى العربية"}
     >
