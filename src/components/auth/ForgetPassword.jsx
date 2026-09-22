@@ -5,7 +5,7 @@ import {
   verifyForgotPasswordOtp,
 } from "../../api/auth.api";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast"; 
 
 const STORE_LOGO_URL =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
@@ -34,6 +34,7 @@ export default function ForgetPassword() {
 
     if (!email.trim()) {
       setError("Please enter your email");
+      toast.error("Please enter your email");
       return;
     }
 
@@ -44,10 +45,11 @@ export default function ForgetPassword() {
       setStep("reset");
     } catch (err) {
       console.error(err);
-      setError(
+      const errMsg =
         err.response?.data?.message ||
-          "Failed to send OTP. Please check your email and try again."
-      );
+        "Failed to send OTP. Please check your email and try again.";
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -62,21 +64,25 @@ export default function ForgetPassword() {
 
     if (!otp.trim()) {
       setError("Please enter the OTP");
+      toast.error("Please enter the OTP");
       return;
     }
 
     if (otp.trim().length < 4) {
       setError("OTP seems too short");
+      toast.error("OTP seems too short");
       return;
     }
 
     if (!newPassword || newPassword.length < 6) {
       setError("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -92,19 +98,21 @@ export default function ForgetPassword() {
     } catch (err) {
       console.error(err);
       const msg = (err.response?.data?.message || "").toLowerCase();
+      let errMsg = "";
 
       if (
         msg.includes("otp") ||
         msg.includes("invalid") ||
         msg.includes("expired")
       ) {
-        setError("Invalid or expired OTP. Please check and try again.");
+        errMsg = "Invalid or expired OTP. Please check and try again.";
       } else {
-        setError(
+        errMsg =
           err.response?.data?.message ||
-            "Failed to reset password. Please try again."
-        );
+          "Failed to reset password. Please try again.";
       }
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -120,7 +128,9 @@ export default function ForgetPassword() {
       await sendForgotPasswordOtp({ email: email.trim() });
       toast.success("OTP resent to your email");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to resend OTP");
+      const errMsg = err.response?.data?.message || "Failed to resend OTP";
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -144,7 +154,7 @@ export default function ForgetPassword() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#0038DC]/10 dark:bg-indigo-700/10 blur-[120px] pointer-events-none"></div>
 
       <div className="w-full max-w-[500px] bg-white dark:bg-slate-900 rounded-[32px] p-8 md:p-12 shadow-2xl shadow-blue-900/5 border border-[#e2e8f0]/80 dark:border-slate-800 relative z-10">
-        {/* Logo — AllInOne only */}
+        {/* Logo */}
         <div className="flex items-center justify-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5">
             <img
@@ -154,9 +164,7 @@ export default function ForgetPassword() {
             />
             <span className="text-xl font-bold tracking-tight text-black dark:text-white">
               AllIn
-              <span className="text-[#2b64f6] dark:text-indigo-400">
-                One
-              </span>
+              <span className="text-[#2b64f6] dark:text-indigo-400">One</span>
             </span>
           </Link>
         </div>
@@ -189,7 +197,7 @@ export default function ForgetPassword() {
           ))}
         </div>
 
-        {/* Error */}
+        {/* Error box inside UI */}
         {error && (
           <div className="mb-5 p-3 bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400 text-xs rounded-xl border border-red-200 dark:border-rose-900/60 font-medium text-center">
             {error}
@@ -271,7 +279,7 @@ export default function ForgetPassword() {
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="At least 6 characters"
                   required
-                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
+                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
                 />
                 <button
                   type="button"
@@ -295,7 +303,7 @@ export default function ForgetPassword() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"
                   required
-                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
+                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#dbe5ff] dark:border-slate-700 text-xs md:text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b64f6]/30 dark:focus:ring-indigo-500/30 focus:border-[#2b64f6] dark:focus:border-indigo-500 transition-all font-medium"
                 />
                 <button
                   type="button"

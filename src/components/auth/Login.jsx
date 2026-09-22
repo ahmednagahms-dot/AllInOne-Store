@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { login } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
 import Cookies from "js-cookie";
+import toast from "react-hot-toast"; // 1. استيراد الـ toast
 import LanguageSwitcher from "../ui/LanguageSwitcher";
 import ThemeToggle from "../ui/ThemeToggle";
 
@@ -21,7 +22,6 @@ export default function LoginPage() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
@@ -33,7 +33,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     try {
       setLoading(true);
@@ -59,15 +58,19 @@ export default function LoginPage() {
           Cookies.set("store_user", JSON.stringify(user), { expires: 7 });
         }
 
-        // Update AuthContext → Navbar updates instantly without refresh
         loginUser(token, user);
+        
+        // 2. رسالة نجاح احترافية قبل التوجيه
+        toast.success("Welcome back! Logged in successfully.");
+        
         navigate("/");
       } else {
-        setError("Login succeeded but no token received");
+        toast.error("Login succeeded but no token received.");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || t("auth.invalidCredentials")
+      // 3. رسالة خطأ احترافية لو البيانات غلط أو فيه مشكلة بالسيرفر
+      toast.error(
+        err.response?.data?.message || t("auth.invalidCredentials") || "Invalid email or password."
       );
     } finally {
       setLoading(false);
@@ -76,7 +79,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex flex-col items-center justify-center p-4 md:p-8 font-sans relative">
-      {/* Scoped animation styles — orchestrated entrance + independent floating badges */}
       <style>{`
         @keyframes fadeSlideUp {
           from { opacity: 0; transform: translateY(14px); }
@@ -85,11 +87,6 @@ export default function LoginPage() {
         @keyframes blinkDot {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
-        }
-        @keyframes shakeError {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
         }
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -124,7 +121,6 @@ export default function LoginPage() {
         .anim-delay-5 { animation-delay: 0.45s; }
         .anim-delay-6 { animation-delay: 0.55s; }
 
-        /* Independent, out-of-phase floating: different duration + delay per badge */
         .float-a { animation: floatA 4.8s cubic-bezier(0.45, 0, 0.55, 1) infinite; animation-delay: 0.1s; }
         .float-b { animation: floatB 5.6s cubic-bezier(0.45, 0, 0.55, 1) infinite; animation-delay: 0.8s; }
         .float-c { animation: floatC 4.2s cubic-bezier(0.45, 0, 0.55, 1) infinite; animation-delay: 1.4s; }
@@ -133,15 +129,10 @@ export default function LoginPage() {
         .blink-dot {
           animation: blinkDot 1.4s ease-in-out infinite;
         }
-        .error-enter {
-          animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-                      shakeError 0.4s ease-in-out 0.35s;
-        }
         .spin-smooth {
           animation: spin 0.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
         }
 
-        /* Premium text + badge glow */
         .moment-highlight {
           color: #2b64f6;
           text-shadow: 0 5px 18px rgba(43, 100, 246, 0.22);
@@ -213,7 +204,7 @@ export default function LoginPage() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .anim-in, .float-a, .float-b, .float-c, .float-d, .blink-dot, .error-enter, .spin-smooth {
+          .anim-in, .float-a, .float-b, .float-c, .float-d, .blink-dot, .spin-smooth {
             animation: none !important;
             opacity: 1 !important;
             transform: none !important;
@@ -224,7 +215,6 @@ export default function LoginPage() {
         }
       `}</style>
 
-      {/* Top Bar with Language Switcher */}
       <div className="anim-in w-full max-w-[1180px] flex justify-end pb-3 gap-2">
         <ThemeToggle />
         <LanguageSwitcher className="ml-2" />
@@ -315,12 +305,6 @@ export default function LoginPage() {
             <p className="anim-in anim-delay-3 text-base text-[#64748b] dark:text-slate-400 mb-6 font-medium">
               {t("auth.loginSubtitle")}
             </p>
-
-            {error && (
-              <div className="error-enter mb-4 p-3 bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400 text-xs rounded-xl border border-red-200 dark:border-rose-900/60 font-medium">
-                {error}
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="anim-in anim-delay-4 space-y-5">
               <div>

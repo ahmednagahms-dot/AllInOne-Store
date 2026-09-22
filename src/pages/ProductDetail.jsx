@@ -10,7 +10,7 @@ import {
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import {
   Star,
   Heart,

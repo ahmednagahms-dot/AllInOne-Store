@@ -8,6 +8,7 @@ import ShopSidebar from "../components/products/ShopSidebar";
 import ShopFeatures from "../components/products/ShopFeatures";
 import { Search, ChevronRight } from "lucide-react";
 import { useLocation, Link, useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const ShopImage =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1789752545/swhfkjpwjhblaonheeo5.png";
@@ -15,7 +16,7 @@ const ShopImage =
 export default function Shop() {
   const { t } = useTranslation();
   const location = useLocation();
-  const [searchParams] = useSearchParams(); // أضفنا لاستخدام قراءة الـ URL Parameters
+  const [searchParams] = useSearchParams(); 
 
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +35,6 @@ export default function Shop() {
   const [availability, setAvailability] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(0);
 
-  // قراءة الفلاتر وكلمة البحث من الـ URL عند فتح الصفحة أو تغيره
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     
@@ -52,7 +52,6 @@ export default function Shop() {
       setSelectedSubcategories([]);
     }
 
-    // قراءة كلمة البحث من الـ URL وتحديث الـ state فوراً
     const searchParam = params.get("search");
     if (searchParam) {
       setSearchQuery(searchParam);
@@ -76,12 +75,13 @@ export default function Shop() {
         setAllProducts(fetchedProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
+        toast.error(t("shop.errorFetching") || "Failed to load products");
       } finally {
         setLoading(false);
       }
     };
     fetchAllProducts();
-  }, []);
+  }, [t]);
 
   const filteredProducts = useMemo(() => {
     let result = [...allProducts];
@@ -198,7 +198,7 @@ export default function Shop() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 pb-12 transition-colors duration-200">
       <div className="container mx-auto px-4 py-6 flex items-center gap-2 text-sm">
-        <Link to="/" className="text-gray-400 dark:text-slate-400 hover:text-blue-600  transition">
+        <Link to="/" className="text-gray-400 dark:text-slate-400 hover:text-blue-600 transition">
           {t("nav.home")}
         </Link>
         <ChevronRight size={14} className="text-gray-300 dark:text-slate-600 rtl:rotate-180" />
@@ -320,6 +320,7 @@ export default function Shop() {
                     setSelectedRating(0);
                     setAvailability([]);
                     setSelectedDiscount(0);
+                    toast.success(t("shop.filtersReset") || "Filters have been reset");
                   }}
                   className="px-6 py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-blue-600 dark:text-indigo-400 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700/50 transition shadow-sm cursor-pointer"
                 >

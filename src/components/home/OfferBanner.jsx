@@ -6,11 +6,10 @@ import { ArrowRight } from "lucide-react";
 /* =========================================================
    Constants
 ========================================================= */
-// Offer duration: 2 days + 18 hours + 45 minutes + 30 seconds
 const OFFER_DURATION_MS =
   (2 * 24 * 60 * 60 + 18 * 60 * 60 + 45 * 60 + 30) * 1000;
 
-// localStorage key to persist offer end time
+
 const STORAGE_KEY = "offer_end_time";
 
 const BANNER_IMAGE_URL =

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import {
   ArrowLeft,
   MapPin,
@@ -16,21 +16,31 @@ import { useAuth } from "../context/AuthContext";
 const CANCELLABLE_STATUSES = ["pending", "confirmed"];
 
 const STATUS_STYLES = {
-  pending: "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400",
-  confirmed: "bg-blue-50 dark:bg-indigo-950/50 text-[#5046E5] dark:text-indigo-400",
-  processing: "bg-yellow-50 dark:bg-amber-950/50 text-yellow-600 dark:text-amber-400",
-  shipped: "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400",
-  delivered: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400",
-  cancelled: "bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400",
-  paid: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400",
-  unpaid: "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400",
+  pending:
+    "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400",
+  confirmed:
+    "bg-blue-50 dark:bg-indigo-950/50 text-[#5046E5] dark:text-indigo-400",
+  processing:
+    "bg-yellow-50 dark:bg-amber-950/50 text-yellow-600 dark:text-amber-400",
+  shipped:
+    "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400",
+  delivered:
+    "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400",
+  cancelled:
+    "bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400",
+  paid:
+    "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400",
+  unpaid:
+    "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400",
 };
 
 function getItemImage(item) {
   const product = item.product || item;
   const img = product.images?.[0];
+
   if (!img) return product.image || "/Background+Border.svg";
   if (typeof img === "string") return img;
+
   return img.url || product.image || "/Background+Border.svg";
 }
 
@@ -51,15 +61,20 @@ export default function OrderDetails() {
   const fetchOrder = useCallback(async () => {
     setLoading(true);
     setError(null);
+
     try {
       const { data } = await getMyOrderById(id);
       const found = data.order || data.data || data;
+
       setOrder(found);
     } catch (err) {
       console.error(err);
-      setError(
-        t("orderDetails.loadError") || "Failed to load order details"
-      );
+
+      const errorMessage =
+        t("orderDetails.loadError") || "Failed to load order details";
+
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -67,10 +82,12 @@ export default function OrderDetails() {
 
   useEffect(() => {
     if (authLoading) return;
+
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
+
     fetchOrder();
   }, [authLoading, isAuthenticated, fetchOrder, navigate]);
 
@@ -78,14 +95,19 @@ export default function OrderDetails() {
     const confirmMsg =
       t("orderDetails.cancelConfirm") ||
       "Are you sure you want to cancel this order?";
+
     if (!window.confirm(confirmMsg)) return;
 
     setCancelling(true);
+
     try {
       await cancelMyOrder(id);
+
       toast.success(
-        t("orderDetails.cancelSuccess") || "Order cancelled successfully"
+        t("orderDetails.cancelSuccess") ||
+          "Order cancelled successfully"
       );
+
       fetchOrder();
     } catch (err) {
       toast.error(
@@ -99,8 +121,13 @@ export default function OrderDetails() {
   };
 
   const handleBuyAgain = async () => {
-    if (!order?.items?.length) return;
+    if (!order?.items?.length) {
+      toast("No items available to add to cart.");
+      return;
+    }
+
     setBuyingAgain(true);
+
     try {
       await Promise.all(
         order.items.map((item) =>
@@ -114,14 +141,19 @@ export default function OrderDetails() {
           })
         )
       );
+
       toast.success(
-        t("orderDetails.buyAgainSuccess") || "Items added to cart"
+        t("orderDetails.buyAgainSuccess") ||
+          "Items added to cart"
       );
+
       navigate("/cart");
     } catch (err) {
       console.error(err);
+
       toast.error(
-        t("orderDetails.buyAgainError") || "Failed to add items to cart"
+        t("orderDetails.buyAgainError") ||
+          "Failed to add items to cart"
       );
     } finally {
       setBuyingAgain(false);
@@ -142,7 +174,9 @@ export default function OrderDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-4">
         <PackageX className="w-10 h-10 text-red-500" />
+
         <p className="text-slate-600">{error}</p>
+
         <button
           onClick={fetchOrder}
           className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 cursor-pointer"
@@ -158,9 +192,11 @@ export default function OrderDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-4">
         <PackageX className="w-10 h-10 text-slate-400" />
+
         <p className="text-slate-600">
           {t("orderDetails.notFound") || "Order not found"}
         </p>
+
         <Link
           to="/orders"
           className="text-blue-600 text-sm font-medium hover:underline"
@@ -174,23 +210,38 @@ export default function OrderDetails() {
   // ===== Data Extraction =====
   const orderNumber = order.orderNumber || order._id;
   const createdAt = order.createdAt || order.date;
+
   const orderStatus = (order.status || "pending").toLowerCase();
+
   const paymentStatus = (
     order.isPaid ? "paid" : order.paymentStatus || "unpaid"
   ).toLowerCase();
+
   const items = order.items || order.products || order.orderItems || [];
-  const shippingAddress = order.shippingAddress || order.address || {};
+
+  const shippingAddress =
+    order.shippingAddress || order.address || {};
+
   const paymentMethod = order.paymentMethod || "cash";
-  const subtotal = Number(order.subtotal ?? order.itemsPrice ?? 0);
-  const discount = Number(order.discount ?? order.discountAmount ?? 0);
+
+  const subtotal = Number(
+    order.subtotal ?? order.itemsPrice ?? 0
+  );
+
+  const discount = Number(
+    order.discount ?? order.discountAmount ?? 0
+  );
+
   const shippingFee = Number(
     order.shippingFee ?? order.shippingPrice ?? 0
   );
+
   const total = Number(
     order.totalPrice ??
       order.total ??
       subtotal - discount + shippingFee
   );
+
   const canCancel = CANCELLABLE_STATUSES.includes(orderStatus);
 
   const formattedDate = createdAt
@@ -212,6 +263,7 @@ export default function OrderDetails() {
         className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 mb-6 transition"
       >
         <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+
         <span>
           {t("orderDetails.backToOrders") || "Back to My Orders"}
         </span>
@@ -222,25 +274,35 @@ export default function OrderDetails() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {t("orderDetails.orderTitle", {
-              number: orderNumber?.slice?.(-6)?.toUpperCase() || orderNumber,
+              number:
+                orderNumber?.slice?.(-6)?.toUpperCase() ||
+                orderNumber,
             }) ||
               `Order #${
-                orderNumber?.slice?.(-6)?.toUpperCase() || orderNumber
+                orderNumber?.slice?.(-6)?.toUpperCase() ||
+                orderNumber
               }`}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{formattedDate}</p>
+
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            {formattedDate}
+          </p>
         </div>
+
         <div className="flex items-center gap-2">
           <span
             className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${
-              STATUS_STYLES[paymentStatus] || "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300"
+              STATUS_STYLES[paymentStatus] ||
+              "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300"
             }`}
           >
             {paymentStatus}
           </span>
+
           <span
             className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${
-              STATUS_STYLES[orderStatus] || "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300"
+              STATUS_STYLES[orderStatus] ||
+              "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300"
             }`}
           >
             {orderStatus}
@@ -251,12 +313,15 @@ export default function OrderDetails() {
       {/* Items */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 mb-6">
         <h2 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">
-          {t("orderDetails.itemsTitle", { count: items.length }) ||
-            `Items (${items.length})`}
+          {t("orderDetails.itemsTitle", {
+            count: items.length,
+          }) || `Items (${items.length})`}
         </h2>
+
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {items.map((item, idx) => {
             const product = item.product || item;
+
             const lineTotal =
               (item.price || product.price || 0) *
               (item.quantity || 1);
@@ -271,18 +336,22 @@ export default function OrderDetails() {
                   alt={product.name || "product"}
                   className="w-16 h-16 rounded-lg object-cover bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shrink-0"
                   onError={(e) => {
-                    e.currentTarget.src = "/Background+Border.svg";
+                    e.currentTarget.src =
+                      "/Background+Border.svg";
                   }}
                 />
+
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-slate-900 dark:text-slate-100 truncate">
                     {product.name || "Product"}
                   </p>
+
                   <p className="text-sm text-slate-500 dark:text-slate-400">
                     {t("orderDetails.quantity") || "Qty"}:{" "}
                     {item.quantity || 1}
                   </p>
                 </div>
+
                 <p className="font-semibold text-slate-900 dark:text-slate-100 shrink-0">
                   ${lineTotal.toFixed(2)}
                 </p>
@@ -298,21 +367,36 @@ export default function OrderDetails() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5">
           <h2 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
             <MapPin className="w-4 h-4 text-[#5046E5] dark:text-indigo-400" />
+
             <span>
-              {t("orderDetails.shippingAddress") || "Shipping Address"}
+              {t("orderDetails.shippingAddress") ||
+                "Shipping Address"}
             </span>
           </h2>
+
           <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            {shippingAddress.fullName || shippingAddress.name || "-"}
+            {shippingAddress.fullName ||
+              shippingAddress.name ||
+              "-"}
             <br />
-            {shippingAddress.address || shippingAddress.street || ""}
-            {shippingAddress.city ? `, ${shippingAddress.city}` : ""}
+
+            {shippingAddress.address ||
+              shippingAddress.street ||
+              ""}
+
+            {shippingAddress.city
+              ? `, ${shippingAddress.city}`
+              : ""}
+
             <br />
+
             {shippingAddress.country || ""}{" "}
             {shippingAddress.postalCode
               ? ` - ${shippingAddress.postalCode}`
               : ""}
+
             <br />
+
             {shippingAddress.phone || ""}
           </p>
         </div>
@@ -321,34 +405,57 @@ export default function OrderDetails() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5">
           <h2 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
             <CreditCard className="w-4 h-4 text-[#5046E5] dark:text-indigo-400" />
-            <span>{t("orderDetails.payment") || "Payment"}</span>
+
+            <span>
+              {t("orderDetails.payment") || "Payment"}
+            </span>
           </h2>
+
           <p className="text-sm text-slate-600 dark:text-slate-300 capitalize mb-4">
             {paymentMethod === "cash"
-              ? t("orderDetails.cashOnDelivery") || "Cash on Delivery"
+              ? t("orderDetails.cashOnDelivery") ||
+                "Cash on Delivery"
               : paymentMethod}
           </p>
+
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-slate-500 dark:text-slate-400">
-              <span>{t("orderDetails.subtotal") || "Subtotal"}</span>
-              <span className="text-slate-800 dark:text-slate-200">${subtotal.toFixed(2)}</span>
+              <span>
+                {t("orderDetails.subtotal") || "Subtotal"}
+              </span>
+
+              <span className="text-slate-800 dark:text-slate-200">
+                ${subtotal.toFixed(2)}
+              </span>
             </div>
+
             {discount > 0 && (
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                <span>{t("orderDetails.discount") || "Discount"}</span>
+                <span>
+                  {t("orderDetails.discount") || "Discount"}
+                </span>
+
                 <span>-${discount.toFixed(2)}</span>
               </div>
             )}
+
             <div className="flex justify-between text-slate-500 dark:text-slate-400">
-              <span>{t("orderDetails.shipping") || "Shipping"}</span>
+              <span>
+                {t("orderDetails.shipping") || "Shipping"}
+              </span>
+
               <span className="text-slate-800 dark:text-slate-200">
                 {shippingFee > 0
                   ? `$${shippingFee.toFixed(2)}`
                   : t("orderDetails.freeShipping") || "Free"}
               </span>
             </div>
+
             <div className="flex justify-between font-semibold text-slate-900 dark:text-slate-100 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <span>{t("orderDetails.total") || "Total"}</span>
+              <span>
+                {t("orderDetails.total") || "Total"}
+              </span>
+
               <span>${total.toFixed(2)}</span>
             </div>
           </div>
@@ -369,6 +476,7 @@ export default function OrderDetails() {
               : t("orderDetails.cancelOrder") || "Cancel Order"}
           </button>
         )}
+
         <button
           type="button"
           onClick={handleBuyAgain}

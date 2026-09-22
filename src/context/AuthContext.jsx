@@ -20,7 +20,6 @@ export function AuthProvider({ children }) {
 
   const [loading, setLoading] = useState(true);
 
-  // عند فتح الموقع: نتأكد من التوكن ونجيب أحدث بيانات المستخدم
   useEffect(() => {
     const initAuth = async () => {
       const token = Cookies.get("store_token");
@@ -35,7 +34,6 @@ export function AuthProvider({ children }) {
         const { data } = await getMe();
         const userData = data.user || data;
 
-        // ✅ ادمج بيانات الـ API مع الكاش
         let cached = {};
         try {
           const cachedStr = Cookies.get("store_user");
@@ -44,13 +42,11 @@ export function AuthProvider({ children }) {
           cached = {};
         }
 
-        // ✅ الـ API له الأولوية، بس الحقول الناقصة بتاخد من الكاش
         const merged = {
           ...cached,
           ...userData,
         };
 
-        // ✅ لو الـ API مش بيرجع avatar، استخدم اللي في الكاش
         if (!userData?.avatar && cached?.avatar) {
           merged.avatar = cached.avatar;
         }
@@ -91,7 +87,7 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
   };
 
-  // تحديث بيانات المستخدم محليًا
+
   const updateUser = (newData) => {
     setUser((prev) => {
       const updated = { ...prev, ...newData };

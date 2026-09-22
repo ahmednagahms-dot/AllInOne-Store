@@ -20,7 +20,6 @@ import ProductDetail from "../pages/ProductDetail";
 import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
 
-// لازم المستخدم يكون مسجل دخول عشان يوصل للصفحة
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Heart, Star, ShoppingCart, Eye, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 
@@ -91,8 +92,16 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     e.preventDefault();
     if (isTogglingWish) return;
     setIsTogglingWish(true);
+    const wasInWishlist = inWishlist;
     try {
-      await toggleItem(productId);
+      const success = await toggleItem(productId);
+      if (success !== false) {
+        toast.success(
+          wasInWishlist
+            ? t("productCard.removedFromWishlist", "Removed from wishlist")
+            : t("productCard.addedToWishlist", "Added to wishlist")
+        );
+      }
     } finally {
       setIsTogglingWish(false);
     }
@@ -106,6 +115,7 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     try {
       const success = await addItem(productId, 1);
       if (success) {
+        toast.success(t("productCard.addedToCart", "Added to cart"));
         navigate('/cart');
       }
     } finally {
