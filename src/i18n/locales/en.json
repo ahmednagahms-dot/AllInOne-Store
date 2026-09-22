@@ -614,5 +614,12 @@
       "noReviews": "No reviews yet."
     },
     "relatedProducts": "Related Products"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you're looking for doesn't exist or has been moved to a different address",
+    "goHome": "Back to Home",
+    "goBack": "Previous Page",
+    "errorBadge": "ERROR 404 — PAGE NOT FOUND"
   }
 }
