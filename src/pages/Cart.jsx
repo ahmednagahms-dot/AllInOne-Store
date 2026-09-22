@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
-import { addToWishlist } from "../api/wishlist.api";
+import { useWishlist } from "../context/WishlistContext";
 import { toast } from "react-toastify";
 import Button from "../components/ui/Button";
 import {
@@ -57,8 +57,10 @@ export default function Cart() {
     removeItem,
     applyCartCoupon,
     removeCartCoupon,
-    clearAllCart, // ✅ fixed name
+    clearAllCart,
   } = useCart();
+
+  const { isInWishlist, toggleItem: toggleWishlistItem } = useWishlist();
 
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
@@ -93,19 +95,11 @@ export default function Cart() {
     setBusyItemId(null);
   };
 
-  const handleMoveToWishlist = async (item) => {
+  const handleToggleWishlist = async (item) => {
     const id = getItemId(item);
     setBusyItemId(id);
-    try {
-      await addToWishlist(id);
-      await removeItem(id);
-      toast.success(t("cart.movedToWishlist"));
-    } catch (err) {
-      console.error(err);
-      toast.error(t("cart.moveToWishlistFailed"));
-    } finally {
-      setBusyItemId(null);
-    }
+    await toggleWishlistItem(id);
+    setBusyItemId(null);
   };
 
   const handleApplyCoupon = async (e) => {
@@ -126,7 +120,7 @@ export default function Cart() {
   const handleClearCart = async () => {
     if (!window.confirm(t("cart.clearCartConfirm")))
       return;
-    await clearAllCart(); // ✅ fixed call
+    await clearAllCart();
   };
 
   // ===== Loading State =====
@@ -295,11 +289,18 @@ export default function Cart() {
                     {/* Actions */}
                     <div className="flex items-center gap-4">
                       <button
-                        onClick={() => handleMoveToWishlist(item)}
-                        className="text-xs text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-600 flex items-center gap-1 cursor-pointer"
+                        onClick={() => handleToggleWishlist(item)}
+                        className={`text-xs flex items-center gap-1 cursor-pointer transition ${
+                          isInWishlist(id)
+                            ? "text-red-500"
+                            : "text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-600"
+                        }`}
                       >
-                        <Heart size={14} />
-                        {t("cart.moveToWishlist")}
+                        <Heart
+                          size={14}
+                          className={isInWishlist(id) ? "fill-red-500 text-red-500" : ""}
+                        />
+                        {isInWishlist(id) ? t("cart.inWishlist") : t("cart.moveToWishlist")}
                       </button>
                       <button
                         onClick={() => handleRemove(item)}
