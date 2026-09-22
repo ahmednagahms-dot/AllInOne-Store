@@ -7,7 +7,7 @@ import ProductToolbar from "../components/products/ProductToolbar";
 import ShopSidebar from "../components/products/ShopSidebar";
 import ShopFeatures from "../components/products/ShopFeatures";
 import { Search, ChevronRight } from "lucide-react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useSearchParams } from "react-router-dom";
 
 const ShopImage =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1789752545/swhfkjpwjhblaonheeo5.png";
@@ -15,6 +15,7 @@ const ShopImage =
 export default function Shop() {
   const { t } = useTranslation();
   const location = useLocation();
+  const [searchParams] = useSearchParams(); // أضفنا لاستخدام قراءة الـ URL Parameters
 
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,17 +34,30 @@ export default function Shop() {
   const [availability, setAvailability] = useState([]);
   const [selectedDiscount, setSelectedDiscount] = useState(0);
 
+  // قراءة الفلاتر وكلمة البحث من الـ URL عند فتح الصفحة أو تغيره
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     
     const categoryParam = params.get("category");
     if (categoryParam) {
       setSelectedCategories([categoryParam.toLowerCase()]);
+    } else {
+      setSelectedCategories([]);
     }
 
     const subcategoryParam = params.get("subcategory");
     if (subcategoryParam) {
       setSelectedSubcategories([subcategoryParam.toLowerCase()]);
+    } else {
+      setSelectedSubcategories([]);
+    }
+
+    // قراءة كلمة البحث من الـ URL وتحديث الـ state فوراً
+    const searchParam = params.get("search");
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    } else {
+      setSearchQuery("");
     }
   }, [location.search]);
 
@@ -74,7 +88,7 @@ export default function Shop() {
 
     if (searchQuery) {
       result = result.filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase())
+        (p.name || p.title || "").toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -82,7 +96,7 @@ export default function Shop() {
       result = result.filter((p) => {
         const sub =
           typeof p.subcategory === "object"
-            ? p.subcategory.name
+            ? p.subcategory?.name
             : p.subcategory;
         if (!sub) {
           return selectedSubcategories.includes("others");
@@ -94,7 +108,7 @@ export default function Shop() {
     if (selectedCategories.length > 0) {
       result = result.filter((p) => {
         const cat =
-          typeof p.category === "object" ? p.category.name : p.category;
+          typeof p.category === "object" ? p.category?.name : p.category;
         return selectedCategories.includes(cat?.toLowerCase());
       });
     }
