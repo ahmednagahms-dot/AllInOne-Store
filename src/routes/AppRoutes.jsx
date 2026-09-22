@@ -19,6 +19,7 @@ import Profile from "../pages/Profile";
 import ProductDetail from "../pages/ProductDetail";
 import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
+import Error404 from "../pages/Error404";
 
 // لازم المستخدم يكون مسجل دخول عشان يوصل للصفحة
 function ProtectedRoute({ children }) {
@@ -49,6 +50,7 @@ export default function AppRoutes() {
       <Route path="/forgot" element={<ForgetPassword />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
       <Route path="/verify-otp" element={<VerifyOtp />} />
+      <Route path="*" element={<Error404 /> }/>
 
       {/* ===== Regular pages (with Navbar + Footer) ===== */}
       <Route element={<MainLayout />}>
