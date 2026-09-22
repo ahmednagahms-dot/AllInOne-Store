@@ -99,7 +99,7 @@ export default function Wishlist() {
         <div className="flex gap-3">
           <button
             onClick={fetchWishlist}
-            className="px-6 py-2.5 bg-[#5046E5] text-white font-medium rounded-lg hover:bg-[#4338CA] transition cursor-pointer"
+            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-400 transition cursor-pointer"
           >
             {t("wishlist.tryAgain")}
           </button>
@@ -118,8 +118,8 @@ export default function Wishlist() {
   if (items.length === 0) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center px-4">
-        <div className="w-20 h-20 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center">
-          <Heart className="text-[#5046E5] dark:text-indigo-400" size={32} />
+        <div className="w-20 h-20 rounded-full bg-indigo-50 dark:bg-blue-600/10 flex items-center justify-center">
+          <Heart className="text-blue-600 " size={32} />
         </div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">
           {t("wishlist.emptyTitle")}
@@ -129,7 +129,7 @@ export default function Wishlist() {
         </p>
         <Link
           to="/"
-          className="mt-2 px-6 py-2.5 bg-[#5046E5] text-white font-medium rounded-lg hover:bg-[#4338CA] transition"
+          className="mt-2 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
         >
           {t("wishlist.exploreProducts")}
         </Link>
@@ -198,7 +198,7 @@ export default function Wishlist() {
               <div className="p-4">
                 <Link
                   to={`/product/${id}`}
-                  className="font-medium text-gray-900 dark:text-slate-100 line-clamp-2 min-h-[48px] block hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                  className="font-medium text-gray-900 dark:text-slate-100 line-clamp-2 min-h-[48px] block hover:text-blue-600 dark:hover:text-blue-400 transition"
                 >
                   {product.name || "Product"}
                 </Link>
@@ -216,7 +216,7 @@ export default function Wishlist() {
                 )}
 
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="font-bold text-gray-900 dark:text-indigo-400">
+                  <span className="font-bold text-gray-900 dark:text-blue-400">
                     ${Number(price).toFixed(2)}
                   </span>
                   {originalPrice && (
@@ -229,7 +229,7 @@ export default function Wishlist() {
                 <button
                   onClick={() => handleAddToCart(id)}
                   disabled={!inStock}
-                  className="w-full flex items-center justify-center gap-2 bg-[#5046E5] hover:bg-[#4338CA] text-white text-sm font-medium py-2.5 rounded-lg transition disabled:bg-gray-300 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition disabled:bg-gray-300 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <ShoppingCart size={16} />
                   {inStock ? t("wishlist.addToCart") : t("wishlist.outOfStock")}

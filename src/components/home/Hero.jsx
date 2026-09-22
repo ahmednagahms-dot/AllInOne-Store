@@ -68,7 +68,7 @@ function HighlightedTitle({ title, highlight }) {
   return (
     <>
       {parts[0]}
-      <span className="text-primary-500">{highlight}</span>
+      <span className="text-blue-600">{highlight}</span>
       {parts[1]}
     </>
   );
@@ -113,9 +113,15 @@ export default function Hero() {
           <div className="grid min-h-[420px] grid-cols-1 items-center lg:grid-cols-2">
             {/* Content Side */}
             <div className="relative z-10 px-6 py-10 sm:px-10 md:px-12 lg:px-14 lg:py-12">
+
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 shadow-sm border border-slate-200/40 dark:border-slate-700/50">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-500">
+
               <div className="hero-badge-animate mb-4 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 shadow-sm border border-slate-200/40 dark:border-slate-700/50">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary-500">
+
                   {currentBadge}
                 </span>
               </div>
@@ -134,14 +140,14 @@ export default function Hero() {
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/shop"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary-500 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-600"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500"
                 >
                   {t("hero.shopNow")}
                   <ArrowRight size={16} className="hero-arrow-animate rtl:rotate-180" />
                 </Link>
                 <Link
                   to="/shop"
-                  className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-500 bg-white dark:bg-slate-900 px-6 text-sm font-semibold text-primary-500 dark:text-indigo-400 transition hover:bg-primary-50 dark:hover:bg-slate-800"
+                  className="inline-flex h-11 items-center justify-center rounded-xl border border-blue-600 bg-white dark:bg-slate-900 px-6 text-sm font-semibold text-blue-600 dark:text-indigo-400 transition hover:bg-primary-50 dark:hover:bg-slate-800"
                 >
                   {t("hero.exploreCollections")}
                 </Link>

@@ -33,7 +33,7 @@ export default function ShopFeatures() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {features.map((feature, index) => (
           <div key={index} className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/50 rounded-2xl flex items-center justify-center text-[#5046E5] dark:text-indigo-400 flex-shrink-0 transition-transform hover:scale-110 duration-300">
+            <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/50 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400  flex-shrink-0 transition-transform hover:scale-110 duration-300">
               <feature.icon size={24} strokeWidth={1.5} />
             </div>
             <div>

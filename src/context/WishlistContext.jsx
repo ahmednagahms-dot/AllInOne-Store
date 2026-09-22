@@ -32,10 +32,10 @@ export function WishlistProvider({ children }) {
     setError(null);
     try {
       const { data } = await getMyWishlist();
-      // API may return data in different shapes
+      // API returns: { success, totalProducts, wishlist: { _id, user, products: [...] } }
       const list =
+        data.wishlist?.products ||
         data.items ||
-        data.wishlist ||
         data.products ||
         data.data?.items ||
         data.data ||
@@ -74,12 +74,17 @@ export function WishlistProvider({ children }) {
       toast.info("Please log in first to add to wishlist");
       return false;
     }
+    // Optimistic: add placeholder immediately
+    setItems((prev) => [...prev, { _id: productId }]);
     try {
       await addToWishlist(productId);
-      await fetchWishlist();
       toast.success("Added to wishlist");
+      // Sync with server in background (don't await)
+      fetchWishlist();
       return true;
     } catch (err) {
+      // Rollback on error
+      setItems((prev) => prev.filter((item) => item._id !== productId));
       console.error(err);
       toast.error(
         err.response?.data?.message || "Failed to add to wishlist"
@@ -89,12 +94,21 @@ export function WishlistProvider({ children }) {
   };
 
   const removeItem = async (productId) => {
+    // Optimistic: remove immediately
+    const prevItems = items;
+    setItems((prev) =>
+      prev.filter(
+        (item) =>
+          (item.product?._id || item.productId || item._id) !== productId
+      )
+    );
     try {
       await removeFromWishlist(productId);
-      await fetchWishlist();
       toast.success("Removed from wishlist");
       return true;
     } catch (err) {
+      // Rollback on error
+      setItems(prevItems);
       console.error(err);
       toast.error(
         err.response?.data?.message || "Failed to remove from wishlist"

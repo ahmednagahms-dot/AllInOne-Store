@@ -358,7 +358,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="animate-spin text-indigo-600" size={40} />
+        <Loader2 className="animate-spin text-blue-600" size={40} />
       </div>
     );
   }
@@ -397,7 +397,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-blue-600 text-blue-600 cursor-pointer dark:text-blue-400 text-sm font-medium hover:bg-blue-50 dark:hover:bg-blue-950/40 transition"
             >
               <Pencil size={14} />
               {t("profile.editProfile") || "Edit Profile"}
@@ -414,7 +414,7 @@ export default function Profile() {
           <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
             {/* Avatar — read-only */}
             <div className="flex flex-col items-center">
-              <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white dark:ring-slate-800 shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+              <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white dark:ring-slate-800 shadow-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
                 {user?.avatar ? (
                   <img
                     src={user.avatar}
@@ -445,7 +445,7 @@ export default function Profile() {
                     value={form.firstName}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                   />
                 </div>
 
@@ -459,7 +459,7 @@ export default function Profile() {
                     value={form.lastName}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                   />
                 </div>
               </div>
@@ -486,7 +486,7 @@ export default function Profile() {
                     <div className="relative">
                       <select
                         disabled={!isEditing}
-                        className="appearance-none px-3 py-2.5 pr-8 rtl:pr-3 rtl:pl-8 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
+                        className="appearance-none px-3 py-2.5 pr-8 rtl:pr-3 rtl:pl-8 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
                       >
                         <option>+20</option>
                         <option>+1</option>
@@ -505,7 +505,7 @@ export default function Profile() {
                       onChange={handleChange}
                       disabled={!isEditing}
                       dir="ltr"
-                      className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                     />
                   </div>
                 </div>
@@ -521,7 +521,7 @@ export default function Profile() {
                   value={form.dateOfBirth}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -563,7 +563,7 @@ export default function Profile() {
                     }
                   }}
                   disabled={!isEditing}
-                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
+                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
                 >
                   <option value="English">
                     {t("profile.languageEnglish") || "English"}
@@ -596,7 +596,7 @@ export default function Profile() {
                     })
                   }
                   disabled={!isEditing}
-                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
+                  className="w-full appearance-none px-3 py-2.5 pr-9 rtl:pr-3 rtl:pl-9 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400"
                 >
                   <option>USD ($)</option>
                   <option>EGP (E£)</option>
@@ -634,7 +634,7 @@ export default function Profile() {
                       }}
                       className={`flex-1 py-1.5 text-xs font-medium rounded-lg capitalize transition cursor-pointer ${
                         preferences.theme === themeKey
-                          ? "bg-indigo-600 text-white shadow-sm"
+                          ? "bg-blue-600 text-white shadow-sm"
                           : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
@@ -660,7 +660,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={handleStartChangePassword}
-              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"
+              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-blue-600 text-blue-600 dark:text-blue-400 text-sm font-medium hover:bg-blue-50 dark:hover:bg-blue-950/40 transition"
             >
               {t("profile.changePassword") || "Change Password"}
             </button>
@@ -677,14 +677,14 @@ export default function Profile() {
                 placeholder={t("profile.email") || "Email"}
                 value={passwordEmail}
                 onChange={(e) => setPasswordEmail(e.target.value)}
-                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={handleSendOtp}
                   disabled={sendingOtp}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition disabled:opacity-60"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition disabled:opacity-60"
                 >
                   {sendingOtp && (
                     <Loader2 size={14} className="animate-spin" />
@@ -710,7 +710,7 @@ export default function Profile() {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 maxLength={6}
-                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full px-3 py-2.5 mb-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
 
               <div className="relative mb-4">
@@ -719,7 +719,7 @@ export default function Profile() {
                   placeholder={t("profile.newPassword") || "New password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 pr-10 rtl:pr-3 rtl:pl-10 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
+                  className="w-full px-3 py-2.5 pr-10 rtl:pr-3 rtl:pl-10 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden"
                 />
                 <button
                   type="button"
@@ -735,7 +735,7 @@ export default function Profile() {
                   type="button"
                   onClick={handleResetPassword}
                   disabled={resettingPassword}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition disabled:opacity-60"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition disabled:opacity-60"
                 >
                   {resettingPassword && (
                     <Loader2 size={14} className="animate-spin" />
@@ -760,7 +760,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              className="px-5 py-2.5 rounded-xl border border-gray-200 cursor-pointer dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition"
             >
               {t("profile.cancel") || "Cancel"}
             </button>
@@ -769,7 +769,7 @@ export default function Profile() {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition disabled:opacity-60 shadow-sm"
+              className="inline-flex items-center gap-2 px-5 cursor-pointer py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition disabled:opacity-60 shadow-sm"
             >
               {saving ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -785,7 +785,7 @@ export default function Profile() {
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 py-3 rounded-xl font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+          className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 py-3 cursor-pointer rounded-xl font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 transition"
         >
           <LogOut size={16} />
           {t("profile.logout") || "Logout"}

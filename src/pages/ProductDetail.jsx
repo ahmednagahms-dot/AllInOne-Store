@@ -397,11 +397,11 @@ export default function ProductDetails() {
                   >
                     {images.map((img, i) => (
                       <SwiperSlide key={i}>
-                        <div className="w-full h-[68px] rounded-lg overflow-hidden border-2 border-transparent bg-[#fafafa] dark:bg-slate-800 hover:border-[#5046E5] transition cursor-pointer">
+                        <div className="w-full h-[68px] rounded-lg  overflow-hidden border-2 border-transparent bg-[#fafafa] dark:bg-slate-800 hover:border-[#5046E5] transition cursor-pointer">
                           <img
                             src={img.url}
                             alt=""
-                            className="w-full h-full object-contain p-2"
+                            className="w-full h-full object-cover rounded-xl p-2"
                           />
                         </div>
                       </SwiperSlide>
@@ -431,7 +431,7 @@ export default function ProductDetails() {
                           <img
                             src={img.url}
                             alt={product.name}
-                            className="w-auto h-auto max-w-[60%] max-h-[80%] object-contain"
+                            className="w-auto h-auto max-w-[80%] max-h-[80%] object-cover rounded-lg"
                           />
                         </div>
                       </SwiperSlide>

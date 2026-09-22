@@ -93,7 +93,7 @@ export default function OfferBanner() {
   return (
     <section className="w-full bg-white dark:bg-slate-950 py-10 sm:py-14 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-        <div className="relative overflow-hidden rounded-3xl bg-primary-600 dark:bg-slate-900">
+        <div className="relative overflow-hidden rounded-3xl bg-blue-500 dark:bg-slate-900">
           <div className="grid grid-cols-1 items-center gap-6 p-6 sm:p-10 lg:grid-cols-2 lg:gap-4 lg:p-12">
             {/* Left: Text + Countdown */}
             <div className="relative z-10">
