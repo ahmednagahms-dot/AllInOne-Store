@@ -44,7 +44,6 @@ export function CartProvider({ children }) {
     }
   }, [user]);
 
-  // Cart items count (API may return data in different shapes)
   const cartItems = cart?.items || cart?.products || [];
   const cartItemsCount = cartItems.reduce(
     (sum, item) => sum + (item.quantity || 1),

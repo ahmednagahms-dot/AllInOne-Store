@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import {
   Loader2,
   Heart,
@@ -54,7 +54,24 @@ export default function Wishlist() {
     try {
       const ok = await addToCart(id, 1);
       if (ok) {
-        toast.success(t("wishlist.addedToCartSuccess"));
+        // استخدام react-hot-toast مع زر تفاعلي للانتقال للسلة
+        toast((tObj) => (
+          <div className="flex items-center justify-between gap-3 w-full">
+            <span className="text-xs font-medium text-gray-800 dark:text-slate-200">
+              {t("wishlist.addedToCartSuccess")}
+            </span>
+            <Link
+              to="/cart"
+              onClick={() => toast.dismiss(tObj.id)}
+              className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-md font-medium transition shrink-0"
+            >
+              {t("wishlist.viewCart") || "View Cart"}
+            </Link>
+          </div>
+        ), {
+          duration: 4000,
+          position: "bottom-right",
+        });
       }
     } catch (err) {
       console.error(err);
@@ -63,8 +80,7 @@ export default function Wishlist() {
   };
 
   const handleClear = async () => {
-    if (!window.confirm(t("wishlist.confirmClear")))
-      return;
+    if (!window.confirm(t("wishlist.confirmClear"))) return;
     try {
       await clearAllWishlist();
       toast.success(t("wishlist.clearedSuccess"));

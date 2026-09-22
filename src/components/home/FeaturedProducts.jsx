@@ -6,9 +6,6 @@ import { getProducts } from "../../api/products.api";
 import ProductCard from "../products/ProductCard";
 import Spinner from "../ui/Spinner";
 
-/* =========================================================
-   دالة موحّدة لاستخراج مصفوفة المنتجات من أي شكل رد
-========================================================= */
 function extractProducts(response) {
   const data = response?.data ?? response;
   const list = data?.products ?? data?.data ?? data ?? [];
@@ -22,18 +19,16 @@ export default function FeaturedProducts() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let isMounted = true; // لمنع setState بعد unmount
+    let isMounted = true;
 
     const fetchFeatured = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // محاولة أولى: منتجات مميزة
         const res = await getProducts({ limit: 4, featured: true });
         let list = extractProducts(res).slice(0, 4);
 
-        // لو مفيش نتائج، نجيب أول 4 منتجات عادية
         if (list.length === 0) {
           const fallback = await getProducts({ limit: 4 });
           list = extractProducts(fallback).slice(0, 4);
@@ -43,7 +38,6 @@ export default function FeaturedProducts() {
       } catch (err) {
         console.error("FeaturedProducts error:", err);
 
-        // محاولة ثانية عند الفشل
         try {
           const fallback = await getProducts({ limit: 4 });
           const list = extractProducts(fallback).slice(0, 4);
@@ -66,7 +60,6 @@ export default function FeaturedProducts() {
   return (
     <section className="w-full bg-white dark:bg-slate-900 py-14 md:py-16 transition-colors duration-200">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
-        {/* ===================== Header ===================== */}
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary-500">
@@ -89,7 +82,6 @@ export default function FeaturedProducts() {
           </Link>
         </div>
 
-        {/* ===================== Content ===================== */}
         {loading ? (
           <div className="flex justify-center py-16">
             <Spinner size={36} />
@@ -113,7 +105,6 @@ export default function FeaturedProducts() {
           </div>
         )}
 
-        {/* ===================== Mobile View All ===================== */}
         <div className="mt-7 flex justify-center sm:hidden">
           <Link
             to="/shop"

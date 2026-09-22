@@ -68,7 +68,7 @@ export default function Profile() {
           console.warn("getMe failed, using cache only:", err?.message);
         }
 
-        // ✅ اجيب الكاش من localStorage
+        // localStorage
         let cached = {};
         try {
           const cachedStr = localStorage.getItem("profile_cache");
@@ -77,7 +77,6 @@ export default function Profile() {
           cached = {};
         }
 
-        // ✅ دالة مساعدة: تفرّق بين "قيمة فاضية" و "مفيش قيمة"
         const pickValue = (apiValue, cachedValue, fallback = "") => {
           if (
             apiValue !== undefined &&
@@ -98,18 +97,17 @@ export default function Profile() {
           ? "العربية"
           : "English";
 
-        // ✅ الـ merge: الأولوية للـ API، بس لو فاضي → الكاش
         const merged = {
           ...cached,
           ...(userData || {}),
-          // حقول الـ API (بياخد من الكاش لو الـ API فاضي)
+
           avatar: pickValue(userData?.avatar, cached?.avatar, null),
           firstName: pickValue(userData?.firstName, cached?.firstName, ""),
           lastName: pickValue(userData?.lastName, cached?.lastName, ""),
           username: pickValue(userData?.username, cached?.username, ""),
           email: pickValue(userData?.email, cached?.email, ""),
           role: pickValue(userData?.role, cached?.role, "customer"),
-          // ✅ حقول الكاش (الأولوية للكاش لأن الـ API مش بيرجعهم)
+
           phone: cached?.phone || userData?.phone || "",
           dateOfBirth: cached?.dateOfBirth || userData?.dateOfBirth || "",
           language: currentLangLabel,
@@ -119,7 +117,6 @@ export default function Profile() {
 
         setUser(merged);
 
-        // ✅ افصل الاسم
         const fullName =
           merged?.firstName && merged?.lastName
             ? `${merged.firstName} ${merged.lastName}`
@@ -145,7 +142,7 @@ export default function Profile() {
           theme: merged?.theme || "light",
         });
 
-        // ✅ احفظ النسخة المدمجة في localStorage + cookies
+        // localStorage + cookies
         localStorage.setItem("profile_cache", JSON.stringify(merged));
         Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
 
@@ -204,7 +201,6 @@ export default function Profile() {
       setUser(merged);
       if (updateUser) updateUser(merged);
 
-      // إذا غيّر المستخدم اللغة من التفضيلات، نطبقها فوراً في i18next
       if (
         preferences.language === "العربية" &&
         !i18n.language?.startsWith("ar")
@@ -219,7 +215,6 @@ export default function Profile() {
         localStorage.setItem("language", "en");
       }
 
-      // ✅ احفظ في localStorage + cookies
       localStorage.setItem("profile_cache", JSON.stringify(merged));
       Cookies.set("store_user", JSON.stringify(merged), { expires: 7 });
 

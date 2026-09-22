@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast"; 
 import { verifyRegisterOtp, sendRegisterOtp } from "../../api/auth.api";
-import { useAuth } from "../../context/AuthContext";
 import { Loader2, Mail, ArrowLeft } from "lucide-react";
-import Cookies from "js-cookie";
 
 export default function VerifyOtp() {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const auth = useAuth();
 
   const { email, username, password } = location.state || {};
 
@@ -20,21 +17,19 @@ export default function VerifyOtp() {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
   } = useForm();
 
-  const otpValue = watch("otp") || "";
-
-  // If no email
+  // No email in state
   if (!email) {
     return (
-      <div className="min-h-screen w-full bg-[#f3f5fc] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-sm w-full">
-          <p className="text-gray-500 mb-4 text-sm">No verification data</p>
+      <div className="min-h-screen w-full bg-[#f3f5fc] dark:bg-slate-950 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 text-center max-w-sm w-full border border-transparent dark:border-slate-800">
+          <p className="text-gray-500 dark:text-slate-400 mb-4 text-sm">
+            No verification data found
+          </p>
           <Link
             to="/signup"
-            className="inline-flex items-center gap-2 text-[#2b64f6] font-semibold text-sm hover:underline"
+            className="inline-flex items-center gap-2 text-[#2b64f6] dark:text-indigo-400 font-semibold text-sm hover:underline"
           >
             <ArrowLeft size={16} />
             Back to Sign Up
@@ -52,56 +47,32 @@ export default function VerifyOtp() {
         otp: String(data.otp).trim(),
       };
 
-      // If API also needs username
       if (username) payload.username = username;
-
-      console.log("Sending verify payload:", payload);
+      if (password) payload.password = password;
 
       const res = await verifyRegisterOtp(payload);
       console.log("Verify response:", res.data);
 
-      const token =
-        res.data?.token ||
-        res.data?.accessToken ||
-        res.data?.data?.token ||
-        res.data?.access_token;
+      toast.success(
+        res.data?.message || "Email verified successfully. Please log in."
+      );
 
-      const user =
-        res.data?.user ||
-        res.data?.data?.user ||
-        res.data?.data;
-
-      if (token) {
-        // Save token
-        Cookies.set("store_token", token, { expires: 7 });
-        if (user) {
-          Cookies.set("store_user", JSON.stringify(user), { expires: 7 });
-        }
-
-        // If there's loginUser in Context
-        if (auth?.loginUser) {
-          auth.loginUser(token, user);
-        } else if (auth?.setUser) {
-          auth.setUser(user);
-        }
-
-        toast.success("Account created successfully 🎉");
-        navigate("/");
-      } else {
-        // Verification succeeded but no token → go to login
-        toast.success("Verified successfully, please log in");
-        navigate("/login");
-      }
+      navigate("/login", {
+        replace: true,
+        state: { email },
+      });
     } catch (error) {
-      console.error("Verify error:", error.response?.data || error);
-      const message =
+      console.error("Full error object from server:", error.response?.data);
+      
+      const serverMsg =
         error.response?.data?.message ||
         error.response?.data?.error ||
         (Array.isArray(error.response?.data?.errors)
           ? error.response.data.errors[0]
           : null) ||
         "Invalid or expired verification code";
-      toast.error(message);
+        
+      toast.error(serverMsg);
     } finally {
       setLoading(false);
     }
@@ -109,23 +80,23 @@ export default function VerifyOtp() {
 
   const handleResend = async () => {
     if (!email) return;
+
     setResending(true);
     try {
-      // We need password and username to resend
-      // If not available in state, user goes back to signup
-      if (!password && !username) {
-        toast.info("Please sign up again to send a new code");
-        navigate("/signup");
-        return;
-      }
       await sendRegisterOtp({
         email,
         username: username || email.split("@")[0],
-        password: password || "temp",
+        password: password || "tempPassword123",
       });
+
       toast.success("Code resent successfully");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to resend");
+      console.error("Resend error details:", err.response?.data || err);
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Failed to resend code";
+      toast.error(message);
     } finally {
       setResending(false);
     }
@@ -140,9 +111,7 @@ export default function VerifyOtp() {
             <Mail size={28} />
           </div>
           <h1 className="text-2xl font-bold mb-2">Verify Your Email</h1>
-          <p className="text-sm text-blue-100">
-            We sent a verification code to
-          </p>
+          <p className="text-sm text-blue-100">We sent a verification code to</p>
           <p className="text-sm font-semibold mt-1 break-all">{email}</p>
         </div>
 
@@ -178,8 +147,8 @@ export default function VerifyOtp() {
 
             <button
               type="submit"
-              disabled={loading || otpValue.length < 4}
-              className="w-full py-3.5 bg-[#2b64f6] dark:bg-indigo-600 hover:bg-blue-700 dark:hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 dark:shadow-indigo-600/30 transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+              disabled={loading}
+              className="w-full py-3.5 bg-[#2b64f6] dark:bg-indigo-600 hover:bg-blue-700 dark:hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 dark:shadow-indigo-600/30 transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
             >
               {loading && <Loader2 size={18} className="animate-spin" />}
               {loading ? "Verifying..." : "Confirm Code"}
@@ -191,7 +160,7 @@ export default function VerifyOtp() {
               type="button"
               onClick={handleResend}
               disabled={resending}
-              className="text-sm text-[#2b64f6] dark:text-indigo-400 font-semibold hover:underline disabled:opacity-50"
+              className="text-sm text-[#2b64f6] dark:text-indigo-400 font-semibold hover:underline disabled:opacity-50 cursor-pointer"
             >
               {resending ? "Sending..." : "Resend Code"}
             </button>
@@ -199,6 +168,7 @@ export default function VerifyOtp() {
             <p className="text-xs text-[#64748b] dark:text-slate-400">
               <Link
                 to="/signup"
+                state={{ email, username, password }}
                 className="font-semibold text-[#2b64f6] dark:text-indigo-400 hover:underline"
               >
                 Back to Sign Up

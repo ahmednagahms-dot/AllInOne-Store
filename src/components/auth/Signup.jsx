@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import { sendRegisterOtp } from "../../api/auth.api";
 import LanguageSwitcher from "../ui/LanguageSwitcher";
 import ThemeToggle from "../ui/ThemeToggle";
@@ -65,8 +66,10 @@ export default function Signup() {
       });
 
       console.log("OTP sent:", response.data);
+      
+      // Toast notification on success
+      toast.success(t("auth.otpSentSuccess") || "OTP sent successfully!");
 
-      // After OTP sent successfully → go to verify page
       navigate("/verify-otp", {
         state: {
           email: formData.email,
@@ -79,6 +82,7 @@ export default function Signup() {
         err.response?.data?.errors?.[0] ||
         t("auth.registerError");
       setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -145,7 +149,7 @@ export default function Signup() {
         }
         .error-enter {
           animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-                      shakeError 0.4s ease-in-out 0.35s;
+                     shakeError 0.4s ease-in-out 0.35s;
         }
         .spin-smooth {
           animation: spin 0.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
@@ -237,7 +241,6 @@ export default function Signup() {
         }
       `}</style>
 
-      {/* Top Bar with Language Switcher */}
       <div className="anim-in w-full max-w-[1220px] flex justify-end pb-3 gap-2">
         <ThemeToggle />
         <LanguageSwitcher className="ml-2" />
@@ -248,7 +251,6 @@ export default function Signup() {
         {/* ================= Left Side ================= */}
         <div className="lg:col-span-6 p-8 md:p-11 flex flex-col justify-between relative bg-[#dde6fe] dark:bg-slate-900/80 border-transparent dark:border-slate-800">
           <div>
-            {/* Logo — AllInOne only */}
             <Link
               to="/"
               className="anim-in anim-delay-1 logo-hover inline-flex items-center gap-2.5 mb-6"
@@ -350,7 +352,6 @@ export default function Signup() {
 
             {/* ================= Form ================= */}
             <form className="anim-in anim-delay-3 space-y-3.5" onSubmit={handleSubmit}>
-              {/* First + Last Name */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] md:text-xs font-bold text-[#334155] dark:text-slate-300 mb-1">

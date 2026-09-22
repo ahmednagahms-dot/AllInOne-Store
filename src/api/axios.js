@@ -32,7 +32,6 @@ api.interceptors.response.use(
         currentUrl.includes("signup") ||
         currentUrl.includes("forgot");
 
-      // Don't redirect to login if user is already on an auth page
       if (!isAuthPage) {
         window.location.href = "/login";
       }

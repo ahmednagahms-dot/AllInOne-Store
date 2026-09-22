@@ -34,5 +34,4 @@ export const getMe = () => api.get("/auth/me");
 // إرسال OTP لتغيير كلمة المرور
 export const sendChangePasswordOtp = sendForgotPasswordOtp;
 
-// تأكيد OTP + كلمة المرور الجديدة
 export const verifyChangePasswordOtp = verifyForgotPasswordOtp;

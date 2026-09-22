@@ -4,38 +4,38 @@ import { Quote, Star, User, AlertCircle } from "lucide-react";
 import { getAllReviews } from "../../api/reviews.api";
 import fallbackReviews from "../../data/reviews";
 
-const arabicFallbackReviews = [
+const englishFallbackReviews = [
   {
     id: 1,
-    name: "أحمد محمد",
-    role: "مشتري موثّق",
+    name: "Ahmed Mohammed",
+    role: "Verified Buyer",
     review:
-      "تجربة تسوق رائعة! وصل المنتج بسرعة وكان مطابقاً تماماً للوصف وجودته ممتازة جداً.",
+      "Great shopping experience! The product arrived quickly, matched the description perfectly, and the quality is excellent.",
     rating: 5,
-    avatar: "أم",
+    avatar: "AM",
   },
   {
     id: 2,
-    name: "سارة علي",
-    role: "مشترية موثّقة",
+    name: "Sara Ali",
+    role: "Verified Buyer",
     review:
-      "جودة عالية وخدمة عملاء راقية وسريعة الاستجابة. بالتأكيد سأكرر تجربة الشراء من هنا.",
+      "High quality and polite, responsive customer service. I will definitely shop here again.",
     rating: 5,
-    avatar: "سع",
+    avatar: "SA",
   },
   {
     id: 3,
-    name: "عمر حسن",
-    role: "مشتري موثّق",
+    name: "Omar Hassan",
+    role: "Verified Buyer",
     review:
-      "المتجر سهل وسلس في الاستخدام وطلبي وصل بحالة ممتازة ومغلف بإتقان. تجربة موفقة للغاية.",
+      "The store is smooth and easy to use. My order arrived in perfect condition and was securely packaged. A very successful experience.",
     rating: 5,
-    avatar: "عح",
+    avatar: "OH",
   },
 ];
 
 /* =========================================================
-   نجوم التقييم بأمان
+   Safe Rating Stars Component
 ========================================================= */
 function RatingStars({ rating = 5 }) {
   const safe = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
@@ -58,7 +58,7 @@ function RatingStars({ rating = 5 }) {
 }
 
 /* =========================================================
-   بطاقة مراجعة
+   Review Card Component
 ========================================================= */
 function ReviewCard({ review }) {
   const { t } = useTranslation();
@@ -130,7 +130,7 @@ function ReviewCard({ review }) {
 }
 
 /* =========================================================
-   Skeleton
+   Skeleton Component
 ========================================================= */
 function ReviewSkeleton() {
   return (
@@ -164,7 +164,7 @@ function ReviewSkeleton() {
 }
 
 /* =========================================================
-   استخراج مصفوفة المراجعات من أي شكل رد
+   Extract Reviews Array from Any Response Structure
 ========================================================= */
 function extractReviews(response) {
   const data = response?.data ?? response;
@@ -178,7 +178,7 @@ function extractReviews(response) {
 }
 
 /* =========================================================
-   المكوّن الرئيسي
+   Main Component
 ========================================================= */
 function CustomerReviews() {
   const { t, i18n } = useTranslation();
@@ -189,7 +189,7 @@ function CustomerReviews() {
 
   useEffect(() => {
     let isMounted = true;
-    const defaultList = isArabic ? arabicFallbackReviews : fallbackReviews;
+    const defaultList = isArabic ? englishFallbackReviews : fallbackReviews;
 
     const fetchReviews = async () => {
       try {

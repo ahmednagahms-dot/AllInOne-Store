@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
+import toast from "react-hot-toast"; // <-- تمت الإضافة هنا
 import {
   getCart,
   updateCartItem,
@@ -19,18 +20,13 @@ import {
   clearCart,
   applyCoupon,
   removeCoupon,
-} from "../../api/cart.api"; 
+} from "../../api/cart.api";
 
-/* =========================================================
-   استخراج الـ cart من أي شكل رد
-========================================================= */
 function extractCart(response) {
   const data = response?.data ?? response;
 
-  // نلاقي الـ cart object
   const cart = data?.cart ?? data?.data?.cart ?? data?.data ?? data;
 
-  // نلاقي الـ items array
   const items =
     cart?.items ??
     cart?.cartItems ??
@@ -48,14 +44,10 @@ function extractCart(response) {
   };
 }
 
-/* =========================================================
-   استخراج بيانات منتج من عنصر cart
-========================================================= */
 function normalizeItem(item) {
   const product = item.product || item;
   const id = product._id || product.id || item.productId || item._id;
 
-  // الصورة
   const images = product.images || item.images;
   const rawImg =
     (Array.isArray(images) && images[0]) ||
@@ -67,11 +59,11 @@ function normalizeItem(item) {
   const img =
     typeof rawImg === "string"
       ? rawImg
-      : rawImg?.url||  rawImg?.path || null;
+      : rawImg?.url || rawImg?.path || null;
 
   return {
     id,
-    name: product.name||  product.title||  item.name || "منتج",
+    name: product.name || product.title || item.name || "Product",
     brand: product.brand || product.category || item.brand || "",
     desc:
       item.variant ||
@@ -95,36 +87,16 @@ function normalizeItem(item) {
   };
 }
 
-/* =========================================================
-   مكوّن بسيط لعرض حالة (Empty/Loading/Error)
-========================================================= */
-function StateCard({ title, children }) {
-  return (
-    <div className="rounded-xl border bg-white p-6 text-center">
-      <p className="mb-4 text-left text-[11px] font-bold text-gray-500">
-        {title}
-      </p>
-      {children}
-    </div>
-  );
-}
-
-/* =========================================================
-   المكوّن الرئيسي
-========================================================= */
 export default function ShoppingCart() {
   const [items, setItems] = useState([]);
   const [coupon, setCoupon] = useState(null);
   const [couponInput, setCouponInput] = useState("");
-  const [couponMessage, setCouponMessage] = useState(null); // { type: "success"|"error", text }
+  const [couponMessage, setCouponMessage] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
 
-  /* =========================================================
-     جلب السلة
-  ========================================================= */
   const fetchCart = async () => {
     setLoading(true);
     setError(null);
@@ -135,7 +107,7 @@ export default function ShoppingCart() {
       setCoupon(c);
     } catch (err) {
       console.error("Cart fetch error:", err);
-      setError("تعذر تحميل السلة");
+      setError("Failed to load cart");
       setItems([]);
     } finally {
       setLoading(false);
@@ -145,9 +117,7 @@ export default function ShoppingCart() {
   useEffect(() => {
     fetchCart();
   }, []);
-  /* =========================================================
-     الإجماليات
-  ========================================================= */
+
   const totals = useMemo(() => {
     const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
     const oldSubtotal = items.reduce(
@@ -156,7 +126,7 @@ export default function ShoppingCart() {
     );
 
     const productDiscount = oldSubtotal - subtotal;
-    const couponDiscount = `coupon?.discountAmount  coupon?.discount  0`;
+    const couponDiscount = Number(coupon?.discountAmount || coupon?.discount || 0);
     const discount = productDiscount + couponDiscount;
 
     const shipping = subtotal >= 50 || subtotal === 0 ? 0 : 10;
@@ -174,14 +144,10 @@ export default function ShoppingCart() {
     };
   }, [items, coupon]);
 
-  /* =========================================================
-     تعديل الكمية
-  ========================================================= */
   const handleUpdateQty = async (id, newQty) => {
     if (newQty < 1) return;
     setUpdatingId(id);
 
-    // Optimistic update
     const prev = items;
     setItems((list) =>
       list.map((i) => (i.id === id ? { ...i, qty: newQty } : i))
@@ -191,15 +157,13 @@ export default function ShoppingCart() {
       await updateCartItem({ productId: id, quantity: newQty });
     } catch (err) {
       console.error(err);
-      setItems(prev); // rollback
+      setItems(prev);
+      toast.error("Failed to update quantity");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  /* =========================================================
-     حذف عنصر
-  ========================================================= */
   const handleRemove = async (id) => {
     setUpdatingId(id);
     const prev = items;
@@ -207,74 +171,75 @@ export default function ShoppingCart() {
 
     try {
       await removeCartItem(id);
+      toast.success("Item removed from cart");
     } catch (err) {
       console.error(err);
       setItems(prev);
+      toast.error("Failed to remove item");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  /* =========================================================
-     تفريغ السلة
-  ========================================================= */
   const handleClear = async () => {
-    if (!window.confirm("متأكد إنك عايز تفرّغ السلة؟")) return;
+    if (!window.confirm("Are you sure you want to clear your cart?")) return;
     const prev = items;
     setItems([]);
 
     try {
       await clearCart();
+      toast.success("Cart cleared successfully");
     } catch (err) {
       console.error(err);
       setItems(prev);
+      toast.error("Failed to clear cart");
     }
   };
 
-  /* =========================================================
-     تطبيق كوبون
-  ========================================================= */
   const handleApplyCoupon = async () => {
     const code = couponInput.trim();
-    if (!code) return;
+    if (!code) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
 
     try {
       const res = await applyCoupon({ code });
       const { coupon: c } = extractCart(res);
 
       setCoupon(c || { code, discountAmount: 0 });
+      const successMsg = `Coupon "${code}" applied successfully!`;
       setCouponMessage({
         type: "success",
-        text:` Coupon "${code}" applied successfully!`,
+        text: successMsg,
       });
+      toast.success(successMsg);
       setCouponInput("");
     } catch (err) {
       console.error(err);
+      const errorMsg =
+        err?.response?.data?.message ||
+        "Invalid coupon code. Please try again.";
       setCouponMessage({
         type: "error",
-        text:
-          err?.response?.data?.message ||
-          "Invalid coupon code. Please try again.",
+        text: errorMsg,
       });
+      toast.error(errorMsg);
     }
   };
 
-  /* =========================================================
-     إزالة الكوبون
-  ========================================================= */
   const handleRemoveCoupon = async () => {
     try {
       await removeCoupon();
       setCoupon(null);
       setCouponMessage(null);
+      toast.success("Coupon removed");
     } catch (err) {
       console.error(err);
+      toast.error("Failed to remove coupon");
     }
   };
 
-  /* =========================================================
-     Loading State
-  ========================================================= */
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f6f7fb]">
@@ -285,9 +250,7 @@ export default function ShoppingCart() {
       </div>
     );
   }
-  /* =========================================================
-     Error State
-  ========================================================= */
+
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f6f7fb] p-4">
@@ -308,9 +271,6 @@ export default function ShoppingCart() {
     );
   }
 
-  /* =========================================================
-     Empty State
-  ========================================================= */
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-[#f6f7fb] p-4 md:p-6">
@@ -331,13 +291,9 @@ export default function ShoppingCart() {
     );
   }
 
-  /* =========================================================
-     Main Render
-  ========================================================= */
   return (
     <div className="min-h-screen bg-[#f6f7fb] p-4 md:p-6">
       <div className="mx-auto max-w-[1280px]">
-        {/* ============ Header ============ */}
         <div className="mb-6 flex items-start justify-between">
           <div>
             <p className="text-[11px] text-gray-400">Home › Cart</p>
@@ -348,9 +304,7 @@ export default function ShoppingCart() {
           </div>
         </div>
 
-        {/* ============ Main Layout ============ */}
         <div className="flex flex-col items-start gap-5 lg:flex-row">
-          {/* ===== Cart Items ===== */}
           <div className="w-full rounded-xl border border-gray-100 bg-white p-4 lg:w-[68%]">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-[13px] font-bold">
@@ -463,7 +417,6 @@ export default function ShoppingCart() {
             ))}
           </div>
 
-          {/* ===== Order Summary ===== */}
           <div className="h-fit w-full rounded-xl border border-gray-100 bg-white p-4 lg:w-[32%]">
             <h2 className="mb-4 text-[13px] font-bold">Order Summary</h2>
 
@@ -496,7 +449,7 @@ export default function ShoppingCart() {
                 <span>
                   {totals.shipping === 0
                     ? "$0.00"
-                    :`$$ {totals.shipping.toFixed(2)`}
+                    : `$${totals.shipping.toFixed(2)}`}
                 </span>
               </div>
 
@@ -511,7 +464,6 @@ export default function ShoppingCart() {
               </div>
             </div>
 
-            {/* Coupon */}
             <div className="mt-4 flex gap-2">
               <input
                 value={couponInput}
@@ -527,7 +479,6 @@ export default function ShoppingCart() {
               </button>
             </div>
 
-            {/* Coupon Message */}
             {couponMessage && (
               <div
                 className={`mt-3 flex items-start gap-2 rounded-lg border px-3 py-2.5 ${
@@ -566,7 +517,6 @@ export default function ShoppingCart() {
               </div>
             )}
 
-            {/* Applied Coupon */}
             {coupon?.code && (
               <div className="mt-3 flex items-center justify-between rounded-lg border border-green-100 bg-green-50 px-3 py-2 text-[10px] text-green-700">
                 <span>
@@ -580,6 +530,7 @@ export default function ShoppingCart() {
                 </button>
               </div>
             )}
+
             <Link
               to="/checkout"
               className="mt-4 block w-full rounded-lg bg-blue-600 py-2.5 text-center text-[11px] font-bold text-white"
@@ -594,7 +545,6 @@ export default function ShoppingCart() {
               Continue Shopping
             </Link>
 
-            {/* Trust badges */}
             <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-center">
               <div>
                 <div className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-gray-50">
