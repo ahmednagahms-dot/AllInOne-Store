@@ -14,16 +14,12 @@ function Newsletter() {
 
           <div className="relative z-10 mx-auto max-w-3xl text-center">
             {/* Icon */}
-
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600/10 text-blue-600">
-
             <div className="newsletter-icon-animate mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#5046E5] shadow-lg shadow-[#8b86f0]/30">
-
               <Mail size={25} />
             </div>
 
             {/* Heading */}
-            <h2 className="text-3xl font-bold text-blue-600  sm:text-4xl">
+            <h2 className="text-3xl font-bold text-blue-600 sm:text-4xl">
               {t("newsletter.title")}
             </h2>
 
@@ -51,11 +47,7 @@ function Newsletter() {
 
               <button
                 type="submit"
-
-                className="flex h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 text-sm font-semibold text-white transition   cursor-pointer"
-
                 className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#5046E5] px-6 text-sm font-semibold text-white shadow-md shadow-[#5046E5]/30 transition hover:bg-[#4338ca] cursor-pointer"
-
               >
                 {t("newsletter.button")}
                 <ArrowRight

@@ -113,15 +113,10 @@ export default function Hero() {
           <div className="grid min-h-[420px] grid-cols-1 items-center lg:grid-cols-2">
             {/* Content Side */}
             <div className="relative z-10 px-6 py-10 sm:px-10 md:px-12 lg:px-14 lg:py-12">
-
-              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 shadow-sm border border-slate-200/40 dark:border-slate-700/50">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-500">
-
+              {/* Badge */}
               <div className="hero-badge-animate mb-4 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 px-3 py-1.5 shadow-sm border border-slate-200/40 dark:border-slate-700/50">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
+                <span className="hero-dot-animate h-1.5 w-1.5 rounded-full bg-primary-500" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary-500">
-
                   {currentBadge}
                 </span>
               </div>
@@ -177,24 +172,25 @@ export default function Hero() {
               <div className="absolute right-[8%] rtl:right-auto rtl:left-[8%] top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full bg-white/60 dark:bg-slate-800/60 sm:h-[320px] sm:w-[320px] lg:h-[360px] lg:w-[360px]" />
 
               {/* Image */}
-            <div className="relative z-10 h-[240px] w-[240px] sm:h-[280px] sm:w-[280px] lg:h-[310px] lg:w-[310px]">
-              <img
-                key={slide.id}
-                src={slide.image}
-                alt={currentTitle}
-                className="h-full w-full rounded-[25px] object-cover drop-shadow-xl transition duration-500"
-              />
-            </div>
+              <div className="relative z-10 h-[240px] w-[240px] sm:h-[280px] sm:w-[280px] lg:h-[310px] lg:w-[310px]">
+                <img
+                  key={slide.id}
+                  src={slide.image}
+                  alt={currentTitle}
+                  className="h-full w-full rounded-[25px] object-cover drop-shadow-xl transition duration-500"
+                />
 
-              <div className="absolute right-[10%] rtl:right-auto rtl:left-[10%] top-[10%] z-20 flex h-16 w-16 rotate-6 rtl:-rotate-6 items-center justify-center rounded-full bg-primary-500 text-center text-white shadow-lg sm:h-[72px] sm:w-[72px]">
-                <div>
-                  <p className="text-[9px] font-bold uppercase text-white/80">
-                    {t("hero.upTo")}
-                  </p>
-                  <p className="text-lg font-extrabold leading-none">
-                    {slide.discount}
-                  </p>
-                  <p className="text-[8px] font-semibold uppercase">{t("hero.off")}</p>
+                {/* Discount badge */}
+                <div className="offer-badge-animate absolute -top-4 -right-4 rtl:right-auto rtl:-left-4 z-20 flex h-16 w-16 items-center justify-center rounded-full bg-primary-500 text-center text-white shadow-lg ring-4 ring-white dark:ring-slate-950 sm:h-[72px] sm:w-[72px]">
+                  <div>
+                    <p className="text-[9px] font-bold uppercase text-white/80">
+                      {t("hero.upTo")}
+                    </p>
+                    <p className="text-lg font-extrabold leading-none">
+                      {slide.discount}
+                    </p>
+                    <p className="text-[8px] font-semibold uppercase">{t("hero.off")}</p>
+                  </div>
                 </div>
               </div>
             </div>

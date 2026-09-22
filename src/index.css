@@ -20,7 +20,6 @@ html.dark {
   font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-
 /* /////////////////Shop Animation//////////////////////////////// */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
@@ -29,36 +28,6 @@ html.dark {
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out forwards;
   opacity: 0;
-}
-
-@keyframes newsletterIconFloat {
-  0% {
-    transform: translateY(0) scale(1);
-    box-shadow: 0 0 0 rgba(139, 134, 240, 0.1);
-  }
-  50% {
-    transform: translateY(-6px) scale(1.04);
-    box-shadow: 0 10px 22px rgba(139, 134, 240, 0.25);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-    box-shadow: 0 0 0 rgba(139, 134, 240, 0.1);
-  }
-}
-
-@keyframes newsletterArrowMove {
-  0% {
-    transform: translateX(0);
-    opacity: 0.8;
-  }
-  50% {
-    transform: translateX(4px);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 0.8;
-  }
 }
 
 @keyframes newsletterIconFloat {
@@ -121,18 +90,25 @@ html.dark {
   }
 }
 
-@keyframes newsletterArrowMove {
-  0% {
-    transform: translateX(0);
-    opacity: 0.8;
+@keyframes badge-float {
+  0%,
+  100% {
+    transform: translateY(0);
   }
   50% {
-    transform: translateX(4px);
-    opacity: 1;
+    transform: translateY(-4px);
   }
+}
+
+@keyframes dot-pulse {
+  0%,
   100% {
-    transform: translateX(0);
-    opacity: 0.8;
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(0.6);
   }
 }
 
@@ -149,6 +125,10 @@ html.dark {
   animation: heroBadgeFloat 2.4s ease-in-out infinite;
 }
 
+.hero-dot-animate {
+  animation: dot-pulse 1.6s ease-in-out infinite;
+}
+
 .offer-badge-animate {
   display: inline-flex;
   animation: offerBadgeFloat 2.4s ease-in-out infinite;
@@ -157,6 +137,7 @@ html.dark {
 .hero-arrow-animate {
   animation: newsletterArrowMove 1.2s ease-in-out infinite;
 }
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }
