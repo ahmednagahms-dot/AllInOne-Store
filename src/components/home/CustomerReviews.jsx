@@ -87,7 +87,7 @@ function ReviewCard({ review }) {
 
   return (
     <div className="relative flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-indigo-950/20 shadow-sm">
-      <div className="absolute right-5 rtl:right-auto rtl:left-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] dark:bg-indigo-950/60 text-[#5046E5] dark:text-indigo-400">
+      <div className="absolute right-5 rtl:right-auto rtl:left-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] dark:bg-blue-600/10 text-blue-600 dark:text-blue-600">
         <Quote size={17} className="rtl:rotate-180" />
       </div>
 
@@ -98,7 +98,7 @@ function ReviewCard({ review }) {
       </p>
 
       <div className="mt-6 flex items-center gap-3 border-t border-slate-100 dark:border-slate-800 pt-5">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#5046E5] text-sm font-bold text-white">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-sm font-bold text-white">
           {isAvatarImage ? (
             <img
               src={avatar}
@@ -228,7 +228,7 @@ function CustomerReviews() {
       <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
         {/* ============ Header ============ */}
         <div className="mx-auto mb-10 max-w-2xl text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[#5046E5]">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-600">
             {t("reviews.tag")}
           </p>
 

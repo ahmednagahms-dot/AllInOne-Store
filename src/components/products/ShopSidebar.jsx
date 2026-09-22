@@ -244,7 +244,7 @@ export default function ShopSidebar({
               ))}
             </div>
             {dynamicSubcategories.length > 5 && (
-              <button onClick={() => setShowAllSubcats(!showAllSubcats)} className="text-sm text-blue-600 dark:text-indigo-400 font-medium hover:underline flex items-center gap-1 cursor-pointer">
+              <button onClick={() => setShowAllSubcats(!showAllSubcats)} className="text-sm text-blue-600  font-medium hover:underline flex items-center gap-1 cursor-pointer">
                 {showAllSubcats ? t("shop.sidebar.showLess") : t("shop.sidebar.showMore")} <ChevronDown size={14} className={showAllSubcats ? "rotate-180" : ""} />
               </button>
             )}
@@ -267,7 +267,7 @@ export default function ShopSidebar({
                   onChange={(e) =>
                     setPriceRange((prev) => ({ ...prev, min: e.target.value }))
                   }
-                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-indigo-500"
+                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-blue-500"
                 />
               </div>
               <div className="relative flex-1">
@@ -280,28 +280,26 @@ export default function ShopSidebar({
                   onChange={(e) =>
                     setPriceRange((prev) => ({ ...prev, max: e.target.value }))
                   }
-                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-indigo-500"
+                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-blue-500"
                 />
               </div>
             </div>
 
             <div className="relative w-full h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full mb-2 mt-4">
               <div
-                className="absolute h-full bg-blue-600 dark:bg-indigo-600 rounded-full transition-all duration-300"
+                className="absolute h-full bg-blue-600  rounded-full transition-all duration-300"
                 style={{ left: `${leftPercent}%`, right: `${rightPercent}%` }}
               ></div>
               <div
-                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-blue-600 dark:bg-indigo-500 rounded-full border-2 border-white dark:border-slate-900 shadow transition-all duration-300"
+                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-blue-600  rounded-full border-2 border-white dark:border-slate-900 shadow transition-all duration-300"
                 style={{
                   left: `${leftPercent}%`,
-                  transform: "translate(-50%, -50%)",
                 }}
               ></div>
               <div
-                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-blue-600 dark:bg-indigo-500 rounded-full border-2 border-white dark:border-slate-900 shadow transition-all duration-300"
+                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-blue-600 rounded-full border-2 border-white dark:border-slate-900 shadow transition-all duration-300"
                 style={{
                   right: `${rightPercent}%`,
-                  transform: "translate(50%, -50%)",
                 }}
               ></div>
 
@@ -355,7 +353,7 @@ export default function ShopSidebar({
                     onChange={() =>
                       setSelectedRating(selectedRating === stars ? 0 : stars)
                     }
-                    className="peer appearance-none w-4 h-4 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 checked:bg-blue-600 dark:checked:bg-indigo-600 checked:border-blue-600 dark:checked:border-indigo-600 transition-all cursor-pointer"
+                    className="peer appearance-none w-4 h-4 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 checked:bg-blue-600 dark:checked:bg-blue-600 checked:border-blue-600 dark:checked:border-blue-600 transition-all cursor-pointer"
                   />
                   <svg
                     className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
@@ -402,7 +400,7 @@ export default function ShopSidebar({
             <label className="flex items-center justify-between cursor-pointer group">
               <div className="flex items-center gap-3">
                 <div className="relative flex items-center justify-center">
-                  <input type="checkbox" checked={availability.includes('in-stock')} onChange={() => handleAvailabilityChange('in-stock')} className="peer appearance-none w-4 h-4 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 checked:bg-blue-600 dark:checked:bg-indigo-600 checked:border-blue-600 dark:checked:border-indigo-600 transition-all cursor-pointer" />
+                  <input type="checkbox" checked={availability.includes('in-stock')} onChange={() => handleAvailabilityChange('in-stock')} className="peer appearance-none w-4 h-4 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 checked:bg-blue-600 dark:checked:bg-blue-600 checked:border-blue-600 dark:checked:border-blue-600 transition-all cursor-pointer" />
                   <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
                 <span className="text-sm text-gray-600 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white transition">{t("shop.sidebar.inStock")}</span>

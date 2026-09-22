@@ -184,7 +184,7 @@ export default function Shop() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 pb-12 transition-colors duration-200">
       <div className="container mx-auto px-4 py-6 flex items-center gap-2 text-sm">
-        <Link to="/" className="text-gray-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-indigo-400 transition">
+        <Link to="/" className="text-gray-400 dark:text-slate-400 hover:text-blue-600  transition">
           {t("nav.home")}
         </Link>
         <ChevronRight size={14} className="text-gray-300 dark:text-slate-600 rtl:rotate-180" />

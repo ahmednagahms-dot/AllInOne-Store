@@ -125,7 +125,7 @@ export default function Orders() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#5046E5]" size={40} />
+        <Loader2 className="animate-spin text-blue-600" size={40} />
       </div>
     );
   }
@@ -146,7 +146,7 @@ export default function Orders() {
         </p>
         <button
           onClick={fetchOrders}
-          className="px-6 py-2.5 bg-[#5046E5] text-white font-medium rounded-lg hover:bg-[#4338CA] transition cursor-pointer"
+          className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-400 transition cursor-pointer"
         >
           {t("orders.tryAgain") || "Try Again"}
         </button>
@@ -176,7 +176,7 @@ export default function Orders() {
             onClick={() => setActiveTab(tab.key)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer ${
               activeTab === tab.key
-                ? "bg-[#5046E5] text-white shadow-sm"
+                ? "bg-blue-600 text-white shadow-sm"
                 : "bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
             }`}
           >
@@ -191,7 +191,7 @@ export default function Orders() {
       {filteredOrders.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
           <div className="w-20 h-20 rounded-full bg-blue-50 dark:bg-indigo-950/50 flex items-center justify-center">
-            <Package className="text-[#5046E5] dark:text-indigo-400" size={32} />
+            <Package className="text-blue-600 dark:text-blue-600" size={32} />
           </div>
           <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">
             {activeTab === "all"
@@ -206,7 +206,7 @@ export default function Orders() {
           </p>
           <Link
             to="/shop"
-            className="mt-2 px-6 py-2.5 bg-[#5046E5] text-white font-medium rounded-lg hover:bg-[#4338CA] transition"
+            className="mt-2 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-400 transition"
           >
             {t("orders.exploreProducts") || "Explore Products"}
           </Link>
@@ -306,7 +306,7 @@ export default function Orders() {
                     )}
                     <Link
                       to={`/orders/${order._id}`}
-                      className="flex items-center gap-1 text-sm text-[#5046E5] dark:text-indigo-400 font-medium hover:underline"
+                      className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-600 font-medium hover:underline"
                     >
                       {t("orders.viewOrder") || "View Order"}
                       <ChevronRight

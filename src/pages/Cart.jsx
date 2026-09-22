@@ -152,7 +152,7 @@ export default function Cart() {
         <div className="flex gap-3">
           <button
             onClick={fetchCart}
-            className="px-6 py-2.5 bg-[#5046E5] text-white font-medium rounded-lg hover:bg-[#4338CA] transition cursor-pointer"
+            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-400 transition cursor-pointer"
           >
             {t("cart.tryAgain")}
           </button>
@@ -171,8 +171,8 @@ export default function Cart() {
   if (items.length === 0) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center px-4">
-        <div className="w-20 h-20 rounded-full bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center">
-          <ShoppingBag className="text-[#5046E5] dark:text-indigo-400" size={32} />
+        <div className="w-20 h-20 rounded-full bg-blue-600 dark:bg-blue-950/50 flex items-center justify-center">
+          <ShoppingBag className="text-white dark:text-blue-600" size={32} />
         </div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">{t("cart.emptyTitle")}</h2>
         <p className="text-gray-500 dark:text-slate-400 max-w-sm">
@@ -180,7 +180,7 @@ export default function Cart() {
         </p>
         <Link
           to="/shop"
-          className="mt-2 px-6 py-2.5 bg-[#5046E5] text-white font-medium rounded-lg hover:bg-[#4338CA] transition"
+          className="mt-2 px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-400 transition"
         >
           {t("cart.continueShopping")}
         </Link>
@@ -244,7 +244,7 @@ export default function Cart() {
                     <div className="min-w-0">
                       <Link
                         to={`/product/${id}`}
-                        className="font-medium text-gray-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-1"
+                        className="font-medium text-gray-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-600 line-clamp-1"
                       >
                         {product.name || t("cart.productFallback")}
                       </Link>
@@ -296,7 +296,7 @@ export default function Cart() {
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => handleMoveToWishlist(item)}
-                        className="text-xs text-gray-500 dark:text-slate-400 hover:text-[#5046E5] dark:hover:text-indigo-400 flex items-center gap-1 cursor-pointer"
+                        className="text-xs text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-600 flex items-center gap-1 cursor-pointer"
                       >
                         <Heart size={14} />
                         {t("cart.moveToWishlist")}
@@ -362,7 +362,7 @@ export default function Cart() {
                 <button
                   type="submit"
                   disabled={couponLoading || !couponCode.trim()}
-                  className="px-4 py-2.5 bg-gray-900 dark:bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2.5 bg-gray-900 dark:bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-blue-400 transition disabled:opacity-50 cursor-pointer"
                 >
                   {couponLoading ? (
                     <Loader2 className="animate-spin" size={16} />
@@ -384,24 +384,24 @@ export default function Cart() {
 
             <Link
               to="/shop"
-              className="w-full flex items-center justify-center text-sm text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 mt-3 transition"
+              className="w-full flex items-center justify-center text-sm text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-600 mt-3 transition"
             >
               {t("cart.continueShopping")}
             </Link>
 
             <div className="grid grid-cols-3 gap-2 mt-6 pt-6 border-t border-gray-100 dark:border-slate-800 text-center">
               <div className="flex flex-col items-center gap-1">
-                <ShieldCheck className="text-[#5046E5] dark:text-indigo-400" size={18} />
+                <ShieldCheck className="text-blue-600 dark:text-blue-400" size={18} />
                 <span className="text-[11px] text-gray-500 dark:text-slate-400">
                   {t("cart.securePayment")}
                 </span>
               </div>
               <div className="flex flex-col items-center gap-1">
-                <RotateCcw className="text-[#5046E5] dark:text-indigo-400" size={18} />
+                <RotateCcw className="text-blue-600 dark:text-blue-400" size={18} />
                 <span className="text-[11px] text-gray-500 dark:text-slate-400">{t("cart.easyReturns")}</span>
               </div>
               <div className="flex flex-col items-center gap-1">
-                <Headphones className="text-[#5046E5] dark:text-indigo-400" size={18} />
+                <Headphones className="text-blue-600 dark:text-blue-400" size={18} />
                 <span className="text-[11px] text-gray-500 dark:text-slate-400">{t("cart.support")}</span>
               </div>
             </div>

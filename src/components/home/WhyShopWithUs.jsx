@@ -62,10 +62,10 @@ function WhyShopWithUs() {
             return (
               <div
                 key={feature.id}
-                className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50 p-6 text-center transition duration-300 hover:-translate-y-1 hover:border-[#5046E5] dark:hover:border-indigo-500/50 hover:bg-white dark:hover:bg-slate-800 hover:shadow-lg dark:hover:shadow-indigo-950/20"
+                className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50 p-6 text-center transition duration-300 hover:-translate-y-1 hover:border-blue-600/90 dark:hover:border-blue-600/90 hover:bg-white dark:hover:bg-slate-800 hover:shadow-lg dark:hover:shadow-indigo-950/20"
               >
                 {/* Icon */}
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EEF2FF] dark:bg-indigo-950/60 text-[#5046E5] dark:text-indigo-400 transition duration-300 group-hover:bg-[#5046E5] group-hover:text-white">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EEF2FF] dark:bg-blue-600/10 text-blue-600 dark:text-blue-600 transition duration-300 group-hover:bg-blue-600 group-hover:text-white">
                   <Icon size={25} strokeWidth={1.8} />
                 </div>
 
