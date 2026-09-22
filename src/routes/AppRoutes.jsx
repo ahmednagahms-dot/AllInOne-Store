@@ -19,6 +19,7 @@ import Profile from "../pages/Profile";
 import ProductDetail from "../pages/ProductDetail";
 import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
+import NotFound from "../pages/NotFound";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -111,6 +112,9 @@ export default function AppRoutes() {
           }
         />
       </Route>
+
+      {/* ===== 404 Catch-all ===== */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
