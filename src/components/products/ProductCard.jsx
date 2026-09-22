@@ -3,13 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Heart, Star, ShoppingCart, Eye, Loader2 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 
 export default function ProductCard({ product, viewMode = "grid" }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { addItem } = useCart(); 
+  const { toggleItem, isInWishlist } = useWishlist();
   
   const [isAdding, setIsAdding] = useState(false);
+  const [isTogglingWish, setIsTogglingWish] = useState(false);
 
   if (!product) return null;
 
@@ -81,6 +84,20 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     badgeColor = "bg-blue-600";
   }
 
+  const inWishlist = isInWishlist(productId);
+
+  const handleToggleWishlist = async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isTogglingWish) return;
+    setIsTogglingWish(true);
+    try {
+      await toggleItem(productId);
+    } finally {
+      setIsTogglingWish(false);
+    }
+  };
+
   const handleAddToCart = async (e) => {
     e.stopPropagation();
     if (stock <= 0 || isAdding) return;
@@ -112,10 +129,15 @@ export default function ProductCard({ product, viewMode = "grid" }) {
           </span>
         )}
         <button 
-          onClick={(e) => e.stopPropagation()} 
-          className="absolute top-3 right-3 w-8 h-8 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 shadow-sm transition z-10 cursor-pointer"
+          onClick={handleToggleWishlist}
+          disabled={isTogglingWish}
+          className={`absolute top-3 right-3 w-8 h-8 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm transition z-10 cursor-pointer ${
+            inWishlist
+              ? "text-red-500 dark:text-red-400"
+              : "text-gray-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400"
+          }`}
         >
-          <Heart size={16} />
+          <Heart size={16} className={inWishlist ? "fill-current" : ""} />
         </button>
         <img
           src={image}
