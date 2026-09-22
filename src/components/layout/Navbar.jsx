@@ -20,6 +20,7 @@ import { useWishlist } from "../../context/WishlistContext";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../ui/LanguageSwitcher";
 import ThemeToggle from "../ui/ThemeToggle";
+import { searchProducts } from "../../api/products.api";
 
 const STORE_LOGO_URL =
   "https://res.cloudinary.com/iuc91bdy/image/upload/v1788294261/akybn7rcd5gmyfvdqx1i.png";
@@ -30,9 +31,13 @@ export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const menuRef = useRef(null);
+  const searchRef = useRef(null);
 
   const { user, isAuthenticated, logoutUser } = useAuth();
   const { cartItemsCount } = useCart();
@@ -42,19 +47,46 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setIsUserMenuOpen(false);
+    setIsSearchOpen(false);
   }, [location.pathname]);
 
-  // Close user menu on outside click
+  // Close user menu & search dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setIsUserMenuOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setIsSearchOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Live Search
+  useEffect(() => {
+    const fetchLiveSearch = async () => {
+      if (searchQuery.trim().length > 1) {
+        try {
+          const response = await searchProducts({ keyword: searchQuery.trim() }); 
+          const products = response.data?.products || response.data || [];
+          setSearchResults(products);
+          setIsSearchOpen(true);
+        } catch (error) {
+          console.error("Error fetching search results:", error);
+          setSearchResults([]);
+        }
+      } else {
+        setSearchResults([]);
+        setIsSearchOpen(false);
+      }
+    };
+
+    const timer = setTimeout(fetchLiveSearch, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleLogout = () => {
     logoutUser();
@@ -66,10 +98,8 @@ export default function Navbar() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(
-        `/shop?search=${encodeURIComponent(searchQuery.trim())}`
-      );
-      setSearchQuery("");
+      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
       setMobileOpen(false);
     }
   };
@@ -128,28 +158,90 @@ export default function Navbar() {
             </NavLink>
           </nav>
 
-          {/* Search - Desktop */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex flex-1 max-w-md mx-2"
-          >
-            <div className="relative w-full">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t("nav.searchPlaceholder")}
-                className="w-full pl-4 pr-11 rtl:pr-4 rtl:pl-11 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <button
-                type="submit"
-                aria-label={t("common.search")}
-                className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                <Search size={18} />
-              </button>
-            </div>
-          </form>
+          {/* Search - Desktop with Dropdown */}
+          <div className="hidden md:flex flex-1 max-w-md mx-2 relative" ref={searchRef}>
+            <form onSubmit={handleSearch} className="w-full">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (searchQuery.trim().length > 1) setIsSearchOpen(true);
+                  }}
+                  placeholder={t("nav.searchPlaceholder")}
+                  className="w-full pl-4 pr-11 rtl:pr-4 rtl:pl-11 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button
+                  type="submit"
+                  aria-label={t("common.search")}
+                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  <Search size={18} />
+                </button>
+              </div>
+            </form>
+
+            {/* Live Search Dropdown */}
+            {isSearchOpen && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-xl py-3 z-50 max-h-96 overflow-y-auto">
+                <div className="px-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Products for "{searchQuery}"
+                </div>
+                <div className="divide-y divide-gray-100 dark:divide-slate-800">
+                  {searchResults.map((product) => {
+                    // استخراج صورة المنتج بنفس منطق كارت المنتج
+                    const productImage =
+                      product.imageCover ||
+                      product.image ||
+                      (product.images && product.images.length > 0
+                        ? typeof product.images[0] === "string"
+                          ? product.images[0]
+                          : product.images[0].url
+                        ? product.images[0].url
+                        : "https://via.placeholder.com/300"
+                        : "https://via.placeholder.com/300");
+
+                    return (
+                      <Link
+                        key={product.id || product._id}
+                        to={`/product/${product.id || product._id}`}
+                        onClick={() => setIsSearchOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                      >
+                        {/* صورة المنتج المصغرة */}
+                        <div className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0 flex items-center justify-center p-1">
+                          <img
+                            src={productImage}
+                            alt={product.title || product.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        {/* تفاصيل المنتج */}
+                        <div className="flex flex-col flex-grow min-w-0">
+                          <p className="text-sm font-medium text-gray-800 dark:text-slate-200 truncate">
+                            {product.title || product.name}
+                          </p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold">
+                            ${product.price}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="pt-2 px-4 border-t border-gray-100 dark:border-slate-800 text-center">
+                  <button
+                    type="button"
+                    onClick={handleSearch}
+                    className="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline cursor-pointer"
+                  >
+                    View all results for "{searchQuery}"
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Icons */}
           <div className="flex items-center gap-1 sm:gap-2">
@@ -204,17 +296,6 @@ export default function Navbar() {
                         "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                     }}
                   />
-                  <div className="hidden xl:block text-xs">
-                    <span className="text-gray-400 dark:text-slate-400 block font-normal">
-                      {t("nav.welcome")}
-                    </span>
-                    <span className="font-bold text-gray-800 dark:text-slate-100 block">
-                      {t("nav.hi")}{" "}
-                      {user?.username?.split(" ")[0] ||
-                        user?.name?.split(" ")[0] ||
-                        t("nav.user")}
-                    </span>
-                  </div>
                   <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-400 hidden xl:block" />
                 </button>
 
@@ -285,137 +366,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="lg:hidden border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <div className="container mx-auto px-4 py-4 space-y-1">
-            {/* Mobile Controls */}
-            <div className="pb-3 flex justify-between items-center border-b border-gray-100 dark:border-slate-800">
-              <span className="text-xs text-gray-500 dark:text-slate-400">
-                {t("nav.freeShippingNotice")}
-              </span>
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
-                <LanguageSwitcher />
-              </div>
-            </div>
-
-            {/* Mobile Search */}
-            <form onSubmit={handleSearch} className="my-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t("nav.searchMobilePlaceholder")}
-                  className="w-full pl-4 pr-10 rtl:pr-4 rtl:pl-10 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="submit"
-                  aria-label={t("common.search")}
-                  className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400"
-                >
-                  <Search size={18} />
-                </button>
-              </div>
-            </form>
-
-            <NavLink
-              to="/"
-              end
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `block py-2.5 font-medium ${
-                  isActive
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-slate-200"
-                }`
-              }
-            >
-              {t("nav.home")}
-            </NavLink>
-            <NavLink
-              to="/shop"
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `block py-2.5 font-medium ${
-                  isActive
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-slate-200"
-                }`
-              }
-            >
-              {t("nav.shop")}
-            </NavLink>
-            <NavLink
-              to="/orders"
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `block py-2.5 font-medium ${
-                  isActive
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-slate-200"
-                }`
-              }
-            >
-              {t("nav.orders")}
-            </NavLink>
-            <NavLink
-              to="/wishlist"
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `block py-2.5 font-medium ${
-                  isActive
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-slate-200"
-                }`
-              }
-            >
-              {t("nav.wishlist")}
-            </NavLink>
-            <NavLink
-              to="/cart"
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `block py-2.5 font-medium ${
-                  isActive
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-slate-200"
-                }`
-              }
-            >
-              {t("cart.title") || "Cart"}
-            </NavLink>
-
-            {!isAuthenticated ? (
-              <div className="pt-3 flex gap-3">
-                <Link
-                  to="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex-1 text-center py-2.5 bg-blue-600 text-white rounded-xl font-medium"
-                >
-                  {t("nav.login")}
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex-1 text-center py-2.5 border border-blue-600 text-blue-600 rounded-xl font-medium"
-                >
-                  {t("nav.signUp")}
-                </Link>
-              </div>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="w-full text-start py-2.5 text-red-600 font-medium cursor-pointer"
-              >
-                {t("nav.logout")}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
     </header>
   );
 }

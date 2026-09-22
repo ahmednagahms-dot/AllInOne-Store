@@ -32,13 +32,19 @@ export default function Footer() {
 
             {/* Social */}
             <div className="mt-6 flex items-center gap-2.5">
-              {["f", "in", "x", "yt"].map((label) => (
+              {[
+                { className: "fa-brands fa-youtube", href: "#", label: "YouTube" },
+                { className: "fa-brands fa-facebook", href: "#", label: "Facebook" },
+                { className: "fa-brands fa-x-twitter", href: "#", label: "X" },
+                { className: "fa-brands fa-linkedin-in", href: "#", label: "LinkedIn" },
+              ].map(({ className, href, label }) => (
                 <a
                   key={label}
-                  href="#"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-xs font-semibold text-slate-300 transition hover:border-primary-500 hover:bg-primary-500 hover:text-white"
+                  href={href}
+                  aria-label={label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-white transition duration-200 hover:-translate-y-1 hover:border-primary-500 hover:bg-primary-500 hover:text-white hover:shadow-[0_0_18px_rgba(79,70,229,0.45)]"
                 >
-                  {label}
+                  <i className={`${className} text-sm`} />
                 </a>
               ))}
             </div>
