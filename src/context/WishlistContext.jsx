@@ -69,18 +69,21 @@ export function WishlistProvider({ children }) {
     [wishlistIds]
   );
 
+  const [togglingIds, setTogglingIds] = useState(new Set());
+
   const addItem = async (productId) => {
     if (!user) {
       toast.info("Please log in first to add to wishlist");
       return false;
     }
+    // Prevent duplicate adds
+    if (isInWishlist(productId)) return true;
     // Optimistic: add placeholder immediately
     setItems((prev) => [...prev, { _id: productId }]);
     try {
       await addToWishlist(productId);
-      toast.success("Added to wishlist");
-      // Sync with server in background (don't await)
-      fetchWishlist();
+      // Sync with server to get full product data
+      await fetchWishlist();
       return true;
     } catch (err) {
       // Rollback on error
@@ -104,7 +107,6 @@ export function WishlistProvider({ children }) {
     );
     try {
       await removeFromWishlist(productId);
-      toast.success("Removed from wishlist");
       return true;
     } catch (err) {
       // Rollback on error
@@ -117,10 +119,21 @@ export function WishlistProvider({ children }) {
     }
   };
 
-  const toggleItem = (productId) => {
-    return isInWishlist(productId)
-      ? removeItem(productId)
-      : addItem(productId);
+  const toggleItem = async (productId) => {
+    // Prevent rapid double-clicks from causing race conditions
+    if (togglingIds.has(productId)) return false;
+    setTogglingIds((prev) => new Set(prev).add(productId));
+    try {
+      return isInWishlist(productId)
+        ? await removeItem(productId)
+        : await addItem(productId);
+    } finally {
+      setTogglingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(productId);
+        return next;
+      });
+    }
   };
 
   const clearAllWishlist = async () => {
