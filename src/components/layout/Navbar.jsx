@@ -70,7 +70,7 @@ export default function Navbar() {
     const fetchLiveSearch = async () => {
       if (searchQuery.trim().length > 1) {
         try {
-          const response = await searchProducts({ keyword: searchQuery.trim() }); 
+          const response = await searchProducts({ keyword: searchQuery.trim() });
           const products = response.data?.products || response.data || [];
           setSearchResults(products);
           setIsSearchOpen(true);
@@ -109,6 +109,13 @@ export default function Navbar() {
       isActive
         ? "text-blue-600 dark:text-blue-400"
         : "text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400"
+    }`;
+
+  const mobileNavLinkClass = ({ isActive }) =>
+    `px-3 py-2.5 rounded-lg font-medium transition ${
+      isActive
+        ? "bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400"
+        : "text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800"
     }`;
 
   return (
@@ -190,7 +197,6 @@ export default function Navbar() {
                 </div>
                 <div className="divide-y divide-gray-100 dark:divide-slate-800">
                   {searchResults.map((product) => {
-                    // استخراج صورة المنتج بنفس منطق كارت المنتج
                     const productImage =
                       product.imageCover ||
                       product.image ||
@@ -198,8 +204,8 @@ export default function Navbar() {
                         ? typeof product.images[0] === "string"
                           ? product.images[0]
                           : product.images[0].url
-                        ? product.images[0].url
-                        : "https://via.placeholder.com/300"
+                          ? product.images[0].url
+                          : "https://via.placeholder.com/300"
                         : "https://via.placeholder.com/300");
 
                     return (
@@ -209,7 +215,6 @@ export default function Navbar() {
                         onClick={() => setIsSearchOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
                       >
-                        {/* صورة المنتج المصغرة */}
                         <div className="w-10 h-10 bg-gray-50 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0 flex items-center justify-center p-1">
                           <img
                             src={productImage}
@@ -217,7 +222,6 @@ export default function Navbar() {
                             className="w-full h-full object-contain"
                           />
                         </div>
-                        {/* تفاصيل المنتج */}
                         <div className="flex flex-col flex-grow min-w-0">
                           <p className="text-sm font-medium text-gray-800 dark:text-slate-200 truncate">
                             {product.title || product.name}
@@ -366,6 +370,91 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileOpen && (
+        <div className="lg:hidden border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            {/* Mobile Search */}
+            <form onSubmit={handleSearch} className="relative md:hidden">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t("nav.searchPlaceholder")}
+                className="w-full pl-4 pr-11 rtl:pr-4 rtl:pl-11 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="submit"
+                aria-label={t("common.search")}
+                className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                <Search size={18} />
+              </button>
+            </form>
+
+            {/* Mobile Nav Links */}
+            <nav className="flex flex-col gap-1">
+              <NavLink to="/" end className={mobileNavLinkClass}>
+                {t("nav.home")}
+              </NavLink>
+              <NavLink to="/shop" className={mobileNavLinkClass}>
+                {t("nav.shop")}
+              </NavLink>
+              <NavLink to="/orders" className={mobileNavLinkClass}>
+                {t("nav.orders")}
+              </NavLink>
+              <NavLink to="/wishlist" className={mobileNavLinkClass}>
+                {t("nav.wishlist")}
+              </NavLink>
+            </nav>
+
+            {/* Language Switcher - Mobile */}
+            <div className="sm:hidden pt-3 border-t border-gray-100 dark:border-slate-800">
+              <LanguageSwitcher className="w-full" />
+            </div>
+
+            {/* Auth Buttons - Mobile */}
+            <div className="pt-3 border-t border-gray-100 dark:border-slate-800">
+              {isAuthenticated ? (
+                <div className="space-y-1">
+                  <Link
+                    to="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="block px-3 py-2.5 rounded-lg text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  >
+                    {t("nav.profile")}
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-start px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
+                  >
+                    <LogOut size={16} />
+                    {t("nav.logout")}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="px-4 py-2.5 text-center text-sm font-medium text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800"
+                  >
+                    {t("nav.login")}
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setMobileOpen(false)}
+                    className="px-4 py-2.5 text-center text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm"
+                  >
+                    {t("nav.signUp")}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
