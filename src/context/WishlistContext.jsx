@@ -151,6 +151,8 @@ export function WishlistProvider({ children }) {
     }
   };
 
+  
+
   return (
     <WishlistContext.Provider
       value={{
