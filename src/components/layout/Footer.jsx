@@ -19,7 +19,7 @@ export default function Footer() {
               <img
                 src={STORE_LOGO_URL}
                 alt="AllInOne"
-                className="h-9 w-auto object-contain"
+                className="h-10 w-auto bg-white p-1 rounded-lg  object-contain"
               />
               <span className="text-lg font-bold tracking-tight text-white">
                 AllIn<span className="text-primary-500">One</span>
