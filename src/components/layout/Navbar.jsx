@@ -137,7 +137,7 @@ export default function Navbar() {
             <img
               src={STORE_LOGO_URL}
               alt="AllInOne"
-              className="h-9 w-auto object-contain"
+              className="h-9 bg-white p-0.5 rounded-lg w-auto object-contain"
             />
             <span className="text-lg font-bold tracking-tight text-black dark:text-white hidden sm:block">
               AllIn

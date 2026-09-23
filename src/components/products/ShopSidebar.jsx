@@ -258,7 +258,7 @@ export default function ShopSidebar({
           <div>
             <div className="flex items-center gap-3 mb-4">
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 text-sm">
+                <span className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 text-sm">
                   $
                 </span>
                 <input
@@ -267,11 +267,11 @@ export default function ShopSidebar({
                   onChange={(e) =>
                     setPriceRange((prev) => ({ ...prev, min: e.target.value }))
                   }
-                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-blue-500"
+                  className="w-full ps-7 pe-3 py-2 text-sm border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-blue-500"
                 />
               </div>
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 text-sm">
+                <span className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 text-sm">
                   $
                 </span>
                 <input
@@ -280,18 +280,18 @@ export default function ShopSidebar({
                   onChange={(e) =>
                     setPriceRange((prev) => ({ ...prev, max: e.target.value }))
                   }
-                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-blue-500"
+                  className="w-full ps-7 pe-3 py-2 text-sm border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-blue-500 dark:focus:border-blue-500"
                 />
               </div>
             </div>
 
-            <div className="relative w-full h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full mb-2 mt-4">
+            <div className="relative w-full h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full mb-2 mt-4" dir="ltr">
               <div
-                className="absolute h-full bg-blue-600  rounded-full transition-all duration-300"
+                className="absolute h-full bg-blue-600 rounded-full transition-all duration-300"
                 style={{ left: `${leftPercent}%`, right: `${rightPercent}%` }}
               ></div>
               <div
-                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-blue-600  rounded-full border-2 border-white dark:border-slate-900 shadow transition-all duration-300"
+                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-blue-600 rounded-full border-2 border-white dark:border-slate-900 shadow transition-all duration-300"
                 style={{
                   left: `${leftPercent}%`,
                 }}
