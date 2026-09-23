@@ -151,7 +151,13 @@ export function WishlistProvider({ children }) {
     }
   };
 
-  
+
+
+
+
+  // fix conflicts
+
+
 
   return (
     <WishlistContext.Provider
