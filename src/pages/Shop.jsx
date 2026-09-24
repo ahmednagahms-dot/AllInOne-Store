@@ -235,7 +235,7 @@ export default function Shop() {
               <img
                 src={ShopImage}
                 alt="Workspace"
-                className="relative z-10 w-56 sm:w-80 lg:w-96 h-36 sm:h-44 lg:h-52 object-cover rounded-[1rem] lg:rounded-[1.5rem] border-2 border-white/60 dark:border-slate-700/60 shadow-sm"
+                className="relative z-10 w-50 sm:w-80 lg:w-96 h-36 sm:h-44 lg:h-52 object-cover rounded-[1rem] lg:rounded-[1.5rem] border-2 border-white/60 dark:border-slate-700/60 shadow-sm"
               />
             </div>
           </div>
