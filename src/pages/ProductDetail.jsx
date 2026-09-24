@@ -736,7 +736,7 @@ export default function ProductDetails() {
             <h2 className="text-xl sm:text-2xl font-bold text-[#374151] dark:text-white mb-4">
               {t("productDetail.relatedProducts")}
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
               {relatedProducts.map((p) => (
                 <ProductCard key={p._id} product={p} />
               ))}
